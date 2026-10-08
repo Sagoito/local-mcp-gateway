@@ -1,0 +1,15 @@
+node_modules/
+dist/
+*.tgz
+.local/
+coverage/
+
+# Local credentials and generated configuration
+.env
+.env.*
+!.env.example
+.local-mcp-auth/
+config.json
+demo-config.json
+*.zip
+IMPLEMENTATION.md
