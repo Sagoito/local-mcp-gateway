@@ -15,7 +15,8 @@ export function clientConfig(
     cliPath: options?.cliPath,
     ...(options?.nodePath === undefined ? {} : { nodePath: options.nodePath }),
   })) {
-    if (typeof value !== 'string' || value.length === 0) throw new Error(`${key} must be a non-empty path`);
+    if (typeof value !== 'string' || value.length === 0)
+      throw new Error(`${key} must be a non-empty path`);
   }
 
   const node = resolve(options.nodePath ?? process.execPath);
@@ -27,10 +28,24 @@ export function clientConfig(
     case 'generic':
       return { mcpServers: { 'local-mcp': { command: node, args } } };
     case 'copilot':
-      return { mcpServers: { 'local-mcp': { type: 'local', command: node, args, tools: ['*'] } } };
+      return {
+        mcpServers: {
+          'local-mcp': { type: 'local', command: node, args, tools: ['*'] },
+        },
+      };
     case 'vscode':
-      return { servers: { 'local-mcp': { type: 'stdio', command: node, args } } };
+      return {
+        servers: { 'local-mcp': { type: 'stdio', command: node, args } },
+      };
     case 'opencode':
-      return { mcp: { 'local-mcp': { type: 'local', command: [node, ...args], enabled: true } } };
+      return {
+        mcp: {
+          'local-mcp': {
+            type: 'local',
+            command: [node, ...args],
+            enabled: true,
+          },
+        },
+      };
   }
 }

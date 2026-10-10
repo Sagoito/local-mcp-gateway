@@ -1,0 +1,7 @@
+# Generated or vendored files; scan first-party source and security fixtures.
+node_modules/
+dist/
+.local/
+coverage/
+benchmark/runs/
+benchmark/fixtures/

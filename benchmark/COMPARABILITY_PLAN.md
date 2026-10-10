@@ -4,12 +4,12 @@ The earlier six/eight-question suites are local regression and smoke tests. They
 
 ## What comparable evaluations use
 
-| Primary source | Published evaluation | What we can reproduce |
-|---|---|---|
-| [StackOne tool discovery](https://www.stackone.com/platform/tools-discovery/) | MetaTool, ToolBench and ToolRet-full; retrieval ranking metrics | ToolRet-full's public corpus, queries, relevance labels and nDCG@10 |
-| [Stacklok comparison framework](https://github.com/StacklokLabs/mcp-optimizer/tree/main/examples/anthropic_comparison) | Shared catalog and test cases; model-directed discovery versus Anthropic native tool search | Public framework/data; its native provider comparison requires credentials |
-| [Stainless MCP eval harness](https://github.com/stainless-api/mcp-evals-harness) | Domain task suites, native provider loops, factuality/completeness and efficiency | Published runner/suites; live API accounts and model access are required |
-| [MCP-Atlas](https://github.com/scaleapi/mcp-atlas) | Public tasks on pinned MCP servers, native model tool calls, claim coverage | Official public task set and Docker harness; server/API/model availability determines eligibility |
+| Primary source                                                                                                         | Published evaluation                                                                        | What we can reproduce                                                                             |
+| ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| [StackOne tool discovery](https://www.stackone.com/platform/tools-discovery/)                                          | MetaTool, ToolBench and ToolRet-full; retrieval ranking metrics                             | ToolRet-full's public corpus, queries, relevance labels and nDCG@10                               |
+| [Stacklok comparison framework](https://github.com/StacklokLabs/mcp-optimizer/tree/main/examples/anthropic_comparison) | Shared catalog and test cases; model-directed discovery versus Anthropic native tool search | Public framework/data; its native provider comparison requires credentials                        |
+| [Stainless MCP eval harness](https://github.com/stainless-api/mcp-evals-harness)                                       | Domain task suites, native provider loops, factuality/completeness and efficiency           | Published runner/suites; live API accounts and model access are required                          |
+| [MCP-Atlas](https://github.com/scaleapi/mcp-atlas)                                                                     | Public tasks on pinned MCP servers, native model tool calls, claim coverage                 | Official public task set and Docker harness; server/API/model availability determines eligibility |
 
 These evaluate different layers. Tool retrieval finds candidate tools; task completion also requires choosing valid arguments, executing tools, interpreting results and answering correctly. A retrieval score is not an answer-quality score. A published vendor figure is not a measurement of that vendor in our environment. StackOne's tables explicitly use different sample counts for some provider comparisons. Do not combine them into a leaderboard of our own results.
 

@@ -12,24 +12,34 @@ export interface SearchOptions {
   tool?: string;
   limit?: number;
 }
-export interface SearchResult { tools: ToolEntry[]; matched: number }
+export interface SearchResult {
+  tools: ToolEntry[];
+  matched: number;
+}
 
 /** Build a reusable BM25 index for an immutable tool-list snapshot. */
 export function createSearchIndex(tools: readonly ToolEntry[]) {
-  const docs = tools.map((tool) => ({ tool, length: 0, lengthNorm: 0, tieRank: 0 }));
+  const docs = tools.map((tool) => ({
+    tool,
+    length: 0,
+    lengthNorm: 0,
+    tieRank: 0,
+  }));
   const postingLists = new Map<string, PostingList>();
   let tokenCount = 0;
 
   for (let docId = 0; docId < tools.length; docId += 1) {
     const tool = tools[docId];
-    const tokens = tokenize(`${tool.server} ${tool.name} ${tool.description ?? ''}`);
+    const tokens = tokenize(
+      `${tool.server} ${tool.name} ${tool.description ?? ''}`,
+    );
     const counts = new Map<string, number>();
     for (const token of tokens) counts.set(token, (counts.get(token) ?? 0) + 1);
     docs[docId].length = tokens.length;
     tokenCount += tokens.length;
     for (const [term, frequency] of counts) {
       let posting = postingLists.get(term);
-      if (!posting) postingLists.set(term, posting = { values: [], idf: 0 });
+      if (!posting) postingLists.set(term, (posting = { values: [], idf: 0 }));
       posting.values.push(docId, frequency);
     }
   }
@@ -37,17 +47,29 @@ export function createSearchIndex(tools: readonly ToolEntry[]) {
   const averageLength = tokenCount / (docs.length || 1);
   const lengthScale = averageLength || 1;
   for (const doc of docs) {
-    doc.lengthNorm = K1 * (1 - B + B * doc.length / lengthScale);
+    doc.lengthNorm = K1 * (1 - B + (B * doc.length) / lengthScale);
   }
   for (const posting of postingLists.values()) {
     const df = posting.values.length / 2;
     posting.idf = Math.log(1 + (docs.length - df + 0.5) / (df + 0.5));
   }
 
-  const stableOrder = docs.map((_, i) => i).sort((a, b) =>
-    String(docs[a].tool.server).localeCompare(String(docs[b].tool.server), 'en') ||
-    String(docs[a].tool.name).localeCompare(String(docs[b].tool.name), 'en') || a - b);
-  for (let i = 0; i < stableOrder.length; i += 1) docs[stableOrder[i]].tieRank = i;
+  const stableOrder = docs
+    .map((_, i) => i)
+    .sort(
+      (a, b) =>
+        String(docs[a].tool.server).localeCompare(
+          String(docs[b].tool.server),
+          'en',
+        ) ||
+        String(docs[a].tool.name).localeCompare(
+          String(docs[b].tool.name),
+          'en',
+        ) ||
+        a - b,
+    );
+  for (let i = 0; i < stableOrder.length; i += 1)
+    docs[stableOrder[i]].tieRank = i;
 
   const byServer = new Map<string, number[]>();
   const byTool = new Map<string, number[]>();
@@ -64,9 +86,14 @@ export function createSearchIndex(tools: readonly ToolEntry[]) {
   return {
     search(options: SearchOptions = {}): SearchResult {
       const limit = normalizeLimit(options.limit);
-      const serverIds = options.server === undefined ? undefined : byServer.get(options.server);
-      const toolIds = options.tool === undefined ? undefined : byTool.get(options.tool);
-      if ((options.server !== undefined && !serverIds) || (options.tool !== undefined && !toolIds)) {
+      const serverIds =
+        options.server === undefined ? undefined : byServer.get(options.server);
+      const toolIds =
+        options.tool === undefined ? undefined : byTool.get(options.tool);
+      if (
+        (options.server !== undefined && !serverIds) ||
+        (options.tool !== undefined && !toolIds)
+      ) {
         return { tools: [], matched: 0 };
       }
       const allowed = (docId: number): boolean =>
@@ -76,10 +103,19 @@ export function createSearchIndex(tools: readonly ToolEntry[]) {
       const query = options.query;
       if (query === undefined || query.trim().length === 0) {
         if (serverIds === undefined && toolIds === undefined) {
-          return { tools: stableOrder.slice(0, limit).map((docId) => docs[docId].tool), matched: docs.length };
+          return {
+            tools: stableOrder.slice(0, limit).map((docId) => docs[docId].tool),
+            matched: docs.length,
+          };
         }
-        const candidates = serverIds === undefined ? toolIds! : toolIds === undefined ? serverIds :
-          (serverIds.length <= toolIds.length ? serverIds : toolIds);
+        const candidates =
+          serverIds === undefined
+            ? toolIds!
+            : toolIds === undefined
+              ? serverIds
+              : serverIds.length <= toolIds.length
+                ? serverIds
+                : toolIds;
         const result: number[] = [];
         let matched = 0;
         for (const docId of candidates) {
@@ -88,7 +124,8 @@ export function createSearchIndex(tools: readonly ToolEntry[]) {
           if (limit === 0) continue;
           const rank = docs[docId].tieRank;
           let insertion = result.length;
-          while (insertion > 0 && docs[result[insertion - 1]].tieRank > rank) insertion -= 1;
+          while (insertion > 0 && docs[result[insertion - 1]].tieRank > rank)
+            insertion -= 1;
           if (insertion >= limit) continue;
           result.splice(insertion, 0, docId);
           if (result.length > limit) result.pop();
@@ -119,7 +156,9 @@ export function createSearchIndex(tools: readonly ToolEntry[]) {
           }
           const frequency = values[i + 1];
           const doc = docs[docId];
-          scores[docId] += posting.idf * (frequency * (K1 + 1)) / (frequency + doc.lengthNorm);
+          scores[docId] +=
+            (posting.idf * (frequency * (K1 + 1))) /
+            (frequency + doc.lengthNorm);
         }
       }
 
@@ -143,9 +182,13 @@ function tokenize(value: string): string[] {
   return value.toLowerCase().match(/[a-z0-9]+/g) ?? [];
 }
 
-function addToIndex(index: Map<string, number[]>, key: string, docId: number): void {
+function addToIndex(
+  index: Map<string, number[]>,
+  key: string,
+  docId: number,
+): void {
   let ids = index.get(key);
-  if (!ids) index.set(key, ids = []);
+  if (!ids) index.set(key, (ids = []));
   ids.push(docId);
 }
 
@@ -166,15 +209,30 @@ function normalizeLimit(value: number | undefined): number {
   return Math.max(0, Math.min(MAX_LIMIT, Math.floor(value)));
 }
 
-function compareRank(a: number, b: number, scores: Float64Array, docs: Array<{ tieRank: number }>): number {
+function compareRank(
+  a: number,
+  b: number,
+  scores: Float64Array,
+  docs: Array<{ tieRank: number }>,
+): number {
   return scores[b] - scores[a] || docs[a].tieRank - docs[b].tieRank;
 }
 
-function isBetter(a: number, b: number, scores: Float64Array, docs: Array<{ tieRank: number }>): boolean {
+function isBetter(
+  a: number,
+  b: number,
+  scores: Float64Array,
+  docs: Array<{ tieRank: number }>,
+): boolean {
   return compareRank(a, b, scores, docs) < 0;
 }
 
-function heapPush(heap: number[], docId: number, scores: Float64Array, docs: Array<{ tieRank: number }>): void {
+function heapPush(
+  heap: number[],
+  docId: number,
+  scores: Float64Array,
+  docs: Array<{ tieRank: number }>,
+): void {
   let index = heap.length;
   heap.push(docId);
   while (index > 0) {
@@ -185,14 +243,20 @@ function heapPush(heap: number[], docId: number, scores: Float64Array, docs: Arr
   }
 }
 
-function heapDown(heap: number[], start: number, scores: Float64Array, docs: Array<{ tieRank: number }>): void {
+function heapDown(
+  heap: number[],
+  start: number,
+  scores: Float64Array,
+  docs: Array<{ tieRank: number }>,
+): void {
   let index = start;
   while (true) {
     const left = index * 2 + 1;
     if (left >= heap.length) return;
     const right = left + 1;
     let worse = left;
-    if (right < heap.length && isBetter(heap[left], heap[right], scores, docs)) worse = right;
+    if (right < heap.length && isBetter(heap[left], heap[right], scores, docs))
+      worse = right;
     if (!isBetter(heap[index], heap[worse], scores, docs)) return;
     [heap[index], heap[worse]] = [heap[worse], heap[index]];
     index = worse;

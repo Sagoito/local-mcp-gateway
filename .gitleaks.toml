@@ -1,0 +1,27 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Generated or vendored files that are not first-party credential sources"
+paths = [
+  '^[.]git/',
+  '^node_modules/',
+  '^dist/',
+  '^[.]local/',
+  '^coverage/',
+  '^benchmark/runs/',
+  '^benchmark/fixtures/',
+]
+
+# Add only an exception to the inherited generic-api-key rule. Both the
+# matched auth-module hash assignment and benchmark/results path must match;
+# other keys and same-line findings remain active.
+[[rules]]
+id = "generic-api-key"
+
+  [[rules.allowlists]]
+  description = "Known frozen benchmark auth-module SHA-256 fingerprints"
+  condition = "AND"
+  paths = ['(^|/)benchmark/results/.*\.json$']
+  regexTarget = "match"
+  regexes = ['(?:src/)?auth\.(?:d\.ts|js|ts)"\s*:\s*"(?:d9c67e85b43f91c125e86e42461dd63a7e0a04f275fefae6032bfab8579dcba8|deeed4d52c783c33d0417e666d87603f28325c43364e2586a1c94dae8419e22a|08394fdd7a82d2dbbc4e7999c64c464dac3241e1ba7c3f6f814110d6784b7705|237378d0f75dff04e443fb072f6a94bb39ce9028ce4e5aa7c8e0af3e3eaf3b33)"']

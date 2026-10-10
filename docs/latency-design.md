@@ -32,11 +32,9 @@ Six unchanged synthetic tasks × two repetitions × three conditions = 36 fresh 
 
 The mailbox daemon now atomically claims request files to prevent duplicate execution/logging. All three arms use that same corrected harness. Record cold list setup separately but include it in total elapsed time, so preloading is not hidden. The compiled gateway used by agents is frozen during runs. Optional working-set configuration was added afterward in source and verified separately; the agent benchmark measures automatic small-catalogue mode, not the selected-working-set mode. Actual model billing/hidden reasoning and native client deferred-tool behavior remain unavailable. Full logged payload can exceed model-visible output due to host truncation; it must not be called actual context usage. Two repetitions per task support a pilot comparison, not statistical proof or production latency guarantees.
 
-
 ## Follow-up: structured single-call execution
 
 The 36-run inline catalogue pilot reduced the median versus the contemporaneous old gateway by 23.7%, but still incurred code-generation errors. A subsequent 12-run gateway-only pass tests an additive structured call option on execute: `{call:{server,tool,args}}`. It uses the same host upstream adapter and bounded results but never evaluates JavaScript. Code remains optional for filtering/composition. This pass is exploratory: controls were run immediately earlier, not interleaved again. Its results must be distinguished from the 36-run comparison. No code was changed during either measured compiled run set.
-
 
 ## Follow-up: bounded native working set and retained results
 
@@ -47,7 +45,6 @@ An optional `nativeTools` set now exposes up to five common tools directly, shar
 Native and structured calls retain oversized raw responses in a bounded in-memory result store and return a handle plus a generic shape summary. `mcp.result(id)` retrieves the snapshot inside the existing isolated QuickJS runtime. The agent can filter it without fetching upstream again. The cache has eight entries, 8 MiB total capacity, five-minute TTL and clears on config replacement/disconnect; it does not establish new permissions or evaluate upstream text.
 
 The prespecified 24-run plan is in [NATIVE_PLAN.md](../benchmark/NATIVE_PLAN.md). The same curated five-tool set applies to every question. This tests a configured common-tool profile, not automatic selection across arbitrary workloads.
-
 
 ## Structured retained JSON queries and language choice
 

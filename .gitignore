@@ -17,3 +17,9 @@ IMPLEMENTATION.md
 # Generated benchmark sessions
 benchmark/runs/
 benchmark/fixtures/
+
+# Tool caches and temporary benchmark test fixtures
+*.tsbuildinfo
+.eslintcache
+test/.benchmark*
+__pycache__/

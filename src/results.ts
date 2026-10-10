@@ -36,9 +36,21 @@ export class ResultStore {
 
   constructor(options: ResultStoreOptions = {}) {
     this.allowCode = options.allowCode ?? (() => true);
-    this.inlineBytes = nonNegativeInteger(options.inlineBytes, DEFAULT_INLINE_BYTES, 'inlineBytes');
-    this.maxEntries = nonNegativeInteger(options.maxEntries, DEFAULT_ENTRY_LIMIT, 'maxEntries');
-    this.maxTotalBytes = nonNegativeInteger(options.maxTotalBytes, DEFAULT_TOTAL_BYTES, 'maxTotalBytes');
+    this.inlineBytes = nonNegativeInteger(
+      options.inlineBytes,
+      DEFAULT_INLINE_BYTES,
+      'inlineBytes',
+    );
+    this.maxEntries = nonNegativeInteger(
+      options.maxEntries,
+      DEFAULT_ENTRY_LIMIT,
+      'maxEntries',
+    );
+    this.maxTotalBytes = nonNegativeInteger(
+      options.maxTotalBytes,
+      DEFAULT_TOTAL_BYTES,
+      'maxTotalBytes',
+    );
     this.ttlMs = nonNegativeInteger(options.ttlMs, DEFAULT_TTL_MS, 'ttlMs');
     this.now = options.now ?? Date.now;
     this.makeId = options.id ?? randomUUID;
@@ -54,16 +66,26 @@ export class ResultStore {
     const content = Array.isArray(result?.content) ? result.content : [];
     let value: unknown;
     if (content.length > 0) {
-      const textBlocks = content.filter((block) => asRecord(block)?.type === 'text');
+      const textBlocks = content.filter(
+        (block) => asRecord(block)?.type === 'text',
+      );
       const hasNonText = textBlocks.length !== content.length;
       if (hasNonText) {
         // Keep images, audio, embedded resources, and unknown future block types intact.
         value = raw;
       } else {
-        const text = textBlocks.map((block) => String(asRecord(block)?.text ?? '')).join('\n');
+        const text = textBlocks
+          .map((block) => {
+            const value = asRecord(block)?.text;
+            return typeof value === 'string' ? value : '';
+          })
+          .join('\n');
         value = parseJsonText(text);
       }
-    } else if (result && Object.prototype.hasOwnProperty.call(result, 'structuredContent')) {
+    } else if (
+      result &&
+      Object.prototype.hasOwnProperty.call(result, 'structuredContent')
+    ) {
       value = result.structuredContent;
     } else {
       value = raw;
@@ -72,7 +94,9 @@ export class ResultStore {
     const rawSnapshot = stringify(raw);
     const snapshotBytes = Buffer.byteLength(rawSnapshot, 'utf8');
     if (snapshotBytes > this.maxTotalBytes) {
-      throw new RangeError(`MCP result snapshot (${snapshotBytes} bytes) exceeds the result-store capacity`);
+      throw new RangeError(
+        `MCP result snapshot (${snapshotBytes} bytes) exceeds the result-store capacity`,
+      );
     }
     const valueSnapshot = stringify(value);
     const outputBytes = Buffer.byteLength(valueSnapshot, 'utf8');
@@ -82,7 +106,11 @@ export class ResultStore {
     this.retain(id, rawSnapshot, snapshotBytes);
     const metadata = {
       gatewayResult: { id, bytes: outputBytes, shape: summarizeShape(value) },
-      hint: `For JSON, call execute.result with id ${JSON.stringify(id)}, path to the desired array, where comparisons, and action all/first/count.` + (this.allowCode() ? ` Use execute.code with mcp.result(${JSON.stringify(id)}) for custom processing; for ordinary text use mcp.text(await mcp.result(${JSON.stringify(id)})).` : ' JavaScript processing is disabled; retained non-JSON text requires a smaller upstream response.'),
+      hint:
+        `For JSON, call execute.result with id ${JSON.stringify(id)}, path to the desired array, where comparisons, and action all/first/count.` +
+        (this.allowCode()
+          ? ` Use execute.code with mcp.result(${JSON.stringify(id)}) for custom processing; for ordinary text use mcp.text(await mcp.result(${JSON.stringify(id)})).`
+          : ' JavaScript processing is disabled; retained non-JSON text requires a smaller upstream response.'),
     };
     const serialized = JSON.stringify(metadata);
     if (Buffer.byteLength(serialized, 'utf8') > MAX_METADATA_BYTES) {
@@ -93,6 +121,7 @@ export class ResultStore {
   }
 
   /** Returns a fresh object parsed from the retained raw-result snapshot. */
+  // eslint-disable-next-line @typescript-eslint/require-await -- Preserve promise rejection for missing or expired results.
   async get(id: string): Promise<unknown> {
     const entry = this.entries.get(id);
     if (!entry) throw new Error(`Unknown or expired MCP result: ${id}`);
@@ -114,8 +143,11 @@ export class ResultStore {
   private retain(id: string, snapshot: string, bytes: number): void {
     this.pruneExpired();
     if (this.maxEntries === 0) throw new RangeError('Result store is disabled');
-    while (this.entries.size >= this.maxEntries || this.totalBytes + bytes > this.maxTotalBytes) {
-      const oldest = this.entries.keys().next().value as string | undefined;
+    while (
+      this.entries.size >= this.maxEntries ||
+      this.totalBytes + bytes > this.maxTotalBytes
+    ) {
+      const oldest = this.entries.keys().next().value;
       if (oldest === undefined) break;
       this.delete(oldest);
     }
@@ -138,15 +170,20 @@ export class ResultStore {
   }
 }
 
-function nonNegativeInteger(value: number | undefined, fallback: number, name: string): number {
+function nonNegativeInteger(
+  value: number | undefined,
+  fallback: number,
+  name: string,
+): number {
   const resolved = value ?? fallback;
-  if (!Number.isSafeInteger(resolved) || resolved < 0) throw new RangeError(`${name} must be a non-negative safe integer`);
+  if (!Number.isSafeInteger(resolved) || resolved < 0)
+    throw new RangeError(`${name} must be a non-negative safe integer`);
   return resolved;
 }
 
 function asRecord(value: unknown): Record<string, unknown> | undefined {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
-    ? value as Record<string, unknown>
+    ? (value as Record<string, unknown>)
     : undefined;
 }
 
@@ -160,7 +197,8 @@ function parseJsonText(text: string): unknown {
 
 function stringify(value: unknown): string {
   const serialized = JSON.stringify(value);
-  if (serialized === undefined) throw new TypeError('MCP result is not JSON-serializable');
+  if (serialized === undefined)
+    throw new TypeError('MCP result is not JSON-serializable');
   return serialized;
 }
 
@@ -168,25 +206,44 @@ function errorMessage(result: Record<string, unknown>): string {
   const content = Array.isArray(result.content) ? result.content : [];
   const message = content
     .filter((block) => asRecord(block)?.type === 'text')
-    .map((block) => String(asRecord(block)?.text ?? ''))
+    .map((block) => {
+      const value = asRecord(block)?.text;
+      return typeof value === 'string' ? value : '';
+    })
     .join('\n');
-  return message ? `MCP tool returned an error: ${message.slice(0, 500)}` : 'MCP tool returned an error';
+  return message
+    ? `MCP tool returned an error: ${message.slice(0, 500)}`
+    : 'MCP tool returned an error';
 }
 
 function summarizeShape(value: unknown): Record<string, unknown> {
-  if (Array.isArray(value)) return { type: 'array', length: value.length, itemKeys: itemKeys(value) };
+  if (Array.isArray(value))
+    return { type: 'array', length: value.length, itemKeys: itemKeys(value) };
   const record = asRecord(value);
   if (!record) return { type: value === null ? 'null' : typeof value };
   const keys = Object.keys(record);
-  const properties: Record<string, unknown> = Object.create(null) as Record<string, unknown>;
+  const properties: Record<string, unknown> = Object.create(null) as Record<
+    string,
+    unknown
+  >;
   let arrayProperties = 0;
   for (const key of keys.slice(0, 16)) {
     const fieldValue = record[key];
     if (Array.isArray(fieldValue) && arrayProperties < 4) {
-      properties[safeKey(key)] = { type: 'array', length: fieldValue.length, itemKeys: itemKeys(fieldValue, 6) };
+      properties[safeKey(key)] = {
+        type: 'array',
+        length: fieldValue.length,
+        itemKeys: itemKeys(fieldValue, 6),
+      };
       arrayProperties += 1;
     } else {
-      properties[safeKey(key)] = { type: Array.isArray(fieldValue) ? 'array' : fieldValue === null ? 'null' : typeof fieldValue };
+      properties[safeKey(key)] = {
+        type: Array.isArray(fieldValue)
+          ? 'array'
+          : fieldValue === null
+            ? 'null'
+            : typeof fieldValue,
+      };
     }
   }
   return { type: 'object', keyCount: keys.length, properties };
@@ -212,7 +269,11 @@ function safeKey(key: string): string {
   let safe = '';
   let bytes = 0;
   for (const character of key) {
-    const printable = /[\u0000-\u001f\u007f-\u009f]/u.test(character) ? '�' : character;
+    // Replace ASCII and C1 controls to keep result metadata safe to display.
+    // eslint-disable-next-line no-control-regex -- This deliberately detects control code points.
+    const printable = /[\u0000-\u001f\u007f-\u009f]/u.test(character)
+      ? '�'
+      : character;
     const size = Buffer.byteLength(printable, 'utf8');
     if (bytes + size > 32) break;
     safe += printable;

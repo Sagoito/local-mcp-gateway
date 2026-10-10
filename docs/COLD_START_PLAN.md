@@ -14,27 +14,27 @@ Eager indexing alone moves work from the first search into startup. Persistence 
 
 Code inspected: [`server.ts`](../src/server.ts), [`upstreams.ts`](../src/upstreams.ts), [`search.ts`](../src/search.ts), and the installed SDK protocol definitions.
 
-| Finding | Effect |
-|---|---|
-| `serve()` awaits upstream `listTools()` before connecting its client transport | All discovery is on the client startup path |
-| Search constructs its BM25 index lazily | The first query pays for tokenization, postings, statistics and ordering |
-| Discovery runs in batches of four | One slow member blocks scheduling the next batch, even when other slots are free |
-| Tool lists live only in memory, with a fixed 30-second TTL | Restart loses metadata; the next search after expiry waits for discovery |
-| Successful discovery creates new arrays even for identical tools | Array-identity index caching rebuilds unchanged catalogues |
-| Any configuration change recreates every upstream manager | Adding one server also discards unrelated connections and caches |
-| A single promise queue serializes gateway calls | A slow request can delay independent searches and executions |
+| Finding                                                                        | Effect                                                                           |
+| ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------- |
+| `serve()` awaits upstream `listTools()` before connecting its client transport | All discovery is on the client startup path                                      |
+| Search constructs its BM25 index lazily                                        | The first query pays for tokenization, postings, statistics and ordering         |
+| Discovery runs in batches of four                                              | One slow member blocks scheduling the next batch, even when other slots are free |
+| Tool lists live only in memory, with a fixed 30-second TTL                     | Restart loses metadata; the next search after expiry waits for discovery         |
+| Successful discovery creates new arrays even for identical tools               | Array-identity index caching rebuilds unchanged catalogues                       |
+| Any configuration change recreates every upstream manager                      | Adding one server also discards unrelated connections and caches                 |
+| A single promise queue serializes gateway calls                                | A slow request can delay independent searches and executions                     |
 
 Existing connection promises already coalesce connection attempts per server. That mechanism can be extended to discovery and rebuilding rather than replaced.
 
 The frozen [v10 results](../benchmark/results/public-v10/README.md) show:
 
-| Measurement | Result | Scope |
-|---|---:|---|
-| Index construction, 5,000 tools | 116.5 ms | One fresh-process diagnostic, deterministic corpus prefix |
-| Index construction, 44,453 tools | 939.1 ms | One fresh-process diagnostic, full corpus |
-| First SDK search, 44,453 tools | 916.0 ms | Catalogue already supplied; excludes process and upstream startup |
-| Warm SDK search, full suite | p50 2.44 ms; p95 6.70 ms | 7,961 measured queries after separate warmup |
-| Retained index heap increment, 44,453 tools | 92.2 MiB | After GC; allocator-sensitive RSS increment was 220.4 MiB |
+| Measurement                                 |                   Result | Scope                                                             |
+| ------------------------------------------- | -----------------------: | ----------------------------------------------------------------- |
+| Index construction, 5,000 tools             |                 116.5 ms | One fresh-process diagnostic, deterministic corpus prefix         |
+| Index construction, 44,453 tools            |                 939.1 ms | One fresh-process diagnostic, full corpus                         |
+| First SDK search, 44,453 tools              |                 916.0 ms | Catalogue already supplied; excludes process and upstream startup |
+| Warm SDK search, full suite                 | p50 2.44 ms; p95 6.70 ms | 7,961 measured queries after separate warmup                      |
+| Retained index heap increment, 44,453 tools |                 92.2 MiB | After GC; allocator-sensitive RSS increment was 220.4 MiB         |
 
 Sources: [memory diagnostic](../benchmark/results/public-v10/memory.json) and [full-suite manifest](../benchmark/results/public-v10/manifest.json). The large corpus is an index fixture, not proof of live 44,453-tool support: live discovery currently has a 5,000-tool cap. None of these numbers measures complete process-to-first-authorized-execution startup. There is no defensible percentage breakdown of that whole path yet.
 
@@ -42,15 +42,15 @@ Sources: [memory diagnostic](../benchmark/results/public-v10/memory.json) and [f
 
 These are documented production techniques. Their applicability to this gateway is an engineering recommendation, not evidence of an already measured speedup here.
 
-| Technique | Industry example | Application here | Priority |
-|---|---|---|---|
-| Persist prepared work with versioned invalidation | Vite caches pre-bundled dependencies on disk [1] | Save metadata plus the actual BM25 index; restore without retokenizing | First |
-| Refresh independently of the query | Lucene shares a current searcher while a replacement is prepared [2]; Caffeine refreshes asynchronously and deduplicates work [3] | Retain an eligible catalogue generation while building its replacement | First |
-| Coalesce misses and bound dependency traffic | AWS caching guidance [4]; Go `singleflight` [5] | One discovery/build per upstream generation; a four-slot work queue with immediate slot reuse | First |
-| Keep the execution engine alive | Gradle Daemon retains a background process [6] | Optional local daemon, thin MCP stdio adapters, idle timeout | Second |
-| Cache runtime compilation | Node module compile cache [7] | Measure import/compile startup separately; enable only if useful | Second |
-| Restore initialized runtime state | Lambda SnapStart snapshots initialized environments [8]; Node supports startup snapshots [9] | A later alternative if ordinary data restoration remains expensive | Defer |
-| Query a persistent inverted index | SQLite FTS5 [10] | Alternative storage/search experiment if JS restoration or memory dominates | Defer |
+| Technique                                         | Industry example                                                                                                                  | Application here                                                                              | Priority |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | -------- |
+| Persist prepared work with versioned invalidation | Vite caches pre-bundled dependencies on disk [1]                                                                                  | Save metadata plus the actual BM25 index; restore without retokenizing                        | First    |
+| Refresh independently of the query                | Lucene shares a current searcher while a replacement is prepared [2]; Caffeine refreshes asynchronously and deduplicates work [3] | Retain an eligible catalogue generation while building its replacement                        | First    |
+| Coalesce misses and bound dependency traffic      | AWS caching guidance [4]; Go `singleflight` [5]                                                                                   | One discovery/build per upstream generation; a four-slot work queue with immediate slot reuse | First    |
+| Keep the execution engine alive                   | Gradle Daemon retains a background process [6]                                                                                    | Optional local daemon, thin MCP stdio adapters, idle timeout                                  | Second   |
+| Cache runtime compilation                         | Node module compile cache [7]                                                                                                     | Measure import/compile startup separately; enable only if useful                              | Second   |
+| Restore initialized runtime state                 | Lambda SnapStart snapshots initialized environments [8]; Node supports startup snapshots [9]                                      | A later alternative if ordinary data restoration remains expensive                            | Defer    |
+| Query a persistent inverted index                 | SQLite FTS5 [10]                                                                                                                  | Alternative storage/search experiment if JS restoration or memory dominates                   | Defer    |
 
 The strongest lesson from snapshot systems is to reuse prepared work. Whole-process snapshots are unnecessary for the first implementation. AWS warns that restored connections and temporary credentials need validation; Node startup snapshots require matching version, architecture and platform, plus compatible flags and CPU features. This complicates a portable gateway with changing user configuration.
 

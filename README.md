@@ -4,7 +4,7 @@ Use the MCP servers you already have through one local gateway. Your agent sees 
 
 ## Install once
 
-Requires Node.js 22 or newer. Install from this repository; there is no published npm package yet.
+Requires Node.js 22.13+ (22.x) or 24+. Install from this repository; there is no published npm package yet.
 
 ```sh
 git clone https://github.com/Sagoito/local-mcp-gateway.git
@@ -28,10 +28,10 @@ This imports the supported servers into the gateway and prints the ready-to-past
 
 Other supported configurations:
 
-| Your configuration | Command |
-|---|---|
-| VS Code workspace | `local-mcp setup .vscode/mcp.json --client vscode` |
-| OpenCode | `local-mcp setup opencode.jsonc --client opencode` |
+| Your configuration     | Command                                                 |
+| ---------------------- | ------------------------------------------------------- |
+| VS Code workspace      | `local-mcp setup .vscode/mcp.json --client vscode`      |
+| OpenCode               | `local-mcp setup opencode.jsonc --client opencode`      |
 | JSON with `mcpServers` | `local-mcp setup /path/to/client.json --client generic` |
 
 Run these from the workspace where the original servers run, or pass `--workspace /path/to/project`. Relative commands, arguments, and working directories need that workspace. `${workspaceFolder}` is resolved there. JSON comments and trailing commas are supported.
@@ -51,13 +51,13 @@ The import is a snapshot of the specified file. Re-running it accepts identical 
 
 You do not need to recreate commands, arguments, environment maps, or HTTP headers for supported entries. Import preserves credential references instead of resolving them into secrets.
 
-| Existing authentication | What happens |
-|---|---|
-| API key or bearer header in the file | Header is copied to the private gateway config; environment references stay references. |
-| Environment variables | `${NAME}`, `${env:NAME}`, and `{env:NAME}` become gateway references. Copilot `$NAME` in environment values/headers is supported. Set variables in the process that launches the gateway. |
-| Auth handled by a stdio executable or wrapper | The same command is retained. Its existing credentials may continue to work under the same OS user, home and working directory. |
-| OAuth handled by the agent | Sessions and keychain tokens are not copied. Sign in once through the gateway if the provider supports its flow. |
-| Client-specific prompts, OIDC, custom scopes/grants, env files, environment-dependent working directories, or sandbox rules | Import stops with a per-server explanation instead of dropping the setting. Keep that server direct until it has a supported configuration. |
+| Existing authentication                                                                                                     | What happens                                                                                                                                                                              |
+| --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| API key or bearer header in the file                                                                                        | Header is copied to the private gateway config; environment references stay references.                                                                                                   |
+| Environment variables                                                                                                       | `${NAME}`, `${env:NAME}`, and `{env:NAME}` become gateway references. Copilot `$NAME` in environment values/headers is supported. Set variables in the process that launches the gateway. |
+| Auth handled by a stdio executable or wrapper                                                                               | The same command is retained. Its existing credentials may continue to work under the same OS user, home and working directory.                                                           |
+| OAuth handled by the agent                                                                                                  | Sessions and keychain tokens are not copied. Sign in once through the gateway if the provider supports its flow.                                                                          |
+| Client-specific prompts, OIDC, custom scopes/grants, env files, environment-dependent working directories, or sandbox rules | Import stops with a per-server explanation instead of dropping the setting. Keep that server direct until it has a supported configuration.                                               |
 
 For a compatible OAuth server:
 
@@ -86,6 +86,8 @@ local-mcp add new-server --url https://example.com/mcp
 New configurations created by `setup` or `import` disable JavaScript. Structured tool calls and retained JSON filtering work without it. Existing configurations retain their settings. Imported exact-name tool filters become enforced allowlists; an empty filter denies all tools, and a sole `*` permits all. Other wildcard filters are rejected.
 
 This is a single-user local tool proxy. Stdio subprocesses run with your OS permissions. An allowed tool can still perform harmful actions through its arguments; approval of `execute` is not approval enforcement for every nested action. The gateway proxies tools over stdio and Streamable HTTP, with discovery, argument, output, and execution limits. It does not proxy upstream prompts/resources or support legacy SSE.
+
+Contributors can run `npm run check` for linting, formatting, types, tests, and package validation. See [contributing](CONTRIBUTING.md) and [quality and security checks](docs/QUALITY_SECURITY.md).
 
 Read the [security model](SECURITY.md) before using privileged tools. [Limits, manual configuration, execution examples, and native tools](docs/USAGE.md) are documented separately.
 

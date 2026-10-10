@@ -1,0 +1,86 @@
+name: Security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '23 5 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit-and-scans:
+    name: Dependency and source scans
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out source and full history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Audit dependencies
+        run: npm run security:deps
+
+      - name: Install pinned Semgrep CLI
+        run: python -m pip install --disable-pip-version-check 'semgrep==1.180.0'
+
+      - name: Install and verify pinned Gitleaks CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          version=8.30.1
+          archive="gitleaks_${version}_linux_x64.tar.gz"
+          checksums="gitleaks_${version}_checksums.txt"
+          base="https://github.com/gitleaks/gitleaks/releases/download/v${version}"
+          mkdir -p "${RUNNER_TEMP}/gitleaks"
+          cd "${RUNNER_TEMP}/gitleaks"
+          curl --fail --location --silent --show-error "${base}/${archive}" --output "${archive}"
+          curl --fail --location --silent --show-error "${base}/${checksums}" --output "${checksums}"
+          echo '061476c21adaf5441516f96f185c1a4706a83cd6329b9b38762271b3d4a52fae  gitleaks_8.30.1_checksums.txt' | sha256sum --check --status
+          awk -v archive="${archive}" '$2 == archive || $2 == "*" archive' "${checksums}" | sha256sum --check --status
+          tar -xzf "${archive}" gitleaks
+          echo "${RUNNER_TEMP}/gitleaks" >> "${GITHUB_PATH}"
+
+      - name: Install and verify pinned actionlint CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "${RUNNER_TEMP}/actionlint"
+          cd "${RUNNER_TEMP}/actionlint"
+          curl --fail --location --silent --show-error https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz --output actionlint.tar.gz
+          echo '8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8  actionlint.tar.gz' | sha256sum --check --status
+          tar -xzf actionlint.tar.gz actionlint
+          echo "${RUNNER_TEMP}/actionlint" >> "${GITHUB_PATH}"
+
+      - name: Check workflow definitions
+        run: npm run security:workflows
+
+      - name: Test security rules and secret scan exceptions
+        run: npm run security:rules && npm run security:secret-rules
+
+      - name: Scan source with local Semgrep rules
+        run: npm run security:sast
+
+      - name: Scan current files for secrets
+        run: npm run security:secrets
+
+      - name: Scan full Git history for secrets
+        run: gitleaks git --config .gitleaks.toml --redact --no-banner --log-opts=--all .

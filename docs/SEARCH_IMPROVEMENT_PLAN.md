@@ -20,24 +20,24 @@ A pre-index v9 diagnostic found expensive direct ranking and many score ties. It
 
 Code inspection identifies these mechanisms:
 
-| Location | Current mechanism | Consequence |
-|---|---|---|
-| `src/server.ts:searchCatalog` | Reuses an indexed BM25 search object per immutable catalogue array | Search avoids rebuilding terms and scanning/sorting every catalogue entry on each request |
-| `src/search.ts` | Lowercase `[a-z0-9]+` tokens; BM25 over configured server alias, capability name, and full description; deterministic tie order; bounded top-k | Connector aliases remain searchable; explicit server/tool fields perform exact filtering |
-| `src/server.ts:run` | One promise queue for search, direct calls, retained queries, and code | A slow request blocks independent operations; this is code evidence, not yet a measured contribution to agent latency |
-| `src/server.ts:serve` | Reads/parses configuration before every call | Avoidable warm-call IO; reload currently closes all upstreams |
-| `src/upstreams.ts:listTools` | Reuses sorted aggregate array while per-server snapshot references and error state stay unchanged; refresh remains request-triggered after 30-second cache expiry | Repeated sorting is removed; cold/expired discovery can still block a request |
+| Location                      | Current mechanism                                                                                                                                                 | Consequence                                                                                                           |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `src/server.ts:searchCatalog` | Reuses an indexed BM25 search object per immutable catalogue array                                                                                                | Search avoids rebuilding terms and scanning/sorting every catalogue entry on each request                             |
+| `src/search.ts`               | Lowercase `[a-z0-9]+` tokens; BM25 over configured server alias, capability name, and full description; deterministic tie order; bounded top-k                    | Connector aliases remain searchable; explicit server/tool fields perform exact filtering                              |
+| `src/server.ts:run`           | One promise queue for search, direct calls, retained queries, and code                                                                                            | A slow request blocks independent operations; this is code evidence, not yet a measured contribution to agent latency |
+| `src/server.ts:serve`         | Reads/parses configuration before every call                                                                                                                      | Avoidable warm-call IO; reload currently closes all upstreams                                                         |
+| `src/upstreams.ts:listTools`  | Reuses sorted aggregate array while per-server snapshot references and error state stay unchanged; refresh remains request-triggered after 30-second cache expiry | Repeated sorting is removed; cold/expired discovery can still block a request                                         |
 
 Public-v9 supplies a cached synthetic catalogue and bypasses production upstream discovery. Production discovery currently limits newly discovered tools to 5,000. The 44,453-tool fixture therefore does not establish live discovery capacity or measure OAuth, expiry, config IO, startup, or real stdio overhead. These need separate operational tests.
 
 ## Research findings
 
-* **Local lexical search is an established implementation path.** SQLite FTS5 provides BM25, column weighting, and a rank-sorted limited-query path. MiniSearch provides an offline in-memory JavaScript index, field boosting, and incremental add/remove. Their rankings/tokenization are not automatically identical to our frozen reference. [1,2]
-* **Semantic matching can help after lexical retrieval.** StackOne reports gains from tool-specific training, hard negatives, consistent formatting, and connector-level holdouts. Its published scores and deployment times are vendor reports, not predictions for our laptop. Do not assume its fine-tuned model is available or that our model will reproduce its result. [3]
-* **A small model can run locally.** BGE-small-en-v1.5 has 384-dimensional outputs, a 512-token sequence limit, ONNX artifacts, and an MIT license. MiniLM-L6-v2 is a comparison candidate; its model card warns that inputs over 256 word pieces are truncated by default. Long documentation requires explicit formatting/chunking choices. Node ONNX bindings and Transformers.js local-model settings permit a local runtime. [4–7]
-* **Combine lexical and dense ranks explicitly.** Reciprocal Rank Fusion combines ranks without calibrating unlike score scales. Its original constant is 60. This is a reasonable fixed experimental starting point, not proof of improvement on tools. [8]
-* **Refresh can follow the protocol.** MCP supports paginated lists and `notifications/tools/list_changed`. Subscribe where supported, with a bounded background polling fallback for servers without notifications. [9]
-* **Code Mode solves a different part of the workflow.** Cloudflare composes calls and processes results in isolated runtimes. That can reduce agent turns/output, but it does not repair our substring ranking. Our direct-call and data-query paths already avoid code for common requests; keep those paths. [10]
+- **Local lexical search is an established implementation path.** SQLite FTS5 provides BM25, column weighting, and a rank-sorted limited-query path. MiniSearch provides an offline in-memory JavaScript index, field boosting, and incremental add/remove. Their rankings/tokenization are not automatically identical to our frozen reference. [1,2]
+- **Semantic matching can help after lexical retrieval.** StackOne reports gains from tool-specific training, hard negatives, consistent formatting, and connector-level holdouts. Its published scores and deployment times are vendor reports, not predictions for our laptop. Do not assume its fine-tuned model is available or that our model will reproduce its result. [3]
+- **A small model can run locally.** BGE-small-en-v1.5 has 384-dimensional outputs, a 512-token sequence limit, ONNX artifacts, and an MIT license. MiniLM-L6-v2 is a comparison candidate; its model card warns that inputs over 256 word pieces are truncated by default. Long documentation requires explicit formatting/chunking choices. Node ONNX bindings and Transformers.js local-model settings permit a local runtime. [4–7]
+- **Combine lexical and dense ranks explicitly.** Reciprocal Rank Fusion combines ranks without calibrating unlike score scales. Its original constant is 60. This is a reasonable fixed experimental starting point, not proof of improvement on tools. [8]
+- **Refresh can follow the protocol.** MCP supports paginated lists and `notifications/tools/list_changed`. Subscribe where supported, with a bounded background polling fallback for servers without notifications. [9]
+- **Code Mode solves a different part of the workflow.** Cloudflare composes calls and processes results in isolated runtimes. That can reduce agent turns/output, but it does not repair our substring ranking. Our direct-call and data-query paths already avoid code for common requests; keep those paths. [10]
 
 ## Implementation sequence
 
@@ -83,17 +83,17 @@ Offer a configuration mode that disables `execute.code` while retaining typed ca
 
 Pin hardware, Node version, corpus, scripts and query order. Warm latency means a ready catalogue/index and model, but an empty query-result cache. Report build/startup/refresh separately.
 
-| Gate | Initial acceptance target |
-|---|---|
-| Stage 1 retrieval | **Measured:** full public suite product nDCG@10 0.295644, zero errors; frozen reference 0.296189. This is a product-usefulness measurement, not a ranking target |
-| Query acceptance | **Measured:** all 7,961 original queries accepted; zero search errors |
-| Lexical warm SDK, up to 5,000 tools | p50 ≤20 ms, p95 ≤50 ms on the designated CPU; not yet verified (the available 5,000-tool measurements are direct index calls, not SDK calls) |
-| Lexical warm SDK, 44,453-tool fixture | p50 ≤50 ms, p95 ≤100 ms; report genuine worst cases and term/posting counts |
-| Catalogue lifecycle | Add/remove/revoke reflected correctly; warm execution not blocked by unrelated discovery; no stale-permission calls |
-| Memory | Initial lexical goal ≤512 MiB RSS at 44,453 tools; separately measure peak rebuild and optional model memory |
-| Optional hybrid | Meaningful paired quality gain over the indexed lexical release, with p95 ≤100 ms at 5,000 tools and ≤150 ms at 44,453; otherwise remains optional |
-| Context | Default still two tools; native profile still bounded to five additional tools and its existing definition budget; report schema/result tokens and actual usage separately |
-| Small-result execution | Proposed warm gateway-added p50 ≤5 ms and p95 ≤15 ms versus the same direct upstream; verify over real stdio, not just in-memory transport |
+| Gate                                  | Initial acceptance target                                                                                                                                                  |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Stage 1 retrieval                     | **Measured:** full public suite product nDCG@10 0.295644, zero errors; frozen reference 0.296189. This is a product-usefulness measurement, not a ranking target           |
+| Query acceptance                      | **Measured:** all 7,961 original queries accepted; zero search errors                                                                                                      |
+| Lexical warm SDK, up to 5,000 tools   | p50 ≤20 ms, p95 ≤50 ms on the designated CPU; not yet verified (the available 5,000-tool measurements are direct index calls, not SDK calls)                               |
+| Lexical warm SDK, 44,453-tool fixture | p50 ≤50 ms, p95 ≤100 ms; report genuine worst cases and term/posting counts                                                                                                |
+| Catalogue lifecycle                   | Add/remove/revoke reflected correctly; warm execution not blocked by unrelated discovery; no stale-permission calls                                                        |
+| Memory                                | Initial lexical goal ≤512 MiB RSS at 44,453 tools; separately measure peak rebuild and optional model memory                                                               |
+| Optional hybrid                       | Meaningful paired quality gain over the indexed lexical release, with p95 ≤100 ms at 5,000 tools and ≤150 ms at 44,453; otherwise remains optional                         |
+| Context                               | Default still two tools; native profile still bounded to five additional tools and its existing definition budget; report schema/result tokens and actual usage separately |
+| Small-result execution                | Proposed warm gateway-added p50 ≤5 ms and p95 ≤15 ms versus the same direct upstream; verify over real stdio, not just in-memory transport                                 |
 
 Remaining targets are engineering goals. The v10 full-suite process-wide peak RSS is 631 MiB including benchmark data, above the initial 512 MiB target and not an isolated index measurement; the isolated 44,453-tool index retained 92.2 MiB heap after GC, with allocator-sensitive RSS delta of 220.4 MiB. The first cold SDK search is 916 ms; optimize or move index construction only after an operational startup/expiry study. Hybrid inference and runtime behavior on Windows/macOS/Linux remain unmeasured. Faster local search does not guarantee a faster final answer.
 

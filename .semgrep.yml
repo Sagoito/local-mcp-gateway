@@ -1,0 +1,222 @@
+rules:
+  - id: local-mcp.host-dynamic-code
+    message: Host-side eval and Function construction execute dynamic code; keep executable user code inside the isolated QuickJS guest runtime.
+    severity: ERROR
+    languages: [javascript, typescript]
+    metadata:
+      category: security
+      cwe: CWE-95
+      confidence: HIGH
+      references:
+        - https://nodejs.org/api/vm.html
+        - https://semgrep.dev/docs/writing-rules/pattern-syntax
+      scope: host JavaScript/TypeScript only; QuickJS guest evalCode is allowed
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: Function(...)
+      - pattern: new Function(...)
+
+  - id: local-mcp.node-vm-execution
+    message: Node's vm module is not a security boundary; use the isolated QuickJS guest runtime for untrusted code.
+    severity: ERROR
+    languages: [javascript, typescript]
+    metadata:
+      category: security
+      cwe: CWE-693
+      confidence: HIGH
+      references:
+        - https://nodejs.org/api/vm.html
+        - https://semgrep.dev/docs/writing-rules/pattern-syntax
+      scope: imports from node:vm or vm; applies to host code
+    pattern-either:
+      - patterns:
+          - pattern: $VM.runInNewContext(...)
+          - pattern-inside: |
+              import * as $VM from 'node:vm';
+              ...
+      - patterns:
+          - pattern: $VM.runInNewContext(...)
+          - pattern-inside: |
+              import * as $VM from 'vm';
+              ...
+      - patterns:
+          - pattern: $VM.runInContext(...)
+          - pattern-inside: |
+              import * as $VM from 'node:vm';
+              ...
+      - patterns:
+          - pattern: $VM.runInContext(...)
+          - pattern-inside: |
+              import * as $VM from 'vm';
+              ...
+      - patterns:
+          - pattern: $VM.runInThisContext(...)
+          - pattern-inside: |
+              import * as $VM from 'node:vm';
+              ...
+      - patterns:
+          - pattern: $VM.runInThisContext(...)
+          - pattern-inside: |
+              import * as $VM from 'vm';
+              ...
+      - patterns:
+          - pattern: $RUN(...)
+          - pattern-inside: |
+              import { ..., runInNewContext as $RUN, ... } from 'node:vm';
+              ...
+      - patterns:
+          - pattern: $RUN(...)
+          - pattern-inside: |
+              import { ..., runInNewContext as $RUN, ... } from 'vm';
+              ...
+      - patterns:
+          - pattern: $RUN(...)
+          - pattern-inside: |
+              import { ..., runInContext as $RUN, ... } from 'node:vm';
+              ...
+      - patterns:
+          - pattern: $RUN(...)
+          - pattern-inside: |
+              import { ..., runInContext as $RUN, ... } from 'vm';
+              ...
+      - patterns:
+          - pattern: $RUN(...)
+          - pattern-inside: |
+              import { ..., runInThisContext as $RUN, ... } from 'node:vm';
+              ...
+      - patterns:
+          - pattern: $RUN(...)
+          - pattern-inside: |
+              import { ..., runInThisContext as $RUN, ... } from 'vm';
+              ...
+      - patterns:
+          - pattern: $VM.runInNewContext(...)
+          - pattern-inside: |
+              const $VM = require('node:vm');
+              ...
+      - patterns:
+          - pattern: $VM.runInNewContext(...)
+          - pattern-inside: |
+              const $VM = require('vm');
+              ...
+
+  - id: local-mcp.shell-child-process
+    message: Shell-based child-process commands can turn untrusted arguments into command injection; use execFile/spawn with shell disabled and an argument array.
+    severity: ERROR
+    languages: [javascript, typescript]
+    metadata:
+      category: security
+      cwe: CWE-78
+      confidence: HIGH
+      references:
+        - https://nodejs.org/api/child_process.html
+        - https://semgrep.dev/docs/writing-rules/pattern-syntax
+      scope: exec/execSync are shell-based; spawn/spawnSync are flagged only with shell:true
+    pattern-either:
+      - patterns:
+          - pattern: $CMD(...)
+          - pattern-inside: |
+              import { ..., exec as $CMD, ... } from 'node:child_process';
+              ...
+      - patterns:
+          - pattern: $CMD(...)
+          - pattern-inside: |
+              import { ..., exec as $CMD, ... } from 'child_process';
+              ...
+      - patterns:
+          - pattern: $CMD(...)
+          - pattern-inside: |
+              import { ..., execSync as $CMD, ... } from 'node:child_process';
+              ...
+      - patterns:
+          - pattern: $CMD(...)
+          - pattern-inside: |
+              import { ..., execSync as $CMD, ... } from 'child_process';
+              ...
+      - patterns:
+          - pattern: $CP.exec(...)
+          - pattern-inside: |
+              import * as $CP from 'node:child_process';
+              ...
+      - patterns:
+          - pattern: $CP.exec(...)
+          - pattern-inside: |
+              import * as $CP from 'child_process';
+              ...
+      - patterns:
+          - pattern: $CP.execSync(...)
+          - pattern-inside: |
+              import * as $CP from 'node:child_process';
+              ...
+      - patterns:
+          - pattern: $CP.execSync(...)
+          - pattern-inside: |
+              import * as $CP from 'child_process';
+              ...
+      - patterns:
+          - pattern: |
+              $CMD(..., { ..., shell: true, ... })
+          - pattern-inside: |
+              import { ..., spawn as $CMD, ... } from 'node:child_process';
+              ...
+      - patterns:
+          - pattern: |
+              $CMD(..., { ..., shell: true, ... })
+          - pattern-inside: |
+              import { ..., spawn as $CMD, ... } from 'child_process';
+              ...
+      - patterns:
+          - pattern: |
+              $CMD(..., { ..., shell: true, ... })
+          - pattern-inside: |
+              import { ..., spawnSync as $CMD, ... } from 'node:child_process';
+              ...
+      - patterns:
+          - pattern: |
+              $CMD(..., { ..., shell: true, ... })
+          - pattern-inside: |
+              import { ..., spawnSync as $CMD, ... } from 'child_process';
+              ...
+      - patterns:
+          - pattern: |
+              $CP.spawn(..., { ..., shell: true, ... })
+          - pattern-inside: |
+              import * as $CP from 'node:child_process';
+              ...
+      - patterns:
+          - pattern: |
+              $CP.spawn(..., { ..., shell: true, ... })
+          - pattern-inside: |
+              import * as $CP from 'child_process';
+              ...
+      - patterns:
+          - pattern: |
+              $CP.spawnSync(..., { ..., shell: true, ... })
+          - pattern-inside: |
+              import * as $CP from 'node:child_process';
+              ...
+      - patterns:
+          - pattern: |
+              $CP.spawnSync(..., { ..., shell: true, ... })
+          - pattern-inside: |
+              import * as $CP from 'child_process';
+              ...
+
+  - id: local-mcp.disabled-tls-verification
+    message: Disabling TLS certificate verification exposes the connection to interception; retain certificate verification.
+    severity: ERROR
+    languages: [javascript, typescript]
+    metadata:
+      category: security
+      cwe: CWE-295
+      confidence: HIGH
+      references:
+        - https://nodejs.org/api/cli.html#node_tls_reject_unauthorizedvalue
+        - https://nodejs.org/api/tls.html
+        - https://semgrep.dev/docs/writing-rules/pattern-syntax
+    pattern-either:
+      - pattern: |
+          { ..., rejectUnauthorized: false, ... }
+      - pattern: process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+      - pattern: 'process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"'
+      - pattern: process.env.NODE_TLS_REJECT_UNAUTHORIZED = `0`

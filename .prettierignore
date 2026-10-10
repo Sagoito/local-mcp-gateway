@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.local/
+coverage/
+benchmark/results/
+benchmark/fixtures/
+benchmark/runs/
+benchmark/__pycache__/
+security/fixtures/
+test/.benchmark*
+package-lock.json

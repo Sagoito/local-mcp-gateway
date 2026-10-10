@@ -1,0 +1,10 @@
+name: First-party security analysis
+paths-ignore:
+  - security/fixtures
+  - benchmark/results
+  - benchmark/fixtures
+  - benchmark/runs
+  - .local
+  - node_modules
+  - dist
+  - coverage

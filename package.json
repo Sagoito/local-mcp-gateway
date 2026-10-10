@@ -9,11 +9,25 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "npm run build && node --import tsx --test test/*.test.ts",
-    "start": "node dist/cli.js"
+    "test": "npm run build && node scripts/run-tests.mjs",
+    "start": "node dist/cli.js",
+    "typecheck": "tsc -p tsconfig.check.json --noEmit",
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "package:check": "npm run build && node scripts/check-package.mjs",
+    "check": "npm run lint && npm run format:check && npm run typecheck && npm test && npm run package:check",
+    "security:deps": "node scripts/run-security.mjs deps",
+    "security:sast": "node scripts/run-security.mjs sast",
+    "security:rules": "node scripts/run-security.mjs rules",
+    "security:secrets": "node scripts/run-security.mjs secrets",
+    "security": "npm run security:deps && npm run security:workflows && npm run security:rules && npm run security:secret-rules && npm run security:sast && npm run security:secrets",
+    "security:workflows": "node scripts/run-security.mjs workflows",
+    "security:secret-rules": "node scripts/check-secret-rules.mjs"
   },
   "engines": {
-    "node": ">=22"
+    "node": "^22.13.0 || >=24.0.0"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.26.0",
@@ -21,16 +35,29 @@
     "zod": "^3.25.0"
   },
   "devDependencies": {
+    "@eslint/js": "10.0.1",
     "@modelcontextprotocol/server-filesystem": "2026.8.31",
     "@modelcontextprotocol/server-memory": "2026.8.31",
     "@types/node": "^22.0.0",
+    "eslint": "10.12.0",
+    "globals": "17.5.0",
     "js-tiktoken": "1.0.21",
+    "prettier": "3.9.10",
     "tsx": "^4.20.0",
-    "typescript": "^5.9.0"
+    "typescript": "^5.9.0",
+    "typescript-eslint": "8.71.1"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/Sagoito/local-mcp-gateway.git"
-  }
+  },
+  "files": [
+    "dist/*.js",
+    "dist/*.d.ts",
+    "README.md",
+    "SECURITY.md",
+    "LICENSE",
+    "docs/USAGE.md"
+  ]
 }

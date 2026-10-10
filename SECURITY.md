@@ -50,3 +50,7 @@ Regression tests exercise real stdio discovery, denied-handler dispatch markers,
 - [MCP security guidance](https://modelcontextprotocol.io/docs/2025-11-25/tutorials/security/security_best_practices)
 - [MCP tool annotations and their limits](https://blog.modelcontextprotocol.io/posts/2026-03-16-tool-annotations/)
 - [QuickJS runtime resource controls](https://github.com/justjake/quickjs-emscripten/blob/main/doc/quickjs-emscripten-core/classes/QuickJSRuntime.md)
+
+## Reporting vulnerabilities
+
+The project is pre-release; security fixes target the current `main` branch. Use GitHub private vulnerability reporting when it is available on the repository. If private reporting is unavailable, open an issue asking for a private contact without posting exploit details, credentials, or sensitive data. Include the affected commit, a minimal reproduction, expected impact, and any relevant configuration once a private channel is established. Revoke exposed credentials immediately.

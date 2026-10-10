@@ -41,7 +41,12 @@ Configure your MCP client to launch the gateway over stdio. Use an absolute path
   "mcpServers": {
     "local-mcp": {
       "command": "node",
-      "args": ["/absolute/path/to/local-mcp/dist/cli.js", "--config", "/absolute/path/to/config.json", "serve"],
+      "args": [
+        "/absolute/path/to/local-mcp/dist/cli.js",
+        "--config",
+        "/absolute/path/to/config.json",
+        "serve"
+      ],
       "env": {
         "TOKEN": "replace-with-your-token"
       }
@@ -59,17 +64,23 @@ At startup the gateway includes compact argument signatures in `execute` when th
 `search` returns up to three matching tools with argument schemas by default, so discovery and schema lookup can share one round trip. Use `includeSchema:false` for compact summaries, or request an exact server/tool:
 
 ```json
-{"query":"issues","includeSchema":false}
+{ "query": "issues", "includeSchema": false }
 ```
 
 ```json
-{"server":"issues","tool":"list_issues","includeSchema":true}
+{ "server": "issues", "tool": "list_issues", "includeSchema": true }
 ```
 
 For a single upstream operation, `execute` accepts a structured call without generated code:
 
 ```json
-{"call":{"server":"issues","tool":"list_issues","args":{"state":"open"}}}
+{
+  "call": {
+    "server": "issues",
+    "tool": "list_issues",
+    "args": { "state": "open" }
+  }
+}
 ```
 
 Text results are parsed as JSON when possible, otherwise returned as text. Non-text content remains a raw MCP result. Results over 32 KiB return a retained-result handle and bounded shape summary; the raw-result limit is 8 MiB. Use `mcp.result(id)` inside code to filter the retained result without fetching it again. This route still permits side effects allowed by upstream credentials; it is not a read-only mode.
@@ -77,10 +88,10 @@ Text results are parsed as JSON when possible, otherwise returned as text. Non-t
 For composition/filtering, `execute` accepts a JavaScript async function body in `code`. Supply exactly one of `call`, `result` or `code`. `mcp.call(server, tool, args)` returns the raw upstream MCP `CallToolResult`, including its `content` array and any `structuredContent`. For example, if a tool returns both fields:
 
 ```js
-const result = await mcp.call("issues", "list_issues", { state: "open" });
+const result = await mcp.call('issues', 'list_issues', { state: 'open' });
 return {
   structured: result.structuredContent,
-  content: result.content
+  content: result.content,
 };
 ```
 
@@ -88,12 +99,12 @@ The returned `content` might look like `[{"type":"text","text":"..."}]`; `struct
 
 ```js
 const [issues, build] = await Promise.all([
-  mcp.call("issues", "list_issues", { state: "open" }),
-  mcp.call("build", "get_build", { id: "latest" })
+  mcp.call('issues', 'list_issues', { state: 'open' }),
+  mcp.call('build', 'get_build', { id: 'latest' }),
 ]);
 return {
   issues: issues.structuredContent ?? issues.content,
-  build: build.structuredContent ?? build.content
+  build: build.structuredContent ?? build.content,
 };
 ```
 
@@ -111,12 +122,12 @@ Point your MCP client configuration at `demo-config.json` using `client-config` 
 
 ```js
 const [issues, build] = await Promise.all([
-  mcp.call("issues", "list_issues", {}),
-  mcp.call("build", "get_build", { id: "demo-1" })
+  mcp.call('issues', 'list_issues', {}),
+  mcp.call('build', 'get_build', { id: 'demo-1' }),
 ]);
 return {
   issues: issues.structuredContent ?? issues.content,
-  build: build.structuredContent ?? build.content
+  build: build.structuredContent ?? build.content,
 };
 ```
 
@@ -127,8 +138,8 @@ The demo server is a fixture, not a real issue tracker or build service.
 `mcp.call` still returns the raw MCP result. Inside `execute`, `mcp.text(result)` joins text blocks, while `mcp.json(result)` parses text as JSON (or uses structuredContent when there is no text). Both reject upstream error results. `mcp.rows(value)` accepts an array, or extracts the only array-valued property of an object; ambiguous objects require an explicit property.
 
 ```js
-const raw = await mcp.call("issues", "list_issues", { state: "open" });
-return mcp.rows(mcp.json(raw)).map(issue => ({ id: issue.id }));
+const raw = await mcp.call('issues', 'list_issues', { state: 'open' });
+return mcp.rows(mcp.json(raw)).map((issue) => ({ id: issue.id }));
 ```
 
 These helpers do not execute text from upstream results. Use `Promise.all` for independent calls. Tool names returned by search are invoked inside `execute`. Configured native tools are also available directly under the names advertised by the client.
@@ -166,12 +177,12 @@ An allowlist restricts tool names, not argument values or the behavior of a perm
 
 Native tool advertisements use conservative side-effect hints rather than forwarding an upstream's read-only claim. Clients may consequently request approval more often; annotations do not replace the enforced allowlist.
 
-| Discovery setting | Default | Configurable range |
-|---|---:|---:|
-| `limits.maxTools` | 5,000 | 1–50,000 |
-| `limits.maxCatalogBytes` | 32 MiB | 1 KiB–128 MiB |
-| `limits.maxToolBytes` | 256 KiB | 1 KiB–1 MiB |
-| `limits.maxPages` per upstream | 100 | 1–1,000 |
+| Discovery setting              | Default | Configurable range |
+| ------------------------------ | ------: | -----------------: |
+| `limits.maxTools`              |   5,000 |           1–50,000 |
+| `limits.maxCatalogBytes`       |  32 MiB |      1 KiB–128 MiB |
+| `limits.maxToolBytes`          | 256 KiB |        1 KiB–1 MiB |
+| `limits.maxPages` per upstream |     100 |            1–1,000 |
 
 Counts and UTF-8 metadata bytes include denied tools and cached listings. Aggregate admission follows server-name order. A server whose complete catalogue exceeds a limit is marked unavailable; tools are not silently truncated. Other admitted servers remain usable. Retained catalogue data and discovery lookahead are bounded, but SDK decoding happens before these checks: these are not transport-byte or process-RAM guarantees. Raising a limit does not establish tested capacity at that size.
 
@@ -215,7 +226,10 @@ Set optional `inlineTools` in your gateway config to select up to five existing 
 {
   "version": 1,
   "servers": {
-    "files": { "command": "node", "args": ["/absolute/path/to/filesystem-server.js", "/allowed/path"] }
+    "files": {
+      "command": "node",
+      "args": ["/absolute/path/to/filesystem-server.js", "/allowed/path"]
+    }
   },
   "inlineTools": [
     { "server": "files", "tool": "read_text_file" },
@@ -234,7 +248,10 @@ Set `nativeTools` to advertise up to five upstream tools with their complete arg
 {
   "version": 1,
   "servers": {
-    "files": { "command": "node", "args": ["/absolute/path/to/filesystem-server.js", "/allowed/path"] }
+    "files": {
+      "command": "node",
+      "args": ["/absolute/path/to/filesystem-server.js", "/allowed/path"]
+    }
   },
   "nativeTools": [
     { "server": "files", "tool": "read_text_file" },
@@ -248,13 +265,12 @@ The native definitions share an 8 KiB JSON budget; schemas are never partially t
 A response too large for the 32 KiB output budget returns `{gatewayResult:{id,bytes,shape},hint}`. The shape includes bounded object keys and array lengths/item keys, not complete data. For a JSON result with a `records` array:
 
 ```js
-const raw = await mcp.result("the-handle-returned-by-your-call");
+const raw = await mcp.result('the-handle-returned-by-your-call');
 const data = mcp.json(raw);
 return { count: data.records.length };
 ```
 
 Use `mcp.text(raw)` for ordinary text. Follow the returned shape rather than assuming an array. Handles expire or are evicted when limits are reached; repeat the upstream operation only if a handle is no longer available. Cache reads count toward the sandbox's 32-call budget. Native selections and retained-result handles do not restrict other upstream tool permissions.
-
 
 ### Filter retained JSON without JavaScript
 
@@ -265,7 +281,7 @@ For ordinary filtering prefer `execute` with `result`. It operates on a previous
   "result": {
     "id": "the-returned-handle",
     "path": ["records"],
-    "where": [{"field": ["status"], "op": "eq", "value": "open"}],
+    "where": [{ "field": ["status"], "op": "eq", "value": "open" }],
     "action": "count"
   }
 }
@@ -273,16 +289,15 @@ For ordinary filtering prefer `execute` with `result`. It operates on a previous
 
 Use `action:"first"` to return a matching record or null, or `action:"all"` for the matching array. Optional `fields:["id","status"]` projects top-level keys. Comparisons support `eq`, `ne`, `lt`, `lte`, `gt` and `gte`; ordering compares strings lexically or numbers numerically, without coercion. Missing fields never match, including `ne`. Field/path traversal reads only own JSON properties. The selected array may contain at most 100,000 records, and evaluation permits at most 1,000,000 visits; exceeding either fails rather than returning an incomplete answer. Output remains capped at 32 KiB. This route neither evaluates generated code nor invokes an upstream operation.
 
-
 ## Evaluation and comparison limits
 
 Stage 1 adds a cached local BM25 index. The full ToolRet development fixture contains 44,453 tools and 7,961 queries.
 
-| Retrieval condition | nDCG@10 / errors, full suite | Full-suite warm SDK p50 / p95 | Paired-sample SDK p50 / p95 |
-|---|---:|---:|---:|
-| Indexed product search | 0.295644 / 0 | 2.44 / 6.70 ms | 2.59 / 4.92 ms |
-| Frozen BM25 reference | 0.296189 / 0 | — | — |
-| Historical v9 gateway | 0.063799 / 360 | — | 417.88 / 834.70 ms |
+| Retrieval condition    | nDCG@10 / errors, full suite | Full-suite warm SDK p50 / p95 | Paired-sample SDK p50 / p95 |
+| ---------------------- | ---------------------------: | ----------------------------: | --------------------------: |
+| Indexed product search |                 0.295644 / 0 |                2.44 / 6.70 ms |              2.59 / 4.92 ms |
+| Frozen BM25 reference  |                 0.296189 / 0 |                             — |                           — |
+| Historical v9 gateway  |               0.063799 / 360 |                             — |          417.88 / 834.70 ms |
 
 The full-suite run took 916 ms for its first cold search; its warm latency covers all 7,961 queries after ten fixed warmup calls. The paired sample uses 90 category-stratified queries and two balanced repetitions; it was not source-stratified. The historical row’s latency comes from that sample, while retrieval scores cover the full suite. A separate index-only diagnostic measured a 116.5 ms build for 5,000 tools; this is not a 5,000-tool SDK latency result. That release capped live discovery at 5,000 tools; the current default is unchanged, with an explicit configurable ceiling. Full-suite peak RSS was 631 MiB, including the index, SDK, and benchmark data. The v10 two-tool definitions measured 3,131 JSON bytes (753 o200k token proxy); the proxy is not provider usage or billed cost. The current security changes were not part of that frozen evaluation. Cold search was slower than v9 (883.6 vs 693.5 ms). The new 8,192-character limit accepted the 360 queries the old v9 interface rejected.
 
