@@ -1,0 +1,323 @@
+{
+  "createdAt": "2026-10-09T20:55:04.922158+00:00",
+  "gatewayReferenceCommit": "0ee3a2ad4c7290e56d9def1c42bfb4bbabc3ed7d",
+  "gatewayIdenticalToQueryV6": true,
+  "productUnchangedDuringPilot": true,
+  "sourceHashes": {
+    "benchmark/quality-prepare.mjs": "f84bb5b23e9e950adece442b10d33b6af47aa44e759d95b685a22c086557a1a8",
+    "benchmark/quality-analyze.mjs": "5478886a1bc2381216bca35db513311626d8496e6afdd2b6a9ea3358770b7043",
+    "benchmark/quality-preflight.mjs": "26ac9213029f6cc26086c07b35da4dac8fa5f0f83ce846b595002a8fccb2e90a",
+    "benchmark/QUALITY_PLAN.md": "7e90ff3f12a4f20a32fa2c15afbda4b16b65e2839e4cc5dd196b8545fc43663a",
+    "benchmark/daemon.mjs": "d4d5ae86ad129ed4744f3f295b5e03b27288571add63b743e7ce30d3f45e7a46",
+    "benchmark/bridge.mjs": "28b8b931ff534b6164ba541a6c2ce18918f7643f076906ea5e1c999d8e41478d",
+    "benchmark/scale-fixtures.mjs": "faaa5c23192fd852c920dd68eafe2fb9d7a384d16157aa5de2c2214dc1aeeb68",
+    "package-lock.json": "21662d243449b6f43cd4ec01c8044fb581cae1027957961267277fd4a6fccec5",
+    "src/results.ts": "0066cb8da7350ef86768e4e54dfc46a56f58e901b0d439386aec9f6615b575be",
+    "src/cli.ts": "e3822ad436eb5ebea4e7ecb8ea91fe3f84c33cc84c2220da4c5ea31cdab626f4",
+    "src/types.ts": "542e6b753399e68b5ef262b5cb14aaf47dece306807092a34ac1a2bac6a41fb1",
+    "src/config.ts": "37dd1ef757aeae661a3d285b1be510e38bb63262bf9aa9faf512b49c6e821a21",
+    "src/catalog.ts": "231f0228b6b20f2f8dbf7acf1492221136528b936e041dde3f2a9b189f92105a",
+    "src/server.ts": "2589af769100a9c4f957ea9a9c4b58a25f83e442ad16957e1b0281353fb39fa1",
+    "src/upstreams.ts": "81f629046bd07287418484b14280618b80c69ad37a8671785e76535b97905c7e",
+    "src/query.ts": "007742b2ec78e096f6f24ccdd3c852a920978f1ec27897ec2865249d33255cb0",
+    "src/sandbox.ts": "3f130f15dac6ae9741924c5ebe6fd48a6ae74238b91b036964422d2a41d1b8dd",
+    "src/auth.ts": "08394fdd7a82d2dbbc4e7999c64c464dac3241e1ba7c3f6f814110d6784b7705"
+  },
+  "compiledHashes": {
+    "query.d.ts": "497d76f5782a1b75d209ffa387dedc0aa7031946bd89b3dcb405114e3dc60621",
+    "cli.js": "f07abf9af9fd4f6d5c19dba5f13c3620d9e04a2a20f96cd9ebcd5afcbbf773af",
+    "auth.d.ts": "d9c67e85b43f91c125e86e42461dd63a7e0a04f275fefae6032bfab8579dcba8",
+    "query.js": "95198d83ce54bdb31179642b98223d5835d5504612e1330a3a01a6a5793c2f3d",
+    "auth.js": "deeed4d52c783c33d0417e666d87603f28325c43364e2586a1c94dae8419e22a",
+    "upstreams.js": "5f5189647c0b6e535100fec4be66be18c00ddd0fc3efcb849c44fc3ec66f3873",
+    "catalog.js": "d32f109019ee65c6c15313d71e6d3d70ad8fdad43434a447f80d1a3058c35c25",
+    "config.d.ts": "85562b0e75e3eaf636471714ad4deb2ad53eeeca5c00c69c56e72bc65718b87c",
+    "types.d.ts": "f8a35d3412f1f72cfe6dd2a5514c6a57563b6feb7ee72397f054c8c2363a0b5a",
+    "catalog.d.ts": "1422a7ca73085e49fbaa9df203252aedea7112ea970415c3c2c58b177a5e559f",
+    "results.js": "a5f8c64b866fce2ef1197f2f127585c010cc812dfd199e270c8129bf38b79e35",
+    "types.js": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "server.js": "3987637b6afa303d9a9bc62f8dd0f0bd68ff763e5fede9485a34c651f22a4193",
+    "server.d.ts": "f62c96d9ea2f745a92d8263d773d4b83b59f62258771ba2f065e22a84e4cd1b2",
+    "config.js": "4fa501b6e3ee706a4a797d5ce23c3fec146e6c9edfb3479b5c8357991649be2b",
+    "sandbox.js": "7a26cee18a5028734733d0e57185eaaa5ea19384f7093b6f8441524f92768203",
+    "cli.d.ts": "43e818adf60173644896298637f47b01d5819b17eda46eaa32d0c7d64724d012",
+    "sandbox.d.ts": "5166649a3366d4db828da50a5c5d404e9c4d633d918f8f12c59e10703c701701",
+    "upstreams.d.ts": "275c3f9a29f729e48b69fbe6c01db8344d319255a846ba5ca28081c989ca17cc",
+    "results.d.ts": "aab05ab12437166cb1db78844a4b0f891914d5df18d95a2001d3de7c2966694c"
+  },
+  "fixtureHashes": {
+    "archive/payment-v3.md": "1dc5ae663a6e15f8be6ab1d49eece9c0ccd16b0246685ee2b8e2596b7eea780a",
+    "config/model-v7.json": "cb59668ffdc2ff317549d287741d0a5f68a1bf68aaeb2e10cde9f4b9b3b6fc3a",
+    "config/model-v8.json": "ba07943a0e749618ef395d50fc04f39682e0dac274e76507043076c914650506",
+    "config/policy.json": "ebef9df59b70d49ea5e22fe1e9492d7118294d6040de5d5b47c7caa8930d23a8",
+    "fallback.txt": "6d2b33ccae54d78d2e98ffbb020974290f11f69ee9d3bdacd0e4415a3bbba680",
+    "incidents.json": "7d808aec9c8963d76ed96ba6b48297f9510b6b687c2c980ff2540ced0a7f8349",
+    "runbooks/manifest.json": "6984c51e427e217959a97ea8a6cdf672ca94a2d4cca2304c7e0bef6ec898efd2",
+    "runbooks/payment-v4-draft.md": "e93b815a3ce7016a76b6e49d2f780ec4aeadbeb357b1160467c4d7df08c0e52e",
+    "runbooks/payment-v4.md": "f611530dc9f1958d70e99dd509d021cd7b52c3fada19ba4b057ae840b9b60643",
+    "service.json": "ffaa8f75b261f065d1d7ebb9d673c222d317b5543c0eb015ebcb0bac0974b261",
+    "utf8-payload.txt": "44cd45f63ac2fd798e386ee2e60fe5bf4e455836578d2e8c4ab2fd83bd04aab4"
+  },
+  "runConfigHashes": {
+    "q1-direct-r1": "79baadab3989a3d16e381a7cf9d737f6b9b138881574a07f2a41dbc335b0cd2c",
+    "q1-gateway-r1": "cc17bef3a826d99e811b3292f54ea968142702488a7c50e928507fcdbb9d796e",
+    "q2-gateway-r1": "15aebc3e5f0a92fd57f9cd935d51dacc58c6a3699af835b4c195c0fa9d112e53",
+    "q2-direct-r1": "64c1c223c406e3da633a9bbfebb5aaf6074b0ffdbf0bcc278b574ba4a7170d00",
+    "q3-direct-r1": "3ba9ca6a293f2ff200b482d6fde529a4c7c07fe12398cffe630d48bbc5e2ba05",
+    "q3-gateway-r1": "8e63ce1eeb46f9cf18ba94606b0b4d4efd9ede7b71c84a86f21931f4705b9cf4",
+    "q4-gateway-r1": "a1f7311fa013506093e33b5c37d2ff4865190219832157467f5f9de0ac7bbd1e",
+    "q4-direct-r1": "3ac0dd4517d7f57da360fa36d3fa5affee648a7abfebd91813587689898035a1",
+    "q5-direct-r1": "fbf73735bccc8090fe1934457973b2171f7b3d9865a9da4801fcf8eea4097846",
+    "q5-gateway-r1": "40a73e9ff146106feca886acb0ea158635847cc448e47cdef27ae850e376f0f6",
+    "q6-gateway-r1": "5fa971f3237d4e0bdf4b0c981198a6b5e8cec5b2c1bf8e15024e01423da73ffc",
+    "q6-direct-r1": "85cc5925d76a52c2a41c8c3384548479cbfc659f4880a453b37ffcac713a8df0",
+    "q7-direct-r1": "911c5ca2ca87a5cc5d81ce73b3f8b33721fd78916ecbe9ef7f76a7a53d5f73e0",
+    "q7-gateway-r1": "4184dd8630ef9f4ba07ce999283a250283a7d3e31f74a8665545d2e765866d2e",
+    "q8-gateway-r1": "7b03011efe27fb8796ae2246bdf20b2896b32b90391fbc2fbd640487733b3850",
+    "q8-direct-r1": "3ae6ce641937330f1da086e9fbeda4d6c686b2adfce692d714a628cfa0c94e3d",
+    "q1-gateway-r2": "b171cdfccb998470652aec00884654504a3fa5601fd5135234e051e759bfbea7",
+    "q1-direct-r2": "03ebc238d4b758e2a55172b025ff844df0da23299edfac958f01a9c81356a4f6",
+    "q2-direct-r2": "393cb15a075540f282176c54c572a1206198f7dd6ff290c116d595784a2e998b",
+    "q2-gateway-r2": "384038ebb7999f8e779b87e381c86d30ff4e02aeba65da323e6f0314d80aa7d8",
+    "q3-gateway-r2": "319b339f5b23b616b408fcfc02d3ebbf2b0fd16c6cb1d281d795c240a10b28f9",
+    "q3-direct-r2": "566a9adf6e693ccce9fb0d9edd6309e2e167594d0dfc9e1350a4debf4f1a9a9c",
+    "q4-direct-r2": "1cda0095bf6adf4d0bbf1affb115994c1272218b09ec7e07d49f4cb533b23edb",
+    "q4-gateway-r2": "5c74c8ba797ac352dda8060c800c4428bad28d21a262d122ba46fa1500704aad",
+    "q5-gateway-r2": "4fb2e7f52daef4812aea0c04404c4e598aa8499268034fe73cdfbf61f477274e",
+    "q5-direct-r2": "0daa71694bdbcb9d2c6259988ccc2f79ee8d6eec8544e52aa4e1e96a4fe68f21",
+    "q6-direct-r2": "d8fafd98ab29bc97622e058fad6aa74c04afe67464b57c5283089f9bce1993ac",
+    "q6-gateway-r2": "53f65cf8f34fee23c2a1dc80270ac82882b6aca99af30dfabf34757a963830ee",
+    "q7-gateway-r2": "57d23438359991febc986b986a891eca6dc1c4ce4bf9a795142509e9454a7189",
+    "q7-direct-r2": "704d7e3b3930f5fa359ad1325f5f8eaf8446daa34506eb73683c5b95b374a56b",
+    "q8-direct-r2": "c14452169e9f8b5435daa0953bb2aa9aca848b2a927fec5509b8a26caa9cb47e",
+    "q8-gateway-r2": "5218d336a6b9bc42637429a8c35d24ef73231633f45944a46efff7763bc1e7fd"
+  },
+  "runPromptHashes": {
+    "q1-direct-r1": "a270aa26e7db3044b1009cf85ed0b19cd0b910c43e0b8b1c394a5939f13999d9",
+    "q1-gateway-r1": "8b598474cb4a94760161eda9e42978ca48f47084dbc718962c0f1f7983a886e7",
+    "q2-gateway-r1": "f0f73392bddfe768783e36dca1259012130492627219efe6d6f5bdfdcc395cc7",
+    "q2-direct-r1": "68bad1eb461fec22419b387162483ef78311928d233d2d49fde767f87cf851e1",
+    "q3-direct-r1": "2a9b87524282d4af2694704d2a9006abc554bb31d07dfb205037d70b5e6ab577",
+    "q3-gateway-r1": "788e0bfe05e44f3d5da379b7253e0d9966fa5b8349336f7875dc82128bf3907e",
+    "q4-gateway-r1": "7eaf47457368a49d9c1454e7b51cab07a1af037df29641aba6f8072e502b3dfa",
+    "q4-direct-r1": "24843b5e5c28a96e8e8e846f43b3ab963e1444b810c315b296209c3249cd9dce",
+    "q5-direct-r1": "9a2c4da9b9d5dc9afb1a4d14a1d41077853e3349053d385cf623c3338e5801be",
+    "q5-gateway-r1": "e8fa06c11213d2987029e551bca261ae2b00a2a6e329234a3482258d694f45df",
+    "q6-gateway-r1": "b806cf1ca3d860c4da07a49e836b62d8635134ef7ae77fbb5c887d1548d4e1ee",
+    "q6-direct-r1": "7c7e6ca7247d04c1b82531420e649d608bf26b828f19f523a62fb5f3b32cc2af",
+    "q7-direct-r1": "931a9693087727b3692cbe637fec9ee8dcd9383ded5f0da92784abf90bd1b92b",
+    "q7-gateway-r1": "3e8fb0a05bbdd5e4a96bb913369e235dcc823ec9533c66cc398d6a96dc215f89",
+    "q8-gateway-r1": "dcc83733e5f0d54209654be3dee6bc93a74011769cec2df1f3405eaffa435d80",
+    "q8-direct-r1": "11186c90092448b553be9582ff75af43257ca3a6ebdc770a670385596c4691db",
+    "q1-gateway-r2": "6a99bcece8ec63d71c8c9aaa06bfa551f3ac1effd588b8d1e84ec4055dbcc3ef",
+    "q1-direct-r2": "e6a7bd0431930ce5578ebc2f89c0938667577f1c9bfbbad8b82d5319be4353ab",
+    "q2-direct-r2": "c15a45d6441920a1d6afaa06660e9041d78035d60dea76f856b5fc4950a1c01f",
+    "q2-gateway-r2": "833f53c20ed1789a0c07c2c7e78a047b29eaa5359b73e09ae9803e234a1918dd",
+    "q3-gateway-r2": "3c44f27f687cf29e4ae4a09db235024d56bfa51faeaa86b83fb81517e2accb65",
+    "q3-direct-r2": "3325cd5694881ba49a9b8047c92ecbf11f9d6c6e12268c51c77c9de66f865573",
+    "q4-direct-r2": "f1c583dd2c6a919d9573466210095d5886c5ae6f8601dfe08643408d8bb372f9",
+    "q4-gateway-r2": "e666493f1db8ca261630710e3f24d47e6a4742138b5691ebf497c6c4d1164805",
+    "q5-gateway-r2": "48dc40ea8f1358240fdfbc6920b0161ce0ba54ef9af49d92a48d81b663d7ff8a",
+    "q5-direct-r2": "4efdd92d7755687870ef06a2698256dbf59fe3f2c24bd66211a8fb01e5571a2b",
+    "q6-direct-r2": "95b531715babfc204a21a49ca9f590418c3b738737e00d5e3b0bc8070ddb541d",
+    "q6-gateway-r2": "19d57c321ac7a121092ac35c07d17951f5a3a9668e53aa85d431149f0a0ad960",
+    "q7-gateway-r2": "23b90da73b82afe4778efe030d89a2e5308377c9720e9ee8b25b6f8c6b6e6ab4",
+    "q7-direct-r2": "1a852eff53a2401fcfa85eb16cbf4c8722f0d8fa66f6335ed828ed995c604618",
+    "q8-direct-r2": "903306e4acb0c51a0e2037153992076a7a32d139610d3c424331443a2155bcca",
+    "q8-gateway-r2": "a9e6c2cf2648142871f0502ab05e471719602592324496a8a3b13b87602c68d6"
+  },
+  "order": [
+    "q1-direct-r1",
+    "q1-gateway-r1",
+    "q2-gateway-r1",
+    "q2-direct-r1",
+    "q3-direct-r1",
+    "q3-gateway-r1",
+    "q4-gateway-r1",
+    "q4-direct-r1",
+    "q5-direct-r1",
+    "q5-gateway-r1",
+    "q6-gateway-r1",
+    "q6-direct-r1",
+    "q7-direct-r1",
+    "q7-gateway-r1",
+    "q8-gateway-r1",
+    "q8-direct-r1",
+    "q1-gateway-r2",
+    "q1-direct-r2",
+    "q2-direct-r2",
+    "q2-gateway-r2",
+    "q3-gateway-r2",
+    "q3-direct-r2",
+    "q4-direct-r2",
+    "q4-gateway-r2",
+    "q5-gateway-r2",
+    "q5-direct-r2",
+    "q6-direct-r2",
+    "q6-gateway-r2",
+    "q7-gateway-r2",
+    "q7-direct-r2",
+    "q8-direct-r2",
+    "q8-gateway-r2"
+  ],
+  "plannedRuns": 32,
+  "model": "gpt-6-luna",
+  "reasoningEffort": "medium",
+  "maxConcurrentWorkers": 4,
+  "initialFirstPairDeliveryCheck": true,
+  "testsPassed": 59,
+  "preflight": {
+    "generatedAt": "2026-10-09T20:53:50.831Z",
+    "upstreamTools": 23,
+    "maximumResponseTokenProxy": 2749,
+    "responseDisplayBudgetTokenProxy": 4500,
+    "records": [
+      {
+        "label": "direct-definitions",
+        "bytes": 13179,
+        "tokenProxy": 2749
+      },
+      {
+        "label": "direct-all-files",
+        "bytes": 5044,
+        "tokenProxy": 1652
+      },
+      {
+        "label": "direct-memory-graph",
+        "bytes": 1001,
+        "tokenProxy": 293
+      },
+      {
+        "label": "direct-file:archive/payment-v3.md",
+        "bytes": 280,
+        "tokenProxy": 76
+      },
+      {
+        "label": "direct-file:config/model-v7.json",
+        "bytes": 172,
+        "tokenProxy": 60
+      },
+      {
+        "label": "direct-file:config/model-v8.json",
+        "bytes": 172,
+        "tokenProxy": 60
+      },
+      {
+        "label": "direct-file:config/policy.json",
+        "bytes": 192,
+        "tokenProxy": 50
+      },
+      {
+        "label": "direct-file:fallback.txt",
+        "bytes": 126,
+        "tokenProxy": 32
+      },
+      {
+        "label": "direct-file:incidents.json",
+        "bytes": 1328,
+        "tokenProxy": 484
+      },
+      {
+        "label": "direct-file:runbooks/manifest.json",
+        "bytes": 356,
+        "tokenProxy": 116
+      },
+      {
+        "label": "direct-file:runbooks/payment-v4-draft.md",
+        "bytes": 296,
+        "tokenProxy": 78
+      },
+      {
+        "label": "direct-file:runbooks/payment-v4.md",
+        "bytes": 370,
+        "tokenProxy": 100
+      },
+      {
+        "label": "direct-file:service.json",
+        "bytes": 362,
+        "tokenProxy": 102
+      },
+      {
+        "label": "direct-file:utf8-payload.txt",
+        "bytes": 128,
+        "tokenProxy": 28
+      },
+      {
+        "label": "direct-missing-file",
+        "bytes": 183,
+        "tokenProxy": 52
+      },
+      {
+        "label": "direct-metadata",
+        "bytes": 648,
+        "tokenProxy": 212
+      },
+      {
+        "label": "direct-exact-nodes",
+        "bytes": 712,
+        "tokenProxy": 210
+      },
+      {
+        "label": "gateway-definitions",
+        "bytes": 7390,
+        "tokenProxy": 1647
+      },
+      {
+        "label": "gateway-discovery-verification",
+        "bytes": 904,
+        "tokenProxy": 189
+      },
+      {
+        "label": "gateway-all-files",
+        "bytes": 2867,
+        "tokenProxy": 1023
+      },
+      {
+        "label": "gateway-memory-graph",
+        "bytes": 424,
+        "tokenProxy": 111
+      },
+      {
+        "label": "gateway-metadata-discovery",
+        "bytes": 849,
+        "tokenProxy": 175
+      },
+      {
+        "label": "gateway-exact-node-discovery",
+        "bytes": 799,
+        "tokenProxy": 177
+      }
+    ],
+    "caveat": "SDK payload bounds plus worker clipping audits support delivery checks; these are not provider-reported context or billing."
+  },
+  "gradingSelfcheck": {
+    "correctAnswerAccepted": true,
+    "wrongAnswerRejected": true,
+    "referenceOrderIgnored": true,
+    "invalidRecoveryOrderRejected": true,
+    "validRecoveryOrderAccepted": true
+  },
+  "completedWrongAnswerRetryPolicy": "never retry completed answers",
+  "coordinatorDeviations": [
+    {
+      "action": "Clarified first gateway worker delivery audit after finish, without new MCP calls or task rerun.",
+      "reason": "Worker initially interpreted catalogue completeness as all upstream tools rather than all advertised public tools."
+    },
+    {
+      "action": "Published post-hoc interpretation/sensitivity in analysis-notes.json and review.json.",
+      "reason": "q6 source field and q8 negative-source citation were underspecified; frozen primary grader/gold answers retained unchanged."
+    }
+  ],
+  "workerDeliveryAudit": "Final audit line retained separately; daemon payload alone does not establish model visibility.",
+  "finalizedAt": "2026-10-09T21:03:40.975619+00:00",
+  "completedRuns": 32,
+  "missingRuns": 0,
+  "interruptedRuns": 0,
+  "completedAnswersRetried": 0,
+  "sourceFixtureConfigPromptAndCompiledHashesVerifiedAfterRun": true,
+  "workerDeliveryAuditCount": 32,
+  "workersReportedClipping": 0,
+  "allCitedSourcesRequestedThroughMcp": true,
+  "generatedCodeCallsObserved": 0,
+  "auditSha256": "41a9de906eec299dfe2fd70d7dc3e9cd3392fb5fb10d3c5bc65ccd5e0da286ce"
+}

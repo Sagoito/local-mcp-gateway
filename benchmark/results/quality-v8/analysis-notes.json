@@ -1,0 +1,17 @@
+{
+  "recordedAt": "2026-10-09T21:01:07.863947+00:00",
+  "status": "post-dispatch observations; frozen primary grader/gold answers unchanged",
+  "q6SourceFieldAmbiguity": {
+    "issue": "Task required evidenceSource:string but did not explicitly demand the threshold file path. Gold expects config/model-v8.json; first-repetition answers used the policy path or an explanatory sentence, while revision/threshold and evidenceRefs were correct.",
+    "interpretation": "Strict field mismatches remain recorded; they are not necessarily incorrect operational facts.",
+    "postHocSensitivity": "Separately score required facts excluding only q6 evidenceSource; report full frozen score alongside."
+  },
+  "q8NegativeSourceCitation": {
+    "issue": "Gold references include missing-preferred.txt, but prompt says evidenceRefs supporting the answer without explicitly requiring the failed read as a citation. Both first-repetition workers cited fallback.txt only.",
+    "interpretation": "Report the frozen recall score and verified error-before-fallback trace separately; missing negative-source citation does not imply an invented recovery."
+  },
+  "q8ValueExtraction": {
+    "issue": "The source line is fallback value: amber-17. One gateway worker returned the entire line rather than the identifier amber-17.",
+    "interpretation": "Retain the frozen extraction mismatch; source data was delivered intact. This is an observed extraction/output difference, not proven evidence loss."
+  }
+}

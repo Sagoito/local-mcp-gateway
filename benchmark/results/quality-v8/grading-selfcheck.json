@@ -1,0 +1,7 @@
+{
+  "correctAnswerAccepted": true,
+  "wrongAnswerRejected": true,
+  "referenceOrderIgnored": true,
+  "invalidRecoveryOrderRejected": true,
+  "validRecoveryOrderAccepted": true
+}

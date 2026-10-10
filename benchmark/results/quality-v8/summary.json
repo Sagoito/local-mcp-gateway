@@ -1,0 +1,758 @@
+{
+  "generatedAt": "2026-10-09T21:02:08.130Z",
+  "runsDir": "/workspace/scratch/ec180a675233/mcp-quality-runs-v8",
+  "runCount": 32,
+  "metrics": {
+    "direct": {
+      "runs": 16,
+      "complete": 16,
+      "failed": 0,
+      "missing": 0,
+      "wholeAnswerExact": 14,
+      "fullResponseExact": 12,
+      "fieldPresent": 34,
+      "fieldTyped": 34,
+      "fieldCorrect": 32,
+      "fieldTotal": 34,
+      "fieldAccuracy": 0.9411764705882353,
+      "medianEvidencePrecision": 1,
+      "medianEvidenceRecall": 1,
+      "medianElapsedMs": 6779.5,
+      "medianFinalPayloadTokenProxy": 3580,
+      "toolCalls": 30,
+      "toolErrors": 2,
+      "unexpectedFieldRuns": 0
+    },
+    "gateway": {
+      "runs": 16,
+      "complete": 16,
+      "failed": 0,
+      "missing": 0,
+      "wholeAnswerExact": 13,
+      "fullResponseExact": 12,
+      "fieldPresent": 34,
+      "fieldTyped": 34,
+      "fieldCorrect": 31,
+      "fieldTotal": 34,
+      "fieldAccuracy": 0.9117647058823529,
+      "medianEvidencePrecision": 1,
+      "medianEvidenceRecall": 1,
+      "medianElapsedMs": 7373,
+      "medianFinalPayloadTokenProxy": 2341,
+      "toolCalls": 34,
+      "toolErrors": 2,
+      "unexpectedFieldRuns": 0
+    }
+  },
+  "perRun": [
+    {
+      "runId": "q1-direct-r1",
+      "wholeAnswerExact": true,
+      "fieldResults": {
+        "byteSize": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "number"
+        },
+        "isFile": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "boolean"
+        }
+      },
+      "evidencePrecision": 1,
+      "evidenceRecall": 1,
+      "status": "complete"
+    },
+    {
+      "runId": "q1-direct-r2",
+      "wholeAnswerExact": true,
+      "fieldResults": {
+        "byteSize": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "number"
+        },
+        "isFile": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "boolean"
+        }
+      },
+      "evidencePrecision": 1,
+      "evidenceRecall": 1,
+      "status": "complete"
+    },
+    {
+      "runId": "q1-gateway-r1",
+      "wholeAnswerExact": true,
+      "fieldResults": {
+        "byteSize": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "number"
+        },
+        "isFile": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "boolean"
+        }
+      },
+      "evidencePrecision": 1,
+      "evidenceRecall": 1,
+      "status": "complete"
+    },
+    {
+      "runId": "q1-gateway-r2",
+      "wholeAnswerExact": true,
+      "fieldResults": {
+        "byteSize": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "number"
+        },
+        "isFile": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "boolean"
+        }
+      },
+      "evidencePrecision": 1,
+      "evidenceRecall": 1,
+      "status": "complete"
+    },
+    {
+      "runId": "q2-direct-r1",
+      "wholeAnswerExact": true,
+      "fieldResults": {
+        "owners": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "object"
+        }
+      },
+      "evidencePrecision": 1,
+      "evidenceRecall": 1,
+      "status": "complete"
+    },
+    {
+      "runId": "q2-direct-r2",
+      "wholeAnswerExact": true,
+      "fieldResults": {
+        "owners": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "object"
+        }
+      },
+      "evidencePrecision": 1,
+      "evidenceRecall": 1,
+      "status": "complete"
+    },
+    {
+      "runId": "q2-gateway-r1",
+      "wholeAnswerExact": true,
+      "fieldResults": {
+        "owners": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "object"
+        }
+      },
+      "evidencePrecision": 1,
+      "evidenceRecall": 1,
+      "status": "complete"
+    },
+    {
+      "runId": "q2-gateway-r2",
+      "wholeAnswerExact": true,
+      "fieldResults": {
+        "owners": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "object"
+        }
+      },
+      "evidencePrecision": 1,
+      "evidenceRecall": 1,
+      "status": "complete"
+    },
+    {
+      "runId": "q3-direct-r1",
+      "wholeAnswerExact": true,
+      "fieldResults": {
+        "ownerTeam": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "nullable-string"
+        },
+        "known": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "boolean"
+        }
+      },
+      "evidencePrecision": 1,
+      "evidenceRecall": 1,
+      "status": "complete"
+    },
+    {
+      "runId": "q3-direct-r2",
+      "wholeAnswerExact": true,
+      "fieldResults": {
+        "ownerTeam": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "nullable-string"
+        },
+        "known": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "boolean"
+        }
+      },
+      "evidencePrecision": 1,
+      "evidenceRecall": 1,
+      "status": "complete"
+    },
+    {
+      "runId": "q3-gateway-r1",
+      "wholeAnswerExact": true,
+      "fieldResults": {
+        "ownerTeam": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "nullable-string"
+        },
+        "known": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "boolean"
+        }
+      },
+      "evidencePrecision": 1,
+      "evidenceRecall": 1,
+      "status": "complete"
+    },
+    {
+      "runId": "q3-gateway-r2",
+      "wholeAnswerExact": true,
+      "fieldResults": {
+        "ownerTeam": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "nullable-string"
+        },
+        "known": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "boolean"
+        }
+      },
+      "evidencePrecision": 1,
+      "evidenceRecall": 1,
+      "status": "complete"
+    },
+    {
+      "runId": "q4-direct-r1",
+      "wholeAnswerExact": true,
+      "fieldResults": {
+        "count": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "number"
+        },
+        "ids": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "array"
+        }
+      },
+      "evidencePrecision": 1,
+      "evidenceRecall": 1,
+      "status": "complete"
+    },
+    {
+      "runId": "q4-direct-r2",
+      "wholeAnswerExact": true,
+      "fieldResults": {
+        "count": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "number"
+        },
+        "ids": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "array"
+        }
+      },
+      "evidencePrecision": 1,
+      "evidenceRecall": 1,
+      "status": "complete"
+    },
+    {
+      "runId": "q4-gateway-r1",
+      "wholeAnswerExact": true,
+      "fieldResults": {
+        "count": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "number"
+        },
+        "ids": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "array"
+        }
+      },
+      "evidencePrecision": 1,
+      "evidenceRecall": 1,
+      "status": "complete"
+    },
+    {
+      "runId": "q4-gateway-r2",
+      "wholeAnswerExact": true,
+      "fieldResults": {
+        "count": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "number"
+        },
+        "ids": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "array"
+        }
+      },
+      "evidencePrecision": 1,
+      "evidenceRecall": 1,
+      "status": "complete"
+    },
+    {
+      "runId": "q5-direct-r1",
+      "wholeAnswerExact": true,
+      "fieldResults": {
+        "actions": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "array"
+        },
+        "rollbackTrigger": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "string"
+        },
+        "evidenceSource": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "string"
+        }
+      },
+      "evidencePrecision": 1,
+      "evidenceRecall": 1,
+      "status": "complete"
+    },
+    {
+      "runId": "q5-direct-r2",
+      "wholeAnswerExact": true,
+      "fieldResults": {
+        "actions": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "array"
+        },
+        "rollbackTrigger": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "string"
+        },
+        "evidenceSource": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "string"
+        }
+      },
+      "evidencePrecision": 1,
+      "evidenceRecall": 1,
+      "status": "complete"
+    },
+    {
+      "runId": "q5-gateway-r1",
+      "wholeAnswerExact": true,
+      "fieldResults": {
+        "actions": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "array"
+        },
+        "rollbackTrigger": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "string"
+        },
+        "evidenceSource": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "string"
+        }
+      },
+      "evidencePrecision": 1,
+      "evidenceRecall": 1,
+      "status": "complete"
+    },
+    {
+      "runId": "q5-gateway-r2",
+      "wholeAnswerExact": true,
+      "fieldResults": {
+        "actions": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "array"
+        },
+        "rollbackTrigger": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "string"
+        },
+        "evidenceSource": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "string"
+        }
+      },
+      "evidencePrecision": 1,
+      "evidenceRecall": 1,
+      "status": "complete"
+    },
+    {
+      "runId": "q6-direct-r1",
+      "wholeAnswerExact": false,
+      "fieldResults": {
+        "revision": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "number"
+        },
+        "threshold": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "number"
+        },
+        "evidenceSource": {
+          "present": true,
+          "typed": true,
+          "correct": false,
+          "expectedType": "string"
+        }
+      },
+      "evidencePrecision": 1,
+      "evidenceRecall": 1,
+      "status": "complete"
+    },
+    {
+      "runId": "q6-direct-r2",
+      "wholeAnswerExact": false,
+      "fieldResults": {
+        "revision": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "number"
+        },
+        "threshold": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "number"
+        },
+        "evidenceSource": {
+          "present": true,
+          "typed": true,
+          "correct": false,
+          "expectedType": "string"
+        }
+      },
+      "evidencePrecision": 1,
+      "evidenceRecall": 1,
+      "status": "complete"
+    },
+    {
+      "runId": "q6-gateway-r1",
+      "wholeAnswerExact": false,
+      "fieldResults": {
+        "revision": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "number"
+        },
+        "threshold": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "number"
+        },
+        "evidenceSource": {
+          "present": true,
+          "typed": true,
+          "correct": false,
+          "expectedType": "string"
+        }
+      },
+      "evidencePrecision": 1,
+      "evidenceRecall": 1,
+      "status": "complete"
+    },
+    {
+      "runId": "q6-gateway-r2",
+      "wholeAnswerExact": false,
+      "fieldResults": {
+        "revision": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "number"
+        },
+        "threshold": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "number"
+        },
+        "evidenceSource": {
+          "present": true,
+          "typed": true,
+          "correct": false,
+          "expectedType": "string"
+        }
+      },
+      "evidencePrecision": 1,
+      "evidenceRecall": 1,
+      "status": "complete"
+    },
+    {
+      "runId": "q7-direct-r1",
+      "wholeAnswerExact": true,
+      "fieldResults": {
+        "owner": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "string"
+        },
+        "region": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "string"
+        }
+      },
+      "evidencePrecision": 1,
+      "evidenceRecall": 1,
+      "status": "complete"
+    },
+    {
+      "runId": "q7-direct-r2",
+      "wholeAnswerExact": true,
+      "fieldResults": {
+        "owner": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "string"
+        },
+        "region": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "string"
+        }
+      },
+      "evidencePrecision": 1,
+      "evidenceRecall": 1,
+      "status": "complete"
+    },
+    {
+      "runId": "q7-gateway-r1",
+      "wholeAnswerExact": true,
+      "fieldResults": {
+        "owner": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "string"
+        },
+        "region": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "string"
+        }
+      },
+      "evidencePrecision": 1,
+      "evidenceRecall": 1,
+      "status": "complete"
+    },
+    {
+      "runId": "q7-gateway-r2",
+      "wholeAnswerExact": true,
+      "fieldResults": {
+        "owner": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "string"
+        },
+        "region": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "string"
+        }
+      },
+      "evidencePrecision": 1,
+      "evidenceRecall": 1,
+      "status": "complete"
+    },
+    {
+      "runId": "q8-direct-r1",
+      "wholeAnswerExact": true,
+      "fieldResults": {
+        "value": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "string"
+        },
+        "usedFallback": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "boolean"
+        }
+      },
+      "evidencePrecision": 1,
+      "evidenceRecall": 0.5,
+      "status": "complete"
+    },
+    {
+      "runId": "q8-direct-r2",
+      "wholeAnswerExact": true,
+      "fieldResults": {
+        "value": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "string"
+        },
+        "usedFallback": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "boolean"
+        }
+      },
+      "evidencePrecision": 1,
+      "evidenceRecall": 0.5,
+      "status": "complete"
+    },
+    {
+      "runId": "q8-gateway-r1",
+      "wholeAnswerExact": false,
+      "fieldResults": {
+        "value": {
+          "present": true,
+          "typed": true,
+          "correct": false,
+          "expectedType": "string"
+        },
+        "usedFallback": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "boolean"
+        }
+      },
+      "evidencePrecision": 1,
+      "evidenceRecall": 0.5,
+      "status": "complete"
+    },
+    {
+      "runId": "q8-gateway-r2",
+      "wholeAnswerExact": true,
+      "fieldResults": {
+        "value": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "string"
+        },
+        "usedFallback": {
+          "present": true,
+          "typed": true,
+          "correct": true,
+          "expectedType": "boolean"
+        }
+      },
+      "evidencePrecision": 1,
+      "evidenceRecall": 0.5,
+      "status": "complete"
+    }
+  ],
+  "method": {
+    "wholeAnswerExact": "Canonical JSON structural equality against frozen expected answer; evidenceRefs are not part of answer equality.",
+    "fieldAccuracy": "Each required expected field is assessed independently for presence, declared type, and exact canonical value.",
+    "evidenceRefs": "Set precision and recall against exact fixture-relative paths or memory:<exact node name>. Correct references assess reference correctness only, not whether cited material was actually used as reasoning.",
+    "unexpectedFields": "Extra top-level JSON keys outside required fields and evidenceRefs are counted, not judged as unsupported factual claims.",
+    "elapsed": "Wall-clock span from first list event start to last retained event start; generic bridge time included.",
+    "toolDefinitions": "Counts from first list event; no billing or provider token usage is inferred.",
+    "completion": "The first successful finish event is retained; no run is repeated or substituted."
+  },
+  "caveats": [
+    "The planned two repetitions per task and condition are descriptive and do not support significance claims.",
+    "Definitions and token proxies are not billed usage. No model-side trace or source-use verification is available."
+  ]
+}

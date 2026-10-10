@@ -1,0 +1,558 @@
+{
+  "generatedAt": "2026-10-09T21:03:40.961408+00:00",
+  "completedRuns": 32,
+  "deliveryAudits": [
+    {
+      "runId": "q1-direct-r1",
+      "agentName": "quality_q1_direct_r1",
+      "advertisedDefinitionsReportedComplete": true,
+      "reportedClipping": "none"
+    },
+    {
+      "runId": "q1-gateway-r1",
+      "agentName": "quality_q1_gateway_r1",
+      "advertisedDefinitionsReportedComplete": true,
+      "reportedClipping": "none",
+      "clarification": {
+        "initialReportedCatalogueComplete": false,
+        "followupAfterFinish": "All seven advertised public definitions were visible. Initial no referred to unadvertised upstream definitions; audit corrected without any task rerun."
+      }
+    },
+    {
+      "runId": "q2-gateway-r1",
+      "agentName": "quality_q2_gateway_r1",
+      "advertisedDefinitionsReportedComplete": true,
+      "reportedClipping": "none"
+    },
+    {
+      "runId": "q2-direct-r1",
+      "agentName": "quality_q2_direct_r1",
+      "advertisedDefinitionsReportedComplete": true,
+      "reportedClipping": "none"
+    },
+    {
+      "runId": "q3-direct-r1",
+      "agentName": "quality_q3_direct_r1",
+      "advertisedDefinitionsReportedComplete": true,
+      "reportedClipping": "none"
+    },
+    {
+      "runId": "q3-gateway-r1",
+      "agentName": "quality_q3_gateway_r1",
+      "advertisedDefinitionsReportedComplete": true,
+      "reportedClipping": "none"
+    },
+    {
+      "runId": "q4-gateway-r1",
+      "agentName": "quality_q4_gateway_r1",
+      "advertisedDefinitionsReportedComplete": true,
+      "reportedClipping": "none"
+    },
+    {
+      "runId": "q4-direct-r1",
+      "agentName": "quality_q4_direct_r1",
+      "advertisedDefinitionsReportedComplete": true,
+      "reportedClipping": "none"
+    },
+    {
+      "runId": "q5-direct-r1",
+      "agentName": "quality_q5_direct_r1",
+      "advertisedDefinitionsReportedComplete": true,
+      "reportedClipping": "none"
+    },
+    {
+      "runId": "q5-gateway-r1",
+      "agentName": "quality_q5_gateway_r1",
+      "advertisedDefinitionsReportedComplete": true,
+      "reportedClipping": "none"
+    },
+    {
+      "runId": "q6-gateway-r1",
+      "agentName": "quality_q6_gateway_r1",
+      "advertisedDefinitionsReportedComplete": true,
+      "reportedClipping": "none"
+    },
+    {
+      "runId": "q6-direct-r1",
+      "agentName": "quality_q6_direct_r1",
+      "advertisedDefinitionsReportedComplete": true,
+      "reportedClipping": "none"
+    },
+    {
+      "runId": "q7-direct-r1",
+      "agentName": "quality_q7_direct_r1",
+      "advertisedDefinitionsReportedComplete": true,
+      "reportedClipping": "none"
+    },
+    {
+      "runId": "q7-gateway-r1",
+      "agentName": "quality_q7_gateway_r1",
+      "advertisedDefinitionsReportedComplete": true,
+      "reportedClipping": "none"
+    },
+    {
+      "runId": "q8-gateway-r1",
+      "agentName": "quality_q8_gateway_r1",
+      "advertisedDefinitionsReportedComplete": true,
+      "reportedClipping": "none"
+    },
+    {
+      "runId": "q8-direct-r1",
+      "agentName": "quality_q8_direct_r1",
+      "advertisedDefinitionsReportedComplete": true,
+      "reportedClipping": "none"
+    },
+    {
+      "runId": "q1-gateway-r2",
+      "agentName": "quality_q1_gateway_r2",
+      "advertisedDefinitionsReportedComplete": true,
+      "reportedClipping": "none"
+    },
+    {
+      "runId": "q1-direct-r2",
+      "agentName": "quality_q1_direct_r2",
+      "advertisedDefinitionsReportedComplete": true,
+      "reportedClipping": "none"
+    },
+    {
+      "runId": "q2-direct-r2",
+      "agentName": "quality_q2_direct_r2",
+      "advertisedDefinitionsReportedComplete": true,
+      "reportedClipping": "none"
+    },
+    {
+      "runId": "q2-gateway-r2",
+      "agentName": "quality_q2_gateway_r2",
+      "advertisedDefinitionsReportedComplete": true,
+      "reportedClipping": "none"
+    },
+    {
+      "runId": "q3-gateway-r2",
+      "agentName": "quality_q3_gateway_r2",
+      "advertisedDefinitionsReportedComplete": true,
+      "reportedClipping": "none"
+    },
+    {
+      "runId": "q3-direct-r2",
+      "agentName": "quality_q3_direct_r2",
+      "advertisedDefinitionsReportedComplete": true,
+      "reportedClipping": "none"
+    },
+    {
+      "runId": "q4-direct-r2",
+      "agentName": "quality_q4_direct_r2",
+      "advertisedDefinitionsReportedComplete": true,
+      "reportedClipping": "none"
+    },
+    {
+      "runId": "q4-gateway-r2",
+      "agentName": "quality_q4_gateway_r2",
+      "advertisedDefinitionsReportedComplete": true,
+      "reportedClipping": "none"
+    },
+    {
+      "runId": "q5-gateway-r2",
+      "agentName": "quality_q5_gateway_r2",
+      "advertisedDefinitionsReportedComplete": true,
+      "reportedClipping": "none"
+    },
+    {
+      "runId": "q5-direct-r2",
+      "agentName": "quality_q5_direct_r2",
+      "advertisedDefinitionsReportedComplete": true,
+      "reportedClipping": "none"
+    },
+    {
+      "runId": "q6-direct-r2",
+      "agentName": "quality_q6_direct_r2",
+      "advertisedDefinitionsReportedComplete": true,
+      "reportedClipping": "none"
+    },
+    {
+      "runId": "q6-gateway-r2",
+      "agentName": "quality_q6_gateway_r2",
+      "advertisedDefinitionsReportedComplete": true,
+      "reportedClipping": "none"
+    },
+    {
+      "runId": "q7-gateway-r2",
+      "agentName": "quality_q7_gateway_r2",
+      "advertisedDefinitionsReportedComplete": true,
+      "reportedClipping": "none"
+    },
+    {
+      "runId": "q7-direct-r2",
+      "agentName": "quality_q7_direct_r2",
+      "advertisedDefinitionsReportedComplete": true,
+      "reportedClipping": "none"
+    },
+    {
+      "runId": "q8-direct-r2",
+      "agentName": "quality_q8_direct_r2",
+      "advertisedDefinitionsReportedComplete": true,
+      "reportedClipping": "none"
+    },
+    {
+      "runId": "q8-gateway-r2",
+      "agentName": "quality_q8_gateway_r2",
+      "advertisedDefinitionsReportedComplete": true,
+      "reportedClipping": "none"
+    }
+  ],
+  "retrievalTraceChecks": [
+    {
+      "runId": "q1-direct-r1",
+      "citedSourcesRequested": [
+        "utf8-payload.txt"
+      ],
+      "unverifiedCitedSources": [],
+      "opaqueGeneratedCode": false,
+      "retrievalScope": "Cited paths are matched against successful MCP read/metadata requests; memory nodes against successful graph-read responses. This proves retrieval opportunity, not internal reasoning or comprehensive claim grounding."
+    },
+    {
+      "runId": "q1-gateway-r1",
+      "citedSourcesRequested": [
+        "utf8-payload.txt"
+      ],
+      "unverifiedCitedSources": [],
+      "opaqueGeneratedCode": false,
+      "retrievalScope": "Cited paths are matched against successful MCP read/metadata requests; memory nodes against successful graph-read responses. This proves retrieval opportunity, not internal reasoning or comprehensive claim grounding."
+    },
+    {
+      "runId": "q2-gateway-r1",
+      "citedSourcesRequested": [
+        "memory:Aster Sync",
+        "memory:Aster Sync Canary"
+      ],
+      "unverifiedCitedSources": [],
+      "opaqueGeneratedCode": false,
+      "retrievalScope": "Cited paths are matched against successful MCP read/metadata requests; memory nodes against successful graph-read responses. This proves retrieval opportunity, not internal reasoning or comprehensive claim grounding."
+    },
+    {
+      "runId": "q2-direct-r1",
+      "citedSourcesRequested": [
+        "memory:Aster Sync",
+        "memory:Aster Sync Canary"
+      ],
+      "unverifiedCitedSources": [],
+      "opaqueGeneratedCode": false,
+      "retrievalScope": "Cited paths are matched against successful MCP read/metadata requests; memory nodes against successful graph-read responses. This proves retrieval opportunity, not internal reasoning or comprehensive claim grounding."
+    },
+    {
+      "runId": "q3-direct-r1",
+      "citedSourcesRequested": [
+        "memory:Vela Router"
+      ],
+      "unverifiedCitedSources": [],
+      "opaqueGeneratedCode": false,
+      "retrievalScope": "Cited paths are matched against successful MCP read/metadata requests; memory nodes against successful graph-read responses. This proves retrieval opportunity, not internal reasoning or comprehensive claim grounding."
+    },
+    {
+      "runId": "q3-gateway-r1",
+      "citedSourcesRequested": [
+        "memory:Vela Router"
+      ],
+      "unverifiedCitedSources": [],
+      "opaqueGeneratedCode": false,
+      "retrievalScope": "Cited paths are matched against successful MCP read/metadata requests; memory nodes against successful graph-read responses. This proves retrieval opportunity, not internal reasoning or comprehensive claim grounding."
+    },
+    {
+      "runId": "q4-gateway-r1",
+      "citedSourcesRequested": [
+        "incidents.json"
+      ],
+      "unverifiedCitedSources": [],
+      "opaqueGeneratedCode": false,
+      "retrievalScope": "Cited paths are matched against successful MCP read/metadata requests; memory nodes against successful graph-read responses. This proves retrieval opportunity, not internal reasoning or comprehensive claim grounding."
+    },
+    {
+      "runId": "q4-direct-r1",
+      "citedSourcesRequested": [
+        "incidents.json"
+      ],
+      "unverifiedCitedSources": [],
+      "opaqueGeneratedCode": false,
+      "retrievalScope": "Cited paths are matched against successful MCP read/metadata requests; memory nodes against successful graph-read responses. This proves retrieval opportunity, not internal reasoning or comprehensive claim grounding."
+    },
+    {
+      "runId": "q5-direct-r1",
+      "citedSourcesRequested": [
+        "runbooks/manifest.json",
+        "runbooks/payment-v4.md"
+      ],
+      "unverifiedCitedSources": [],
+      "opaqueGeneratedCode": false,
+      "retrievalScope": "Cited paths are matched against successful MCP read/metadata requests; memory nodes against successful graph-read responses. This proves retrieval opportunity, not internal reasoning or comprehensive claim grounding."
+    },
+    {
+      "runId": "q5-gateway-r1",
+      "citedSourcesRequested": [
+        "runbooks/manifest.json",
+        "runbooks/payment-v4.md"
+      ],
+      "unverifiedCitedSources": [],
+      "opaqueGeneratedCode": false,
+      "retrievalScope": "Cited paths are matched against successful MCP read/metadata requests; memory nodes against successful graph-read responses. This proves retrieval opportunity, not internal reasoning or comprehensive claim grounding."
+    },
+    {
+      "runId": "q6-gateway-r1",
+      "citedSourcesRequested": [
+        "config/model-v7.json",
+        "config/model-v8.json",
+        "config/policy.json"
+      ],
+      "unverifiedCitedSources": [],
+      "opaqueGeneratedCode": false,
+      "retrievalScope": "Cited paths are matched against successful MCP read/metadata requests; memory nodes against successful graph-read responses. This proves retrieval opportunity, not internal reasoning or comprehensive claim grounding."
+    },
+    {
+      "runId": "q6-direct-r1",
+      "citedSourcesRequested": [
+        "config/model-v7.json",
+        "config/model-v8.json",
+        "config/policy.json"
+      ],
+      "unverifiedCitedSources": [],
+      "opaqueGeneratedCode": false,
+      "retrievalScope": "Cited paths are matched against successful MCP read/metadata requests; memory nodes against successful graph-read responses. This proves retrieval opportunity, not internal reasoning or comprehensive claim grounding."
+    },
+    {
+      "runId": "q7-direct-r1",
+      "citedSourcesRequested": [
+        "service.json"
+      ],
+      "unverifiedCitedSources": [],
+      "opaqueGeneratedCode": false,
+      "retrievalScope": "Cited paths are matched against successful MCP read/metadata requests; memory nodes against successful graph-read responses. This proves retrieval opportunity, not internal reasoning or comprehensive claim grounding."
+    },
+    {
+      "runId": "q7-gateway-r1",
+      "citedSourcesRequested": [
+        "service.json"
+      ],
+      "unverifiedCitedSources": [],
+      "opaqueGeneratedCode": false,
+      "retrievalScope": "Cited paths are matched against successful MCP read/metadata requests; memory nodes against successful graph-read responses. This proves retrieval opportunity, not internal reasoning or comprehensive claim grounding."
+    },
+    {
+      "runId": "q8-gateway-r1",
+      "citedSourcesRequested": [
+        "fallback.txt"
+      ],
+      "unverifiedCitedSources": [],
+      "opaqueGeneratedCode": false,
+      "retrievalScope": "Cited paths are matched against successful MCP read/metadata requests; memory nodes against successful graph-read responses. This proves retrieval opportunity, not internal reasoning or comprehensive claim grounding."
+    },
+    {
+      "runId": "q8-direct-r1",
+      "citedSourcesRequested": [
+        "fallback.txt"
+      ],
+      "unverifiedCitedSources": [],
+      "opaqueGeneratedCode": false,
+      "retrievalScope": "Cited paths are matched against successful MCP read/metadata requests; memory nodes against successful graph-read responses. This proves retrieval opportunity, not internal reasoning or comprehensive claim grounding."
+    },
+    {
+      "runId": "q1-gateway-r2",
+      "citedSourcesRequested": [
+        "utf8-payload.txt"
+      ],
+      "unverifiedCitedSources": [],
+      "opaqueGeneratedCode": false,
+      "retrievalScope": "Cited paths are matched against successful MCP read/metadata requests; memory nodes against successful graph-read responses. This proves retrieval opportunity, not internal reasoning or comprehensive claim grounding."
+    },
+    {
+      "runId": "q1-direct-r2",
+      "citedSourcesRequested": [
+        "utf8-payload.txt"
+      ],
+      "unverifiedCitedSources": [],
+      "opaqueGeneratedCode": false,
+      "retrievalScope": "Cited paths are matched against successful MCP read/metadata requests; memory nodes against successful graph-read responses. This proves retrieval opportunity, not internal reasoning or comprehensive claim grounding."
+    },
+    {
+      "runId": "q2-direct-r2",
+      "citedSourcesRequested": [
+        "memory:Aster Sync",
+        "memory:Aster Sync Canary"
+      ],
+      "unverifiedCitedSources": [],
+      "opaqueGeneratedCode": false,
+      "retrievalScope": "Cited paths are matched against successful MCP read/metadata requests; memory nodes against successful graph-read responses. This proves retrieval opportunity, not internal reasoning or comprehensive claim grounding."
+    },
+    {
+      "runId": "q2-gateway-r2",
+      "citedSourcesRequested": [
+        "memory:Aster Sync",
+        "memory:Aster Sync Canary"
+      ],
+      "unverifiedCitedSources": [],
+      "opaqueGeneratedCode": false,
+      "retrievalScope": "Cited paths are matched against successful MCP read/metadata requests; memory nodes against successful graph-read responses. This proves retrieval opportunity, not internal reasoning or comprehensive claim grounding."
+    },
+    {
+      "runId": "q3-gateway-r2",
+      "citedSourcesRequested": [
+        "memory:Vela Router"
+      ],
+      "unverifiedCitedSources": [],
+      "opaqueGeneratedCode": false,
+      "retrievalScope": "Cited paths are matched against successful MCP read/metadata requests; memory nodes against successful graph-read responses. This proves retrieval opportunity, not internal reasoning or comprehensive claim grounding."
+    },
+    {
+      "runId": "q3-direct-r2",
+      "citedSourcesRequested": [
+        "memory:Vela Router"
+      ],
+      "unverifiedCitedSources": [],
+      "opaqueGeneratedCode": false,
+      "retrievalScope": "Cited paths are matched against successful MCP read/metadata requests; memory nodes against successful graph-read responses. This proves retrieval opportunity, not internal reasoning or comprehensive claim grounding."
+    },
+    {
+      "runId": "q4-direct-r2",
+      "citedSourcesRequested": [
+        "incidents.json"
+      ],
+      "unverifiedCitedSources": [],
+      "opaqueGeneratedCode": false,
+      "retrievalScope": "Cited paths are matched against successful MCP read/metadata requests; memory nodes against successful graph-read responses. This proves retrieval opportunity, not internal reasoning or comprehensive claim grounding."
+    },
+    {
+      "runId": "q4-gateway-r2",
+      "citedSourcesRequested": [
+        "incidents.json"
+      ],
+      "unverifiedCitedSources": [],
+      "opaqueGeneratedCode": false,
+      "retrievalScope": "Cited paths are matched against successful MCP read/metadata requests; memory nodes against successful graph-read responses. This proves retrieval opportunity, not internal reasoning or comprehensive claim grounding."
+    },
+    {
+      "runId": "q5-gateway-r2",
+      "citedSourcesRequested": [
+        "runbooks/manifest.json",
+        "runbooks/payment-v4.md"
+      ],
+      "unverifiedCitedSources": [],
+      "opaqueGeneratedCode": false,
+      "retrievalScope": "Cited paths are matched against successful MCP read/metadata requests; memory nodes against successful graph-read responses. This proves retrieval opportunity, not internal reasoning or comprehensive claim grounding."
+    },
+    {
+      "runId": "q5-direct-r2",
+      "citedSourcesRequested": [
+        "runbooks/manifest.json",
+        "runbooks/payment-v4.md"
+      ],
+      "unverifiedCitedSources": [],
+      "opaqueGeneratedCode": false,
+      "retrievalScope": "Cited paths are matched against successful MCP read/metadata requests; memory nodes against successful graph-read responses. This proves retrieval opportunity, not internal reasoning or comprehensive claim grounding."
+    },
+    {
+      "runId": "q6-direct-r2",
+      "citedSourcesRequested": [
+        "config/model-v7.json",
+        "config/model-v8.json",
+        "config/policy.json"
+      ],
+      "unverifiedCitedSources": [],
+      "opaqueGeneratedCode": false,
+      "retrievalScope": "Cited paths are matched against successful MCP read/metadata requests; memory nodes against successful graph-read responses. This proves retrieval opportunity, not internal reasoning or comprehensive claim grounding."
+    },
+    {
+      "runId": "q6-gateway-r2",
+      "citedSourcesRequested": [
+        "config/model-v7.json",
+        "config/model-v8.json",
+        "config/policy.json"
+      ],
+      "unverifiedCitedSources": [],
+      "opaqueGeneratedCode": false,
+      "retrievalScope": "Cited paths are matched against successful MCP read/metadata requests; memory nodes against successful graph-read responses. This proves retrieval opportunity, not internal reasoning or comprehensive claim grounding."
+    },
+    {
+      "runId": "q7-gateway-r2",
+      "citedSourcesRequested": [
+        "service.json"
+      ],
+      "unverifiedCitedSources": [],
+      "opaqueGeneratedCode": false,
+      "retrievalScope": "Cited paths are matched against successful MCP read/metadata requests; memory nodes against successful graph-read responses. This proves retrieval opportunity, not internal reasoning or comprehensive claim grounding."
+    },
+    {
+      "runId": "q7-direct-r2",
+      "citedSourcesRequested": [
+        "service.json"
+      ],
+      "unverifiedCitedSources": [],
+      "opaqueGeneratedCode": false,
+      "retrievalScope": "Cited paths are matched against successful MCP read/metadata requests; memory nodes against successful graph-read responses. This proves retrieval opportunity, not internal reasoning or comprehensive claim grounding."
+    },
+    {
+      "runId": "q8-direct-r2",
+      "citedSourcesRequested": [
+        "fallback.txt"
+      ],
+      "unverifiedCitedSources": [],
+      "opaqueGeneratedCode": false,
+      "retrievalScope": "Cited paths are matched against successful MCP read/metadata requests; memory nodes against successful graph-read responses. This proves retrieval opportunity, not internal reasoning or comprehensive claim grounding."
+    },
+    {
+      "runId": "q8-gateway-r2",
+      "citedSourcesRequested": [
+        "fallback.txt"
+      ],
+      "unverifiedCitedSources": [],
+      "opaqueGeneratedCode": false,
+      "retrievalScope": "Cited paths are matched against successful MCP read/metadata requests; memory nodes against successful graph-read responses. This proves retrieval opportunity, not internal reasoning or comprehensive claim grounding."
+    }
+  ],
+  "metrics": {
+    "direct": {
+      "frozenRequiredFieldsCorrect": 32,
+      "requiredFieldTotal": 34,
+      "allRequiredFieldsPresent": true,
+      "frozenFactuallyExact": 14,
+      "frozenFullResponseExact": 12,
+      "coreFactsSensitivityCorrect": 32,
+      "coreFactsSensitivityTotal": 32,
+      "sensitivityStatus": "Post-hoc: excludes only ambiguous q6 evidenceSource, retains q8 extraction mismatch. Frozen scores remain primary.",
+      "referenceMatched": 24,
+      "referenceExpected": 26,
+      "referencesClaimed": 24,
+      "pooledReferencePrecision": 1.0,
+      "pooledReferenceRecall": 0.9230769230769231,
+      "q8RecoverySequencesValid": 2,
+      "q1q2NonNativeToolObserved": 4,
+      "unambiguousTaskAnswersExact": 12,
+      "unambiguousTaskAttempts": 12,
+      "meanElapsedMs": 7571.375,
+      "maximumElapsedMs": 15698.0
+    },
+    "gateway": {
+      "frozenRequiredFieldsCorrect": 31,
+      "requiredFieldTotal": 34,
+      "allRequiredFieldsPresent": true,
+      "frozenFactuallyExact": 13,
+      "frozenFullResponseExact": 12,
+      "coreFactsSensitivityCorrect": 31,
+      "coreFactsSensitivityTotal": 32,
+      "sensitivityStatus": "Post-hoc: excludes only ambiguous q6 evidenceSource, retains q8 extraction mismatch. Frozen scores remain primary.",
+      "referenceMatched": 24,
+      "referenceExpected": 26,
+      "referencesClaimed": 24,
+      "pooledReferencePrecision": 1.0,
+      "pooledReferenceRecall": 0.9230769230769231,
+      "q8RecoverySequencesValid": 2,
+      "q1q2NonNativeToolObserved": 4,
+      "unambiguousTaskAnswersExact": 12,
+      "unambiguousTaskAttempts": 12,
+      "meanElapsedMs": 9332.4375,
+      "maximumElapsedMs": 31365.0
+    }
+  },
+  "limitations": [
+    "Worker audits are self-reported visibility checks, not provider-side token logs.",
+    "Post-hoc sensitivity must not be substituted for frozen grading.",
+    "Cited-source retrieval checks do not reveal model reasoning or establish all-claim grounding.",
+    "Two repetitions, eight synthetic task types and two MCP implementations do not establish quality equivalence or security guarantees."
+  ]
+}

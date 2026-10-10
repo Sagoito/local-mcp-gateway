@@ -1,0 +1,124 @@
+{
+  "generatedAt": "2026-10-09T20:53:50.831Z",
+  "upstreamTools": 23,
+  "maximumResponseTokenProxy": 2749,
+  "responseDisplayBudgetTokenProxy": 4500,
+  "records": [
+    {
+      "label": "direct-definitions",
+      "bytes": 13179,
+      "tokenProxy": 2749
+    },
+    {
+      "label": "direct-all-files",
+      "bytes": 5044,
+      "tokenProxy": 1652
+    },
+    {
+      "label": "direct-memory-graph",
+      "bytes": 1001,
+      "tokenProxy": 293
+    },
+    {
+      "label": "direct-file:archive/payment-v3.md",
+      "bytes": 280,
+      "tokenProxy": 76
+    },
+    {
+      "label": "direct-file:config/model-v7.json",
+      "bytes": 172,
+      "tokenProxy": 60
+    },
+    {
+      "label": "direct-file:config/model-v8.json",
+      "bytes": 172,
+      "tokenProxy": 60
+    },
+    {
+      "label": "direct-file:config/policy.json",
+      "bytes": 192,
+      "tokenProxy": 50
+    },
+    {
+      "label": "direct-file:fallback.txt",
+      "bytes": 126,
+      "tokenProxy": 32
+    },
+    {
+      "label": "direct-file:incidents.json",
+      "bytes": 1328,
+      "tokenProxy": 484
+    },
+    {
+      "label": "direct-file:runbooks/manifest.json",
+      "bytes": 356,
+      "tokenProxy": 116
+    },
+    {
+      "label": "direct-file:runbooks/payment-v4-draft.md",
+      "bytes": 296,
+      "tokenProxy": 78
+    },
+    {
+      "label": "direct-file:runbooks/payment-v4.md",
+      "bytes": 370,
+      "tokenProxy": 100
+    },
+    {
+      "label": "direct-file:service.json",
+      "bytes": 362,
+      "tokenProxy": 102
+    },
+    {
+      "label": "direct-file:utf8-payload.txt",
+      "bytes": 128,
+      "tokenProxy": 28
+    },
+    {
+      "label": "direct-missing-file",
+      "bytes": 183,
+      "tokenProxy": 52
+    },
+    {
+      "label": "direct-metadata",
+      "bytes": 648,
+      "tokenProxy": 212
+    },
+    {
+      "label": "direct-exact-nodes",
+      "bytes": 712,
+      "tokenProxy": 210
+    },
+    {
+      "label": "gateway-definitions",
+      "bytes": 7390,
+      "tokenProxy": 1647
+    },
+    {
+      "label": "gateway-discovery-verification",
+      "bytes": 904,
+      "tokenProxy": 189
+    },
+    {
+      "label": "gateway-all-files",
+      "bytes": 2867,
+      "tokenProxy": 1023
+    },
+    {
+      "label": "gateway-memory-graph",
+      "bytes": 424,
+      "tokenProxy": 111
+    },
+    {
+      "label": "gateway-metadata-discovery",
+      "bytes": 849,
+      "tokenProxy": 175
+    },
+    {
+      "label": "gateway-exact-node-discovery",
+      "bytes": 799,
+      "tokenProxy": 177
+    }
+  ],
+  "caveat": "SDK payload bounds plus worker clipping audits support delivery checks; these are not provider-reported context or billing."
+}
