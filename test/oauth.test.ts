@@ -5,7 +5,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { auth } from '@modelcontextprotocol/sdk/client/auth.js';
-import { createAuthProvider, startCallbackServer } from '../src/auth.js';
+import { createAuthProvider, login, startCallbackServer } from '../src/auth.js';
 
 const resourceUrl = 'https://resource.example/mcp';
 const issuer = 'https://auth.example';
@@ -249,5 +249,91 @@ test('loopback OAuth callback validates state and handles a completed response o
     );
   } finally {
     await callback.close();
+  }
+});
+
+test('OAuth callback refuses an already-aborted signal and closes promptly on later cancellation', async () => {
+  const alreadyAborted = new AbortController();
+  alreadyAborted.abort();
+  await assert.rejects(
+    startCallbackServer(async () => true, alreadyAborted.signal),
+    /OAuth login cancelled/,
+  );
+
+  const controller = new AbortController();
+  const callback = await startCallbackServer(
+    async () => true,
+    controller.signal,
+  );
+  controller.abort();
+  await assert.rejects(callback.result, /OAuth login cancelled/);
+  await callback.close();
+
+  // Successful rebind proves abort closed the listening socket instead of merely
+  // rejecting the result promise and leaving the callback server alive.
+  const next = await startCallbackServer(async () => true);
+  await next.close();
+});
+
+test('authorization URL hook captures the URL while callback cancellation remains prompt', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'local-mcp-oauth-hook-'));
+  let captured: URL | undefined;
+  const provider = createAuthProvider(
+    'remote',
+    { url: resourceUrl },
+    join(dir, 'config.json'),
+    true,
+    (url) => {
+      captured = url;
+    },
+  );
+  const controller = new AbortController();
+  const callback = await startCallbackServer(
+    async () => true,
+    controller.signal,
+  );
+  try {
+    await provider.redirectToAuthorization(
+      new URL('https://auth.example/authorize?state=opaque'),
+    );
+    assert.equal(captured?.origin, 'https://auth.example');
+    assert.equal(captured?.searchParams.get('state'), 'opaque');
+    controller.abort();
+    await assert.rejects(callback.result, /OAuth login cancelled/);
+    await callback.close();
+  } finally {
+    await callback.close();
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test('login abort closes its callback listener while transport startup is pending', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'local-mcp-oauth-abort-login-'));
+  const originalFetch = globalThis.fetch;
+  let notifyFetchStarted!: () => void;
+  const fetchStarted = new Promise<void>((resolve) => {
+    notifyFetchStarted = resolve;
+  });
+  globalThis.fetch = async () => {
+    notifyFetchStarted();
+    return await new Promise<Response>(() => undefined);
+  };
+  const controller = new AbortController();
+  try {
+    const pendingLogin = login(
+      'remote',
+      { url: resourceUrl },
+      join(dir, 'config.json'),
+      { signal: controller.signal },
+    );
+    await fetchStarted;
+    controller.abort();
+    await assert.rejects(pendingLogin, /OAuth login cancelled/);
+
+    const callback = await startCallbackServer(async () => true);
+    await callback.close();
+  } finally {
+    globalThis.fetch = originalFetch;
+    await rm(dir, { recursive: true, force: true });
   }
 });

@@ -11,6 +11,7 @@ import type {
   Upstreams,
 } from './types.js';
 import { createAuthProvider } from './auth.js';
+import { PROJECT_SLUG, PROJECT_VERSION } from './brand.js';
 import {
   assertCallArguments,
   assertToolAllowed,
@@ -31,6 +32,7 @@ export function createUpstreams(
 ): Upstreams & { getErrors(): Record<string, string> } {
   const live = new Map<string, Promise<Connection>>();
   const errors: Record<string, string> = {};
+  let closed = false;
   const toolCache = new Map<
     string,
     {
@@ -54,7 +56,7 @@ export function createUpstreams(
     server: string,
     serverConfig: ServerConfig,
   ): Promise<Connection> => {
-    const client = new Client({ name: 'local-mcp-gateway', version: '0.1.0' });
+    const client = new Client({ name: PROJECT_SLUG, version: PROJECT_VERSION });
     let transport: Transport;
     if ('command' in serverConfig) {
       transport = new StdioClientTransport({
@@ -106,6 +108,7 @@ export function createUpstreams(
   };
 
   const get = (server: string): Promise<Connection> => {
+    if (closed) throw new Error('Upstream connections are closed');
     const cfg = config.servers[server];
     if (!cfg || cfg.disabled)
       throw new Error(`Unknown upstream server "${server}"`);
@@ -122,6 +125,7 @@ export function createUpstreams(
 
   return {
     async listTools(): Promise<ToolEntry[]> {
+      if (closed) throw new Error('Upstream connections are closed');
       const available = new Map<string, ToolEntry[]>();
       for (const name of Object.keys(errors)) delete errors[name];
       const discover = async (
@@ -339,6 +343,7 @@ export function createUpstreams(
       }
     },
     async close(): Promise<void> {
+      closed = true;
       const connections = await Promise.allSettled([...live.values()]);
       await Promise.all(
         connections.flatMap((r) =>

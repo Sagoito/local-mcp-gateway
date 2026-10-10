@@ -34,6 +34,34 @@ function parse(argv: string[]): Parsed {
   }
   const command = tokens.shift();
   if (!command) return { positional: [], configPath, options: {} };
+  if (command === 'web' || command === 'connect') {
+    const definitions: ParseArgsOptionsConfig =
+      command === 'web'
+        ? { port: { type: 'string' } }
+        : {
+            'connection-file': { type: 'string' },
+            url: { type: 'string' },
+            'token-env': { type: 'string' },
+          };
+    const parsed = parseArgs({
+      args: tokens,
+      options: definitions,
+      allowPositionals: false,
+      strict: true,
+    });
+    const values: Parsed['options'] = {};
+    for (const [name, value] of Object.entries(parsed.values)) {
+      if (value !== undefined && typeof value !== 'string')
+        throw new Error(`Invalid option: ${name}`);
+      values[name] = value;
+    }
+    return {
+      command,
+      positional: [],
+      configPath,
+      options: values,
+    };
+  }
   if (command === 'add') {
     const split = tokens.indexOf('--');
     const tail = split >= 0 ? tokens.splice(split) : [];
@@ -104,7 +132,7 @@ function parse(argv: string[]): Parsed {
 }
 
 function usage(): string {
-  return `Usage: local-mcp [--config PATH] <command>\n\nCommands:\n  setup FILE [--client generic|copilot|vscode|opencode] [--dry-run]\n  import FILE [--format auto|mcpServers|vscode|opencode] [--workspace DIR] [--server NAME]... [--dry-run]\n  client-config [--client generic|copilot|vscode|opencode]\n  init\n  add NAME --url URL [--header 'Name=Value'] [--oauth-client-id ID] [--allow-tool TOOL]...\n  add NAME [--env KEY=VALUE]... [--allow-tool TOOL]... -- COMMAND [ARGS...]\n  add NAME --no-tools -- COMMAND [ARGS...]\n  remove NAME\n  list\n  login NAME\n  serve\n  doctor\n\nsetup accepts the same import options; diagnostics go to stderr and the agent entry goes to stdout.`;
+  return `Usage: weftly [--config PATH] <command>\n\nCommands:\n  web [--port PORT]\n  connect --connection-file FILE\n  connect --url URL --token-env NAME\n  setup FILE [--client generic|copilot|vscode|opencode] [--dry-run]\n  import FILE [--format auto|mcpServers|vscode|opencode] [--workspace DIR] [--server NAME]... [--dry-run]\n  client-config [--client generic|copilot|vscode|opencode]\n  init\n  add NAME --url URL [--header 'Name=Value'] [--oauth-client-id ID] [--allow-tool TOOL]...\n  add NAME [--env KEY=VALUE]... [--allow-tool TOOL]... -- COMMAND [ARGS...]\n  add NAME --no-tools -- COMMAND [ARGS...]\n  remove NAME\n  list\n  login NAME\n  serve\n  doctor\n\nsetup accepts the same import options; diagnostics go to stderr and the agent entry goes to stdout.`;
 }
 
 function headerPairs(
@@ -133,6 +161,51 @@ async function run(argv: string[]): Promise<void> {
   const { command, positional, options, configPath } = parsed;
   if (!command || command === 'help' || command === '--help') {
     console.log(usage());
+    return;
+  }
+  if (command === 'web') {
+    const rawPort = options.port;
+    if (
+      rawPort !== undefined &&
+      (typeof rawPort !== 'string' ||
+        !/^\d+$/.test(rawPort) ||
+        Number(rawPort) > 65535)
+    )
+      throw new Error('--port must be an integer from 0 to 65535');
+    const { startWebService } = await import('./web-service.js');
+    const service = await startWebService({
+      configPath,
+      port: rawPort === undefined ? undefined : Number(rawPort),
+      cliPath: fileURLToPath(import.meta.url),
+    });
+    console.log(
+      `Weftly dashboard: ${service.dashboardUrl}\nKeep this service running while your agents use it.`,
+    );
+    const stop = () => {
+      void service.close().catch(() => {
+        process.exitCode = 1;
+      });
+    };
+    process.once('SIGINT', stop);
+    process.once('SIGTERM', stop);
+    return;
+  }
+  if (command === 'connect') {
+    const { connectBridge } = await import('./bridge.js');
+    const bridge = await connectBridge({
+      connectionFile: options['connection-file'] as string | undefined,
+      url: options.url as string | undefined,
+      tokenEnv: options['token-env'] as string | undefined,
+      onError: () => {
+        console.error('Bridge transport failed');
+        process.exitCode = 1;
+      },
+    });
+    const stop = () => {
+      void bridge.close();
+    };
+    process.once('SIGINT', stop);
+    process.once('SIGTERM', stop);
     return;
   }
   if (command === 'client-config') {

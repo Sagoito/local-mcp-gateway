@@ -40,6 +40,34 @@ test('stdio upstream is lazy, reusable, paginated-compatible, and returns MCP re
   }
 });
 
+test('closing upstreams is terminal and idempotent', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'local-mcp-terminal-close-'));
+  const upstreams = createUpstreams(
+    {
+      version: 1,
+      servers: {
+        issues: {
+          command: process.execPath,
+          args: [resolve('examples/demo-server.mjs'), 'issues'],
+        },
+      },
+    },
+    join(dir, 'config.json'),
+  );
+  try {
+    assert.equal((await upstreams.listTools()).length, 1);
+    await Promise.all([upstreams.close(), upstreams.close()]);
+    await assert.rejects(upstreams.listTools(), /connections are closed/);
+    await assert.rejects(
+      upstreams.callTool('issues', 'list_issues', {}),
+      /connections are closed/,
+    );
+  } finally {
+    await upstreams.close();
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
 test('upstream failures are sanitized and do not reveal transport details', async () => {
   const upstreams = createUpstreams(
     {

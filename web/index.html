@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f6f5f1" />
+    <title>Weftly · Local MCP</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Main navigation">
+        <a class="brand" href="#overview" aria-label="Weftly home"
+          ><span class="brand-mark" aria-hidden="true">w</span
+          ><span>weftly</span></a
+        >
+        <div class="workspace-label">LOCAL WORKSPACE</div>
+        <nav class="nav-list">
+          <a class="nav-item active" href="#overview" aria-current="page"
+            ><span class="nav-icon" aria-hidden="true">◫</span>Overview</a
+          >
+          <a class="nav-item" href="#servers"
+            ><span class="nav-icon" aria-hidden="true">⌘</span>Servers
+            <span class="nav-count" id="nav-count">0</span></a
+          >
+          <button class="nav-item" id="nav-settings" type="button">
+            <span class="nav-icon" aria-hidden="true">⚙</span>Settings
+          </button>
+        </nav>
+        <div class="sidebar-bottom">
+          <div class="local-indicator">
+            <span class="workspace-dot" aria-hidden="true"></span
+            ><span>Local workspace</span>
+          </div>
+          <p>Your configuration stays on this machine.</p>
+        </div>
+      </aside>
+      <main class="main-area" id="overview">
+        <header class="topbar">
+          <div class="breadcrumbs">
+            <span>Workspace</span><span class="crumb-slash">/</span
+            ><strong>Overview</strong>
+          </div>
+          <div class="top-actions">
+            <span class="connection-status"
+              ><span class="status-dot" id="service-dot"></span
+              ><span id="service-label">Connecting</span></span
+            ><button
+              class="avatar"
+              id="connection-open"
+              type="button"
+              aria-label="Connection settings"
+            >
+              W
+            </button>
+          </div>
+        </header>
+        <div class="content-wrap">
+          <section class="page-intro">
+            <div>
+              <div class="eyebrow">YOUR LOCAL CONTROL PLANE</div>
+              <h1>Good to see you.</h1>
+              <p>Bring your MCP servers together and keep them in reach.</p>
+            </div>
+            <div class="intro-actions">
+              <button
+                class="button button-secondary"
+                id="import-open"
+                type="button"
+              >
+                <span aria-hidden="true">↥</span> Import config</button
+              ><button
+                class="button button-primary"
+                id="add-server"
+                type="button"
+              >
+                <span aria-hidden="true">＋</span> Add server
+              </button>
+            </div>
+          </section>
+          <section class="stats-grid" aria-label="Workspace summary">
+            <article class="stat-card">
+              <div class="stat-label">CONNECTED SERVERS</div>
+              <div class="stat-value" id="stat-connected">—</div>
+              <div class="stat-note">
+                <span class="stat-icon teal-icon">⌘</span>Ready to serve tools
+              </div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-label">AVAILABLE TOOLS</div>
+              <div class="stat-value" id="stat-tools">—</div>
+              <div class="stat-note">
+                <span class="stat-icon">✳</span>Across your workspace
+              </div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-label">WORKSPACE STATUS</div>
+              <div class="stat-value status-value" id="stat-status">
+                Loading
+              </div>
+              <div class="stat-note" id="stat-subnote">
+                Local service connection
+              </div>
+            </article>
+          </section>
+          <section
+            class="notice"
+            id="notice"
+            role="status"
+            aria-live="polite"
+            hidden
+          >
+            <span class="notice-icon" aria-hidden="true">i</span
+            ><span id="notice-text"></span
+            ><button
+              type="button"
+              class="icon-button notice-close"
+              aria-label="Dismiss notice"
+              id="notice-close"
+            >
+              ×
+            </button>
+          </section>
+          <section class="section-heading" id="servers">
+            <div>
+              <div class="section-kicker">YOUR WORKSPACE</div>
+              <h2>
+                Servers <span class="heading-count" id="server-count">0</span>
+              </h2>
+            </div>
+            <button type="button" class="text-button" id="refresh-servers">
+              <span aria-hidden="true">↻</span> Refresh connections
+            </button>
+          </section>
+          <section id="server-list" class="server-list" aria-live="polite">
+            <div class="loading-card">
+              <span class="spinner" aria-hidden="true"></span
+              ><span>Loading your servers…</span>
+            </div>
+          </section>
+          <section class="bottom-card">
+            <div class="bottom-symbol" aria-hidden="true">↗</div>
+            <div>
+              <h3>Ready to connect your tools?</h3>
+              <p>
+                Use a client connection file to give your favorite agent access
+                to this workspace.
+              </p>
+            </div>
+            <button
+              type="button"
+              class="button button-secondary"
+              id="connection-open-bottom"
+            >
+              Set up a client <span aria-hidden="true">→</span>
+            </button>
+          </section>
+          <footer class="footer">
+            <span
+              >Weftly <span class="footer-sep">·</span> Private by design</span
+            ><span>Local workspace</span>
+          </footer>
+        </div>
+      </main>
+    </div>
+    <div id="modal-root"></div>
+  </body>
+</html>

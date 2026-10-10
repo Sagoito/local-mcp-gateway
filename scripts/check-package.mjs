@@ -9,7 +9,7 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 
@@ -19,6 +19,7 @@ if (!npmCli)
   throw new Error('Run package validation with npm run package:check');
 const temp = mkdtempSync(join(tmpdir(), 'local-mcp-package-'));
 const client = new Client({ name: 'package-validation', version: '1' });
+let service;
 function npm(args, cwd) {
   return execFileSync(process.execPath, [npmCli, ...args], {
     cwd,
@@ -44,7 +45,12 @@ try {
         ['README.md', 'SECURITY.md', 'LICENSE', 'docs/USAGE.md'].includes(
           path,
         ) ||
-        /^dist\/[A-Za-z0-9-]+\.(?:js|d\.ts)$/.test(path),
+        /^dist\/[A-Za-z0-9-]+\.(?:js|d\.ts)$/.test(path) ||
+        [
+          'dist/web/index.html',
+          'dist/web/app.js',
+          'dist/web/style.css',
+        ].includes(path),
       `Unexpected package file: ${path}`,
     );
   }
@@ -57,6 +63,12 @@ try {
     );
   const manifest = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
   assert.ok(paths.includes(manifest.bin['local-mcp']), 'Packed CLI must exist');
+  assert.ok(paths.includes(manifest.bin.weftly), 'Branded CLI must exist');
+  for (const asset of ['index.html', 'app.js', 'style.css'])
+    assert.ok(
+      paths.includes(`dist/web/${asset}`),
+      `Missing dashboard asset: ${asset}`,
+    );
   assert.ok(paths.includes('LICENSE'), 'License must ship with the package');
   writeFileSync(
     join(temp, 'package.json'),
@@ -73,7 +85,7 @@ try {
     ],
     temp,
   );
-  const cli = join(temp, 'node_modules', 'local-mcp-gateway', 'dist', 'cli.js');
+  const cli = join(temp, 'node_modules', manifest.name, 'dist', 'cli.js');
   const help = execFileSync(process.execPath, [cli, 'help'], {
     cwd: temp,
     encoding: 'utf8',
@@ -96,10 +108,49 @@ try {
     .map((tool) => tool.name)
     .sort();
   assert.deepEqual(names, ['execute', 'search']);
+  await client.close();
+  const { startWebService } = await import(
+    pathToFileURL(
+      join(temp, 'node_modules', manifest.name, 'dist', 'web-service.js'),
+    )
+  );
+  service = await startWebService({
+    configPath: join(temp, 'web-config.json'),
+    port: 0,
+    cliPath: cli,
+  });
+  for (const asset of ['/', '/app.js', '/style.css']) {
+    const response = await fetch(`${service.origin}${asset}`);
+    assert.equal(
+      response.status,
+      200,
+      `Installed dashboard asset failed: ${asset}`,
+    );
+    assert.ok((await response.text()).length > 0);
+  }
+  const admin = new URL(service.dashboardUrl).hash.slice('#token='.length);
+  const connection = await fetch(`${service.origin}/api/connection`, {
+    headers: { Authorization: `Bearer ${admin}` },
+  });
+  assert.equal(connection.status, 200);
+  const entry = Object.values((await connection.json()).entry.mcpServers)[0];
+  await client.connect(
+    new StdioClientTransport({
+      command: entry.command,
+      args: entry.args,
+      cwd: temp,
+      stderr: 'pipe',
+    }),
+  );
+  assert.deepEqual(
+    (await client.listTools()).tools.map((tool) => tool.name).sort(),
+    ['execute', 'search'],
+  );
   console.log(
-    `Package validated: ${paths.length} allowed files; isolated production install and stdio handshake passed.`,
+    `Package validated: ${paths.length} allowed files; isolated production install, dashboard assets, and legacy/bridge handshakes passed.`,
   );
 } finally {
   await client.close();
+  await service?.close();
   rmSync(temp, { recursive: true, force: true });
 }

@@ -43,6 +43,7 @@ switch (mode) {
       'src',
       'scripts',
       'examples',
+      'web',
     ]);
     break;
   case 'rules': {

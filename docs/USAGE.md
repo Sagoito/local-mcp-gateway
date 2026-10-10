@@ -1,6 +1,26 @@
 # Configuration and advanced usage
 
-Start with the [setup guide](../README.md). Commands below run from the installed gateway checkout. `--config` is optional; the default is `$LOCAL_MCP_CONFIG` or `~/.config/local-mcp/config.json`. New `setup`/`import` configurations disable JavaScript; examples using `code` require explicitly setting `security.allowCode:true`. Existing configurations retain their policy.
+Start with the [Weftly quickstart](../README.md). The current executable is `weftly`; the previous `local-mcp` command remains available as a legacy alias. Commands below also run as `node dist/cli.js ...` from the built repository checkout. `--config` is optional; the CLI default is `$WEFTLY_CONFIG`, then `$LOCAL_MCP_CONFIG`, then `~/.config/local-mcp/config.json`. New `web`/`setup`/`import` configurations disable JavaScript; examples using `code` require explicitly setting `security.allowCode:true`. Existing configurations retain their policy.
+
+## Manage a local workspace in the browser
+
+From a repository checkout, run the local control plane with Node.js 26.11.1 or later:
+
+```sh
+npm ci
+npm run build
+node dist/cli.js web
+```
+
+Open the dashboard URL printed by the command and leave the service running. The dashboard can add and edit stdio and HTTP servers, set tool allowlists, start supported OAuth sign-ins, import supported client configuration text, and explicitly refresh upstream connections to discover tools. Imports are reviewed before they are applied and do not rewrite the source file. The dashboard starts without connecting to configured upstreams; use **Refresh connections** when you want to check them.
+
+To connect an agent, choose **Set up a client** in the dashboard and copy the generated entry into that client's MCP configuration. The entry points to a private connection file and omits the administrator credential. The agent bridge uses the local service's MCP endpoint, so keep the service running for the full agent session. Stdio commands and local file paths are resolved on the machine running the service, under that user's OS permissions.
+
+The web service is single-user and binds to loopback. It is intended for local management, not remote hosting or multi-user access. The browser administrator session is distinct from the private MCP connection used by agents. Configuration and upstream credentials remain under the local service's control; read the [security model](../SECURITY.md) before adding privileged tools.
+
+## Continue with the CLI
+
+The existing `setup`, `import`, `client-config`, `add`, `remove`, `list`, `login`, `serve`, and `doctor` commands remain available for manual configuration and scripting. The sections below document those workflows and advanced gateway behavior.
 
 ## Connect upstream servers
 
@@ -23,6 +43,7 @@ node dist/cli.js --config ./config.json add issues --url https://mcp.example.tes
 ```
 
 Set `TOKEN` in the environment of the MCP client process that launches the gateway. Desktop clients do not necessarily inherit variables from an interactive shell. Keep secrets out of checked-in config files.
+In web mode, set these variables in the environment that launches `weftly web`; the agent bridge does not expand upstream credentials.
 
 OAuth login is an explicit command for an HTTP upstream. The gateway discovers whether the upstream requires OAuth during login, then opens a browser for authorization code with PKCE. `--oauth-client-id` can provide a pre-registered client ID when needed:
 
