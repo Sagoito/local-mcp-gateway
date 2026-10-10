@@ -349,10 +349,15 @@ await server.connect(new StdioServerTransport());
     const text =
       (response.content as Array<{ text?: string }>).find((c) => c.text)
         ?.text ?? '';
-    assert.deepEqual(JSON.parse(text), {
-      cwd: await realpath(dir),
-      token: value,
-    });
+    const reportedContext = JSON.parse(text) as {
+      cwd: string;
+      token: string;
+      [key: string]: unknown;
+    };
+    assert.deepEqual(
+      { ...reportedContext, cwd: await realpath(reportedContext.cwd) },
+      { cwd: await realpath(dir), token: value },
+    );
     assert.equal(await readFile(marker, 'utf8'), 'started');
   } finally {
     await client.close();

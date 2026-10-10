@@ -97,7 +97,10 @@ test('direct benchmark daemon supports arbitrary stdio aliases and isolates runs
       },
     });
 
-    await assert.rejects(bridge(runC, 'list'), /spawn|ENOENT|MCP connection/);
+    await assert.rejects(
+      bridge(runC, 'list'),
+      /spawn|ENOENT|MCP connection|MCP error -32000: Connection closed/,
+    );
     await writeConfig(runC, {
       recovered: { command: process.execPath, args: [fixture, 'builds'] },
     });
