@@ -1,0 +1,339 @@
+{
+  "createdAt": "2026-10-10T09:05:15.180Z",
+  "datasetSha256": "da9b96e52472638513c1005f176afbc098e9e0b6b2efe8068d765ee2eef6b203",
+  "compiledServerSha256": "3987637b6afa303d9a9bc62f8dd0f0bd68ff763e5fede9485a34c651f22a4193",
+  "tools": 44453,
+  "queries": 15,
+  "callsPerCondition": 30,
+  "selection": "five evenly spaced accepted queries per category; two repetitions with reversed condition order; no relevance labels inspected",
+  "scope": "cached upstream, in-memory SDK, no config file IO, refresh, execution, LLM or billing; diagnostic sample only",
+  "directSearchMs": {
+    "p50": 655.471206000002,
+    "p95": 1637.6366630000048,
+    "mean": 786.5787034000001
+  },
+  "sdkRoundTripMs": {
+    "p50": 623.5042109999995,
+    "p95": 1487.9045360000018,
+    "mean": 780.910045033333
+  },
+  "matched": {
+    "p50": 44453,
+    "p95": 44453,
+    "mean": 41503.8
+  },
+  "uniqueTopTenScores": {
+    "p50": 3,
+    "p95": 7,
+    "mean": 3.8
+  },
+  "memory": {
+    "rss": 366706688,
+    "heapTotal": 264097792,
+    "heapUsed": 129115392,
+    "external": 60741910,
+    "arrayBuffers": 40127094
+  },
+  "rows": [
+    {
+      "queryId": "craft_Math_algebra_query_172",
+      "querySha256": "a0ec0ef484d628f45d7c385d61633ede8d4fbb7a5a92bfe7574d3a82aed09ec4",
+      "category": "code",
+      "repetition": 0,
+      "directMs": 301.3766929999997,
+      "sdkMs": 304.75659399999995,
+      "matched": 38436,
+      "uniqueTopTenScores": 3
+    },
+    {
+      "queryId": "craft_Vqa_query_60",
+      "querySha256": "9aefc3a72234da82aa5bb174eaa0b92d8ee6e3cca9adbb71083e4db86c941a44",
+      "category": "code",
+      "repetition": 0,
+      "directMs": 382.19828199999984,
+      "sdkMs": 382.3748330000003,
+      "matched": 43779,
+      "uniqueTopTenScores": 3
+    },
+    {
+      "queryId": "gorilla_huggingface_query_199",
+      "querySha256": "1562764d06342564bcec9760392f51c31fdc465652e75304e78596b56f9bd5da",
+      "category": "code",
+      "repetition": 0,
+      "directMs": 894.6832980000004,
+      "sdkMs": 842.7582810000004,
+      "matched": 44453,
+      "uniqueTopTenScores": 4
+    },
+    {
+      "queryId": "gorilla_pytorch_query_38",
+      "querySha256": "51f9f6d5d777897081b529ba8b62d089bd4d1188ad32a38829197b66ea8a3532",
+      "category": "code",
+      "repetition": 0,
+      "directMs": 652.678868,
+      "sdkMs": 623.5042109999995,
+      "matched": 44453,
+      "uniqueTopTenScores": 3
+    },
+    {
+      "queryId": "toolink_query_308",
+      "querySha256": "6c0ac966492252941b9aa2cf99133196f15b8e331f877b4c8ffcf9dad744f27e",
+      "category": "code",
+      "repetition": 0,
+      "directMs": 613.6877030000005,
+      "sdkMs": 617.4494789999999,
+      "matched": 43725,
+      "uniqueTopTenScores": 3
+    },
+    {
+      "queryId": "metatool_which_query_23",
+      "querySha256": "08645614a7c981f91621395162d9f54b0afd5865e59d3b07f1e0bb849fe0b391",
+      "category": "customized",
+      "repetition": 0,
+      "directMs": 503.8316300000006,
+      "sdkMs": 519.0373280000003,
+      "matched": 44453,
+      "uniqueTopTenScores": 2
+    },
+    {
+      "queryId": "taskbench_huggingface_query_10",
+      "querySha256": "1995eb5ca1fab854ebad034e088f4bf736a13b79251012a617c513d9511b4755",
+      "category": "customized",
+      "repetition": 0,
+      "directMs": 608.5884719999995,
+      "sdkMs": 593.9815239999989,
+      "matched": 44453,
+      "uniqueTopTenScores": 2
+    },
+    {
+      "queryId": "tool_be_honest_query_157",
+      "querySha256": "b067fc08e4fd5993ced681b04df35910ac1cd3e408c01c31b75c984f2d716cab",
+      "category": "customized",
+      "repetition": 0,
+      "directMs": 1290.742545000001,
+      "sdkMs": 1230.5945609999999,
+      "matched": 44453,
+      "uniqueTopTenScores": 7
+    },
+    {
+      "queryId": "toolalpaca_query_15",
+      "querySha256": "891ce67486b31117f1b9f755c0590a2c53b9ce9c8aa0c1d5676fce28d8fb2d4a",
+      "category": "customized",
+      "repetition": 0,
+      "directMs": 539.749084000001,
+      "sdkMs": 583.6407770000005,
+      "matched": 44258,
+      "uniqueTopTenScores": 4
+    },
+    {
+      "queryId": "toolbench_sam_query_105",
+      "querySha256": "9713d4aef80e6506c75ca66f8ed54561dda29b26ffa6a9da7909d2c8347a44fc",
+      "category": "customized",
+      "repetition": 0,
+      "directMs": 192.85925999999927,
+      "sdkMs": 186.40960799999993,
+      "matched": 7829,
+      "uniqueTopTenScores": 3
+    },
+    {
+      "queryId": "apigen_query_398",
+      "querySha256": "3f443cca938c3a341680b41572ead77ca66b7d13c748dcb1115c7b76996110d7",
+      "category": "web",
+      "repetition": 0,
+      "directMs": 776.7732570000007,
+      "sdkMs": 809.3281239999997,
+      "matched": 44453,
+      "uniqueTopTenScores": 3
+    },
+    {
+      "queryId": "rotbench_query_5",
+      "querySha256": "20876a1b12abf4dca161341629227e346b989aa8fe0b1b58e40f78025d84c72a",
+      "category": "web",
+      "repetition": 0,
+      "directMs": 710.5290419999983,
+      "sdkMs": 838.6034239999972,
+      "matched": 44453,
+      "uniqueTopTenScores": 4
+    },
+    {
+      "queryId": "toolACE_query_452",
+      "querySha256": "1db0f97544038f2d2de61aaa542afd4d4d523594439c237e98001d2b2743fc6a",
+      "category": "web",
+      "repetition": 0,
+      "directMs": 1491.1763229999997,
+      "sdkMs": 1424.1377759999996,
+      "matched": 44453,
+      "uniqueTopTenScores": 6
+    },
+    {
+      "queryId": "toolbench_query_744",
+      "querySha256": "9ec402d006d428c4ff43d245334c6f2424bb049e8d23355af2a2f7200706165e",
+      "category": "web",
+      "repetition": 0,
+      "directMs": 1084.5329719999972,
+      "sdkMs": 1063.2468050000025,
+      "matched": 44453,
+      "uniqueTopTenScores": 5
+    },
+    {
+      "queryId": "toolLens_query_307",
+      "querySha256": "8440fb567fb5cad248d1a3f0bdd1d5c65129c27508d3a0413dc6d503e359c699",
+      "category": "web",
+      "repetition": 0,
+      "directMs": 1217.9985760000018,
+      "sdkMs": 1164.4076380000006,
+      "matched": 44453,
+      "uniqueTopTenScores": 5
+    },
+    {
+      "queryId": "craft_Math_algebra_query_172",
+      "querySha256": "a0ec0ef484d628f45d7c385d61633ede8d4fbb7a5a92bfe7574d3a82aed09ec4",
+      "category": "code",
+      "repetition": 1,
+      "directMs": 306.8341509999991,
+      "sdkMs": 317.8889999999992,
+      "matched": 38436,
+      "uniqueTopTenScores": 3
+    },
+    {
+      "queryId": "craft_Vqa_query_60",
+      "querySha256": "9aefc3a72234da82aa5bb174eaa0b92d8ee6e3cca9adbb71083e4db86c941a44",
+      "category": "code",
+      "repetition": 1,
+      "directMs": 379.1077030000015,
+      "sdkMs": 424.26761599999736,
+      "matched": 43779,
+      "uniqueTopTenScores": 3
+    },
+    {
+      "queryId": "gorilla_huggingface_query_199",
+      "querySha256": "1562764d06342564bcec9760392f51c31fdc465652e75304e78596b56f9bd5da",
+      "category": "code",
+      "repetition": 1,
+      "directMs": 810.6952549999987,
+      "sdkMs": 889.9173630000005,
+      "matched": 44453,
+      "uniqueTopTenScores": 4
+    },
+    {
+      "queryId": "gorilla_pytorch_query_38",
+      "querySha256": "51f9f6d5d777897081b529ba8b62d089bd4d1188ad32a38829197b66ea8a3532",
+      "category": "code",
+      "repetition": 1,
+      "directMs": 615.4351019999995,
+      "sdkMs": 610.2615880000012,
+      "matched": 44453,
+      "uniqueTopTenScores": 3
+    },
+    {
+      "queryId": "toolink_query_308",
+      "querySha256": "6c0ac966492252941b9aa2cf99133196f15b8e331f877b4c8ffcf9dad744f27e",
+      "category": "code",
+      "repetition": 1,
+      "directMs": 665.363347999999,
+      "sdkMs": 638.1844659999988,
+      "matched": 43725,
+      "uniqueTopTenScores": 3
+    },
+    {
+      "queryId": "metatool_which_query_23",
+      "querySha256": "08645614a7c981f91621395162d9f54b0afd5865e59d3b07f1e0bb849fe0b391",
+      "category": "customized",
+      "repetition": 1,
+      "directMs": 539.7315000000017,
+      "sdkMs": 491.8127600000007,
+      "matched": 44453,
+      "uniqueTopTenScores": 2
+    },
+    {
+      "queryId": "taskbench_huggingface_query_10",
+      "querySha256": "1995eb5ca1fab854ebad034e088f4bf736a13b79251012a617c513d9511b4755",
+      "category": "customized",
+      "repetition": 1,
+      "directMs": 655.471206000002,
+      "sdkMs": 584.4085899999991,
+      "matched": 44453,
+      "uniqueTopTenScores": 2
+    },
+    {
+      "queryId": "tool_be_honest_query_157",
+      "querySha256": "b067fc08e4fd5993ced681b04df35910ac1cd3e408c01c31b75c984f2d716cab",
+      "category": "customized",
+      "repetition": 1,
+      "directMs": 1401.0867359999975,
+      "sdkMs": 1371.302076,
+      "matched": 44453,
+      "uniqueTopTenScores": 7
+    },
+    {
+      "queryId": "toolalpaca_query_15",
+      "querySha256": "891ce67486b31117f1b9f755c0590a2c53b9ce9c8aa0c1d5676fce28d8fb2d4a",
+      "category": "customized",
+      "repetition": 1,
+      "directMs": 545.3045829999974,
+      "sdkMs": 505.31501600000047,
+      "matched": 44258,
+      "uniqueTopTenScores": 4
+    },
+    {
+      "queryId": "toolbench_sam_query_105",
+      "querySha256": "9713d4aef80e6506c75ca66f8ed54561dda29b26ffa6a9da7909d2c8347a44fc",
+      "category": "customized",
+      "repetition": 1,
+      "directMs": 186.6747680000044,
+      "sdkMs": 179.56511500000488,
+      "matched": 7829,
+      "uniqueTopTenScores": 3
+    },
+    {
+      "queryId": "apigen_query_398",
+      "querySha256": "3f443cca938c3a341680b41572ead77ca66b7d13c748dcb1115c7b76996110d7",
+      "category": "web",
+      "repetition": 1,
+      "directMs": 757.3022669999991,
+      "sdkMs": 762.3103119999942,
+      "matched": 44453,
+      "uniqueTopTenScores": 3
+    },
+    {
+      "queryId": "rotbench_query_5",
+      "querySha256": "20876a1b12abf4dca161341629227e346b989aa8fe0b1b58e40f78025d84c72a",
+      "category": "web",
+      "repetition": 1,
+      "directMs": 925.6358719999989,
+      "sdkMs": 1011.3017269999982,
+      "matched": 44453,
+      "uniqueTopTenScores": 4
+    },
+    {
+      "queryId": "toolACE_query_452",
+      "querySha256": "1db0f97544038f2d2de61aaa542afd4d4d523594439c237e98001d2b2743fc6a",
+      "category": "web",
+      "repetition": 1,
+      "directMs": 1637.6366630000048,
+      "sdkMs": 1616.427558999996,
+      "matched": 44453,
+      "uniqueTopTenScores": 6
+    },
+    {
+      "queryId": "toolbench_query_744",
+      "querySha256": "9ec402d006d428c4ff43d245334c6f2424bb049e8d23355af2a2f7200706165e",
+      "category": "web",
+      "repetition": 1,
+      "directMs": 1213.8883320000023,
+      "sdkMs": 1352.2026639999967,
+      "matched": 44453,
+      "uniqueTopTenScores": 5
+    },
+    {
+      "queryId": "toolLens_query_307",
+      "querySha256": "8440fb567fb5cad248d1a3f0bdd1d5c65129c27508d3a0413dc6d503e359c699",
+      "category": "web",
+      "repetition": 1,
+      "directMs": 1695.7876109999997,
+      "sdkMs": 1487.9045360000018,
+      "matched": 44453,
+      "uniqueTopTenScores": 5
+    }
+  ]
+}
