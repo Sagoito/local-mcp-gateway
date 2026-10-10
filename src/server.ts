@@ -93,7 +93,7 @@ const executeInput = z
       .object({
         server: z.string().min(1).max(100),
         tool: z.string().min(1).max(200),
-        args: z.record(z.unknown()).default({}),
+        args: z.record(z.string(), z.unknown()).default({}),
       })
       .strict()
       .optional(),

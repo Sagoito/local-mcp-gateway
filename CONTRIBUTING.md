@@ -23,4 +23,10 @@ For local security runs, install the pinned CLI versions used by CI: Semgrep 1.1
 
 These tools are only needed for security scans; no hooks or scanners are installed into the gateway runtime.
 
+## Dependency updates
+
+Dependabot groups minor and patch updates and opens major upgrades separately. Every update must pass the same quality and security checks as other changes; QuickJS and validation-library updates also exercise the sandbox and input-validation regression tests.
+
+Node.js type declarations track Node.js 22, the oldest supported runtime, so type checking does not silently allow newer APIs. TypeScript is kept on the latest supported 6.0 patch while `typescript-eslint` requires a version below 6.1. Dependabot excludes versions outside those compatibility ranges, not security or patch updates within them. Revisit both limits when runtime support or typed-lint compatibility changes.
+
 GitHub Actions also runs CodeQL's JavaScript and TypeScript `security-extended` query suite and dependency review on pull requests. Those checks report findings in GitHub and are not represented by the local `npm run check` command. Repository branch protection must be configured separately to make any workflow status a merge requirement.

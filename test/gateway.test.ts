@@ -799,6 +799,58 @@ test('structured calls avoid code, reject ambiguous requests and retain oversize
   }
 });
 
+test('structured call args default to an object and accept arbitrary JSON values', async () => {
+  const dispatched: unknown[] = [];
+  const client = await connected(
+    createGateway({
+      listTools: async () => [],
+      close: async () => {},
+      callTool: async (_server, _tool, args) => {
+        dispatched.push(args);
+        return { content: [{ type: 'text', text: 'ok' }] };
+      },
+    }),
+  );
+  try {
+    const defaultArgs = await client.callTool({
+      name: 'execute',
+      arguments: { call: { server: 's', tool: 'read' } },
+    });
+    assert.equal(defaultArgs.isError, undefined);
+
+    const args = {
+      text: 'value',
+      number: 42,
+      boolean: false,
+      nil: null,
+      array: [1, 'two', null],
+      object: { nested: true },
+    };
+    const arbitraryValues = await client.callTool({
+      name: 'execute',
+      arguments: { call: { server: 's', tool: 'read', args } },
+    });
+    assert.equal(arbitraryValues.isError, undefined);
+    assert.deepEqual(dispatched, [{}, args]);
+
+    const invalid = await client.callTool({
+      name: 'execute',
+      arguments: {
+        call: { server: 's', tool: 'read', args: ['not', 'a', 'record'] },
+      },
+    });
+    assert.equal(invalid.isError, true);
+    assert.match(textOf(invalid), /expected record/i);
+    assert.equal(
+      dispatched.length,
+      2,
+      'invalid args are rejected before dispatch',
+    );
+  } finally {
+    await client.close();
+  }
+});
+
 test('native tools preserve schemas, use conservative hints, route directly, and retain large responses', async () => {
   const tool: ToolEntry = {
     server: 'files',
