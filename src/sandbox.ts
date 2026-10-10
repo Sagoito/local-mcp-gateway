@@ -8,6 +8,9 @@ const DEFAULT_CALLS = 32;
 const DEFAULT_OUTPUT = 32 * 1024;
 const MAX_CODE = 64 * 1024;
 const MAX_RPC_RESULT = 8 * 1024 * 1024;
+// Reuse the expensive WASM module initialization while creating a new runtime and
+// context for every execution below. QuickJS state therefore remains isolated.
+const wasmModule = newQuickJSWASMModule();
 
 function bounded(value: number | undefined, fallback: number, min: number, max: number, name: string): number {
   if (value === undefined) return fallback;
@@ -31,7 +34,7 @@ export async function executeCode(code: string, upstreams: Upstreams, options: S
   const maxCalls = bounded(options.maxCalls, DEFAULT_CALLS, 1, 10_000, "maxCalls");
   const maxOutputBytes = bounded(options.maxOutputBytes, DEFAULT_OUTPUT, 1, 16 * 1024 * 1024, "maxOutputBytes");
   const deadline = Date.now() + timeoutMs;
-  const wasm = await newQuickJSWASMModule();
+  const wasm = await wasmModule;
   const runtime = wasm.newRuntime({ memoryLimitBytes: memoryBytes });
   const context = runtime.newContext();
   const abort = new AbortController();
@@ -115,11 +118,43 @@ export async function executeCode(code: string, upstreams: Upstreams, options: S
     delete globalThis.XMLHttpRequest; delete globalThis.WebSocket; delete globalThis.console;
     const __safeStringify = JSON.stringify.bind(JSON);
     const __safeCall = globalThis.__hostCall;
+    const text = result => {
+      if (result && result.isError === true) throw new Error('MCP tool returned an error result');
+      const blocks = result && Array.isArray(result.content) ? result.content : [];
+      const texts = blocks.filter(block => block && block.type === 'text' && typeof block.text === 'string');
+      if (texts.length === 0) throw new TypeError('MCP result contains no text content');
+      return texts.map(block => block.text).join('\\n');
+    };
+    const json = result => {
+      if (result && result.isError === true) throw new Error('MCP tool returned an error result');
+      const blocks = result && Array.isArray(result.content) ? result.content : [];
+      const texts = blocks.filter(block => block && block.type === 'text' && typeof block.text === 'string');
+      if (texts.length > 0) {
+        const source = texts.map(block => block.text).join('\\n');
+        try { return JSON.parse(source); }
+        catch (error) {
+          const detail = error && typeof error.message === 'string' ? error.message : String(error);
+          throw new TypeError('MCP text content is not valid JSON: ' + detail);
+        }
+      }
+      if (result && Object.prototype.hasOwnProperty.call(result, 'structuredContent')) return result.structuredContent;
+      throw new TypeError('MCP result has neither text content nor structuredContent');
+    };
+    const rows = value => {
+      if (Array.isArray(value)) return value;
+      const keys = value !== null && typeof value === 'object' ? Object.getOwnPropertyNames(value) : [];
+      const arrayKeys = keys.filter(key => Array.isArray(value[key]));
+      if (arrayKeys.length === 1) return value[arrayKeys[0]];
+      const reason = arrayKeys.length === 0
+        ? 'no array-valued property was found'
+        : 'multiple array-valued properties were found: ' + arrayKeys.join(', ');
+      throw new TypeError('mcp.rows expects an array or an object with exactly one array-valued property; ' + reason + '. Object keys: [' + keys.join(', ') + ']. Select an explicit array property.');
+    };
     const mcp = Object.freeze({call: (server, tool, args = {}) => {
       if (typeof server !== 'string' || typeof tool !== 'string' || !args || typeof args !== 'object' || Array.isArray(args))
         return Promise.reject(new TypeError('mcp.call expects server, tool, and object arguments'));
       return __safeCall(server, tool, __safeStringify(args));
-    }});
+    }, text, json, rows});
   `;
   try {
     const init = context.evalCode(prelude);

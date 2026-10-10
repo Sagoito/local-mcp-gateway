@@ -75,7 +75,7 @@ The gateway checks the config again before each request and applies changes on t
 
 ## Discover and execute tools
 
-`search` returns compact summaries first. Request a schema for an exact server/tool when you need argument details:
+`search` returns up to three matching tools with argument schemas by default, so discovery and schema lookup can share one round trip. Use `includeSchema:false` for compact summaries, or request an exact server/tool:
 
 ```json
 {"query":"issues","includeSchema":false}
@@ -133,7 +133,22 @@ return {
 
 The demo server is a fixture, not a real issue tracker or build service.
 
+### Result helpers
+
+`mcp.call` still returns the raw MCP result. Inside `execute`, `mcp.text(result)` joins text blocks, while `mcp.json(result)` parses text as JSON (or uses structuredContent when there is no text). Both reject upstream error results. `mcp.rows(value)` accepts an array, or extracts the only array-valued property of an object; ambiguous objects require an explicit property.
+
+```js
+const raw = await mcp.call("issues", "list_issues", { state: "open" });
+return mcp.rows(mcp.json(raw)).map(issue => ({ id: issue.id }));
+```
+
+These helpers do not execute text from upstream results. Use `Promise.all` for independent calls. Tool names returned by search are invoked inside `execute`, not as separate client-facing tools.
+
 ## Limits and security notes
+
+**This prototype is not an authorization boundary.** Generated code cannot directly access host filesystem or network APIs, but `mcp.call` can invoke any configured upstream tool, including destructive operations. The gateway does not enforce tool allowlists, argument policies, or per-operation approvals. Client approval of the outer `execute` call must not be mistaken for inspection/approval of every nested action. Prompt injection in upstream descriptions/results remains a risk, and read tools can still expose sensitive data. A compromised upstream stdio process also runs outside QuickJS with the gateway user's OS permissions.
+
+Before sensitive deployments, enforce permissions at each upstream, use narrowly scoped credentials, and add host-side tool/argument policies and trusted approval handling. QuickJS resource bounds reduce exposure but are not a claim of OS-level isolation or a security audit.
 
 - The gateway process runs locally, but configured upstream services and the model/client may be remote. No telemetry is sent by this project itself.
 - `execute` runs JavaScript in a QuickJS sandbox with no filesystem, network, imports, or console access. Defaults are 32 upstream calls, 32 MiB of JavaScript heap, a 15-second execution timeout (maximum 60 seconds), and 32 KiB of returned JSON. Each individual MCP response is limited to 8 MiB before the final result is assembled; the 32 KiB final output limit still applies. Individual upstream calls have a 30-second timeout. Cancellation on timeout is best effort and does not roll back side effects already performed upstream.
@@ -154,7 +169,7 @@ npm run build
 
 Validated with Node.js 24 on Linux. The automated suite covers CLI configuration and secret-reference preservation, real stdio MCP composition and config reload, sandbox time/memory/output limits and cleanup, and mocked SDK OAuth discovery, dynamic registration, PKCE code exchange and token refresh.
 
-In a synthetic catalog test, the two advertised gateway tool definitions serialize to 1,518 UTF-8 bytes with either 1 or 1,000 upstream tools. Another test filters over 100 KB of intermediate data to less than 100 bytes of final JSON. These are byte measurements, not model token counts or measured cost/latency savings.
+In a synthetic catalog test, the two advertised gateway tool definitions serialize to 1,998 UTF-8 bytes with either 1 or 1,000 upstream tools. Another test filters over 100 KB of intermediate data to less than 100 bytes of final JSON. These are byte measurements, not model token counts or measured cost/latency savings.
 
 Browser callback handling and real vendor OAuth interoperability have not been exercised end to end. Test your first authenticated upstream before relying on this prototype. No service credentials are included.
 
@@ -165,3 +180,5 @@ Browser callback handling and real vendor OAuth interoperability have not been e
 ## Agent benchmark
 
 [24-run Luna pilot](benchmark/results/local-luna/README.md): two official MCP servers, direct versus gateway. Initial tool-list bytes fell 88%; median answers were slower (19.83 s versus 7.85 s). Large-response filtering helped, but actual billed savings are unmeasured. Includes [test plan](benchmark/PLAN.md), [questions](benchmark/questions.json), harness and raw audit logs.
+
+[Latency follow-up](benchmark/results/latency-v2/README.md): another 24 runs after discovery/parsing changes. Gateway median was 18.33 s versus 19.83 s historically and 7.58 s for the current direct control; the latency gap remains. 26 tests pass.

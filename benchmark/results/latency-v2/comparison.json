@@ -1,0 +1,106 @@
+{
+  "warning": "Historical versus current hosted-agent timing is descriptive; consult contemporaneous direct controls and per-question results.",
+  "before": {
+    "direct": {
+      "totalRuns": 12,
+      "completeRuns": 12,
+      "missingRuns": 0,
+      "failedRuns": 0,
+      "passes": 10,
+      "passRateAmongComplete": 0.8333333333333334,
+      "medianAgentElapsedMs": 7849,
+      "medianCallRpcMs": 11,
+      "medianFinalPayloadTokenProxy": 4286.5,
+      "cumulativeInputTokenProxy": 871977,
+      "outputTokenProxy": 851,
+      "inputProxyCostAt1USDPerMTokens": 0.871977,
+      "outputProxyCostAt1USDPerMTokens": 0.000851
+    },
+    "gateway": {
+      "totalRuns": 12,
+      "completeRuns": 12,
+      "missingRuns": 0,
+      "failedRuns": 0,
+      "passes": 12,
+      "passRateAmongComplete": 1,
+      "medianAgentElapsedMs": 19827.5,
+      "medianCallRpcMs": 322,
+      "medianFinalPayloadTokenProxy": 3590,
+      "cumulativeInputTokenProxy": 220380,
+      "outputTokenProxy": 3003,
+      "inputProxyCostAt1USDPerMTokens": 0.22038,
+      "outputProxyCostAt1USDPerMTokens": 0.003003
+    }
+  },
+  "after": {
+    "direct": {
+      "totalRuns": 12,
+      "completeRuns": 12,
+      "missingRuns": 0,
+      "failedRuns": 0,
+      "passes": 11,
+      "passRateAmongComplete": 0.9166666666666666,
+      "medianAgentElapsedMs": 7575.5,
+      "medianCallRpcMs": 12,
+      "medianFinalPayloadTokenProxy": 4332,
+      "cumulativeInputTokenProxy": 999644,
+      "outputTokenProxy": 920,
+      "inputProxyCostAt1USDPerMTokens": 0.999644,
+      "outputProxyCostAt1USDPerMTokens": 0.00092
+    },
+    "gateway": {
+      "totalRuns": 12,
+      "completeRuns": 12,
+      "missingRuns": 0,
+      "failedRuns": 0,
+      "passes": 12,
+      "passRateAmongComplete": 1,
+      "medianAgentElapsedMs": 18333,
+      "medianCallRpcMs": 311.5,
+      "medianFinalPayloadTokenProxy": 3119.5,
+      "cumulativeInputTokenProxy": 207221,
+      "outputTokenProxy": 3003,
+      "inputProxyCostAt1USDPerMTokens": 0.207221,
+      "outputProxyCostAt1USDPerMTokens": 0.003003
+    }
+  },
+  "gatewayMedianChangePercent": -7.5375110326566634,
+  "questions": [
+    {
+      "question": "filesystem-memory-join",
+      "beforeGatewayMs": 27032.5,
+      "afterGatewayMs": 19914.5,
+      "currentDirectMs": 7575.5
+    },
+    {
+      "question": "large-filter-aggregation",
+      "beforeGatewayMs": 27712.5,
+      "afterGatewayMs": 31761.5,
+      "currentDirectMs": 20258.5
+    },
+    {
+      "question": "multi-hop-dependency-runbook",
+      "beforeGatewayMs": 22119,
+      "afterGatewayMs": 21282,
+      "currentDirectMs": 11118
+    },
+    {
+      "question": "parallel-small-reads",
+      "beforeGatewayMs": 7695,
+      "afterGatewayMs": 12507.5,
+      "currentDirectMs": 4954
+    },
+    {
+      "question": "small-direct-lookup",
+      "beforeGatewayMs": 8759.5,
+      "afterGatewayMs": 7041,
+      "currentDirectMs": 4692
+    },
+    {
+      "question": "unfamiliar-file-search",
+      "beforeGatewayMs": 17915,
+      "afterGatewayMs": 14406.5,
+      "currentDirectMs": 9423
+    }
+  ]
+}

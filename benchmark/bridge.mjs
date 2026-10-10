@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile, rename } from 'node:fs/promises';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 
@@ -22,7 +22,8 @@ try {
 const inbox = path.join(runsDir, 'inbox'); const outbox = path.join(runsDir, 'outbox');
 await mkdir(inbox, { recursive: true }); await mkdir(outbox, { recursive: true });
 const id = randomUUID(); const requestPath = path.join(inbox, `${id}.json`); const responsePath = path.join(outbox, `${id}.json`);
-await writeFile(requestPath, JSON.stringify({ id, runId, op, ...(name ? { name } : {}), ...(args ? { args } : {}), ...(answer !== undefined ? { answer } : {}) }), { mode: 0o600 });
+await writeFile(`${requestPath}.tmp`, JSON.stringify({ id, runId, op, ...(name ? { name } : {}), ...(args ? { args } : {}), ...(answer !== undefined ? { answer } : {}) }), { mode: 0o600 });
+await rename(`${requestPath}.tmp`, requestPath);
 const deadline = Date.now() + 120_000;
 while (Date.now() < deadline) {
   try {

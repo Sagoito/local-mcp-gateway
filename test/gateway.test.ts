@@ -33,7 +33,7 @@ test('catalog discovery stays bounded and only expands the exact requested schem
     assert.deepEqual(listed.tools.map(tool => tool.name).sort(), ['execute', 'search']);
     const oneToolCatalog = await searchCatalogResponseFor([tools[0]!]);
     assert.equal(JSON.stringify(listed.tools), JSON.stringify(oneToolCatalog.tools));
-    const compact = await client.callTool({ name: 'search', arguments: { query: 'tool_999' } });
+    const compact = await client.callTool({ name: 'search', arguments: { query: 'tool_999', includeSchema: false } });
     const compactText = textOf(compact);
     assert.equal(compact.isError, undefined);
     assert.equal(compactText.includes('inputSchema'), false);
@@ -44,6 +44,30 @@ test('catalog discovery stays bounded and only expands the exact requested schem
     // Diagnostic reports actual fixture sizes, not token estimates.
     const directCatalogBytes = Buffer.byteLength(JSON.stringify(searchCatalog(tools, { limit: 8 })));
     console.log(`gateway catalog fixture: 1000 upstream tools; gateway list ${listed.tools.length} tools / ${Buffer.byteLength(JSON.stringify(listed.tools))} B (same list size with 1 upstream tool); direct 8-result catalog JSON ${directCatalogBytes} B; compact result ${Buffer.byteLength(compactText)} B; exact schema ${Buffer.byteLength(exactText)} B`);
+  } finally { await client.close(); }
+});
+
+test('discovery defaults to three schemas and ranks capability terms above server aliases', async () => {
+  const tools: ToolEntry[] = [
+    { server: 'issues-api', name: 'list_open_issues', description: 'Find active issues', inputSchema: { type: 'object', properties: {} } },
+    { server: 'issues-api', name: 'search_issue_history', description: 'Search historical issue records', inputSchema: { type: 'object', properties: { phrase: { type: 'string' } } } },
+    { server: 'issues-api', name: 'search_issues_legacy', description: 'Deprecated issue search', inputSchema: { type: 'object', properties: { query: { type: 'string' } } } },
+    { server: 'builds', name: 'get_build', description: 'Retrieve build status', inputSchema: { type: 'object', properties: { id: { type: 'string' } } } },
+  ];
+  const ranked = searchCatalog(tools, { query: 'issues-api search' });
+  const rankedNames = (ranked.results as Array<{ name: string }>).map(item => item.name);
+  assert.deepEqual(rankedNames, ['search_issue_history', 'search_issues_legacy']);
+
+  const client = await connected(createGateway({ listTools: async () => tools, callTool: async () => ({}), close: async () => {} }));
+  try {
+    const defaults = await client.callTool({ name: 'search', arguments: {} });
+    const result = JSON.parse(textOf(defaults));
+    assert.equal(result.results.length, 3);
+    assert.ok(result.results.every((item: ToolEntry) => item.inputSchema));
+    const compact = await client.callTool({ name: 'search', arguments: { includeSchema: false, limit: 1 } });
+    const compactResult = JSON.parse(textOf(compact));
+    assert.equal(compactResult.results.length, 1);
+    assert.equal('inputSchema' in compactResult.results[0], false);
   } finally { await client.close(); }
 });
 

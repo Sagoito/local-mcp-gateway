@@ -19,6 +19,63 @@ test("bridges calls and supports parallel MCP calls", async () => {
   assert.deepEqual(got.sort(), ["one", "two"]);
 });
 
+test("keeps mcp.call raw and adds text and JSON result helpers", async () => {
+  const response = {
+    content: [
+      { type: "image", data: "ignored" },
+      { type: "text", text: "first" },
+      { type: "text", text: "second" },
+    ],
+    structuredContent: { source: "structured" },
+  };
+  const upstreams = mock(async () => response);
+  const out = await executeCode(`
+    const raw = await mcp.call('a', 'x');
+    return { raw, text: mcp.text(raw) };
+  `, upstreams);
+  assert.deepEqual(out, { raw: response, text: "first\nsecond" });
+
+  const parsed = await executeCode("return mcp.json(await mcp.call('a','x'));", mock(async () => ({
+    content: [{ type: "text", text: '{"answer":42}' }],
+    structuredContent: { answer: 0 },
+  })));
+  assert.deepEqual(parsed, { answer: 42 });
+
+  const structured = await executeCode("return mcp.json(await mcp.call('a','x'));", mock(async () => ({
+    content: [{ type: "image", data: "ignored" }],
+    structuredContent: { answer: 42 },
+  })));
+  assert.deepEqual(structured, { answer: 42 });
+});
+
+test("result helpers report tool errors, missing text, and malformed JSON clearly", async () => {
+  const errored = mock(async () => ({ isError: true, content: [{ type: "text", text: "failed" }] }));
+  await assert.rejects(executeCode("return mcp.text(await mcp.call('a','x'));", errored), /MCP tool returned an error result/i);
+  await assert.rejects(executeCode("return mcp.json(await mcp.call('a','x'));", errored), /MCP tool returned an error result/i);
+
+  const structuredOnly = mock(async () => ({ structuredContent: { ok: true } }));
+  await assert.rejects(executeCode("return mcp.text(await mcp.call('a','x'));", structuredOnly), /no text content/i);
+  await assert.rejects(executeCode("return mcp.json(await mcp.call('a','x'));", mock(async () => ({ content: [] }))), /neither text content nor structuredContent/i);
+
+  const malformed = mock(async () => ({
+    content: [{ type: "text", text: "{broken" }],
+    structuredContent: { fallback: true },
+  }));
+  await assert.rejects(executeCode("return mcp.json(await mcp.call('a','x'));", malformed), /MCP text content is not valid JSON:.*expecting property name/i);
+});
+
+test("mcp.rows accepts arrays and unambiguous array properties, and diagnoses ambiguous shapes", async () => {
+  const out = await executeCode(`
+    return [mcp.rows([1, 2]), mcp.rows({ records: [3] })];
+  `, mock());
+  assert.deepEqual(out, [[1, 2], [3]]);
+
+  await assert.rejects(executeCode("return mcp.rows({ left: [1], right: [2] });", mock()),
+    /multiple array-valued properties.*left, right.*Object keys: \[left, right\].*Select an explicit array property/i);
+  await assert.rejects(executeCode("return mcp.rows({ count: 2, label: 'x' });", mock()),
+    /no array-valued property.*Object keys: \[count, label\].*Select an explicit array property/i);
+});
+
 test("enforces timeout for loops and unresolved awaits", async () => {
   await assert.rejects(executeCode("while (true) {}", mock(), { timeoutMs: 100 }), /interrupt|timed out|timeout/i);
   await assert.rejects(executeCode("await new Promise(() => {}); return 1", mock(), { timeoutMs: 100 }), /timed out/i);
