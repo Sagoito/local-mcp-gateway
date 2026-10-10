@@ -204,7 +204,7 @@ npm run build
 
 ## Verification
 
-Validated with Node.js 24 on Linux. The automated suite covers CLI configuration and secret-reference preservation, real stdio MCP composition and config reload, host allowlist enforcement and policy revocation, disabled-code execution, cached/fresh discovery budgets and refresh identity, sandbox time/memory/argument/output limits and cleanup, and mocked SDK OAuth discovery, dynamic registration, PKCE code exchange and token refresh. A local HTTP test covers callback state validation and duplicate rejection.
+The automated suite runs in CI on Ubuntu with Node.js 26.11.1 (the minimum supported version) and the latest Node.js 26 release, and on Windows and macOS with the latest Node.js 26 release. It covers CLI configuration and secret-reference preservation, real stdio MCP composition and config reload, host allowlist enforcement and policy revocation, disabled-code execution, cached/fresh discovery budgets and refresh identity, sandbox time/memory/argument/output limits and cleanup, and mocked SDK OAuth discovery, dynamic registration, PKCE code exchange and token refresh. A local HTTP test covers callback state validation and duplicate rejection.
 
 In a synthetic catalog test, the two advertised gateway tool definitions remain small without inline signatures; the optional inline catalogue adds at most 4,096 UTF-8 bytes before JSON escaping. Another test filters over 100 KB of intermediate data to less than 100 bytes of final JSON. These are byte measurements, not model token counts or measured cost/latency savings.
 
