@@ -72,6 +72,7 @@
   const showModal = (title, subtitle, content, opts = {}) => {
     modalReturnFocus = document.activeElement;
     root.replaceChildren();
+    $('workspace').inert = true;
     const backdrop = el('div', 'modal-backdrop');
     const dialog = el('section', `dialog${opts.wide ? ' wide' : ''}`);
     dialog.setAttribute('role', 'dialog');
@@ -134,7 +135,10 @@
     if (loginTimer) clearTimeout(loginTimer);
     loginTimer = null;
     root.replaceChildren();
-    if (modalReturnFocus?.focus) modalReturnFocus.focus();
+    $('workspace').inert = false;
+    if (modalReturnFocus?.isConnected && modalReturnFocus?.focus)
+      modalReturnFocus.focus();
+    else $('add-server').focus();
   }
   const field = (labelText, input, hint, full = false) => {
     const wrap = el('div', `field${full ? ' full' : ''}`);
@@ -652,14 +656,14 @@
     const security = state?.config?.security || {};
     const allowCode = checkbox(
       'allow-code',
-      'Allow code execution tools',
+      'Allow JavaScript composition',
       security.allowCode === true,
     );
     const content = el('div');
     const intro = el(
       'p',
       '',
-      'Code execution is disabled by default. Enabling it allows eligible tools to execute code within the configured gateway limits.',
+      'Allow agents to compose tool calls with JavaScript in the gateway sandbox. Structured calls work with this setting off.',
     );
     intro.className = 'form-help';
     const notice = el(
@@ -1021,55 +1025,124 @@
   };
   const renderState = () => {
     const servers = state?.servers || [];
-    $('nav-count').textContent = String(servers.length);
-    $('server-count').textContent = String(servers.length);
-    const connected = servers.filter((s) => s.state === 'ready').length;
-    $('stat-connected').textContent = String(connected);
-    const tools = servers.reduce(
-      (sum, s) =>
-        sum +
-        (s.state === 'ready' && Number.isFinite(s.toolCount) ? s.toolCount : 0),
-      0,
+    const query = $('server-filter').value.trim().toLocaleLowerCase();
+    const filtered = servers.filter((server) =>
+      [server.name, server.url, server.command, server.transport].some(
+        (value) =>
+          typeof value === 'string' &&
+          value.toLocaleLowerCase().includes(query),
+      ),
     );
-    $('stat-tools').textContent = String(tools);
-    const errors = servers.filter((s) => s.state === 'error').length;
+    $('nav-count').textContent = String(servers.length);
+    $('filter-summary').textContent =
+      `${filtered.length} of ${servers.length} connections${query ? ' match your search' : ''}.`;
+    $('server-count').textContent = query
+      ? `${filtered.length} / ${servers.length}`
+      : String(servers.length);
+    const connected = servers.filter(
+      (server) => server.state === 'ready',
+    ).length;
+    const unchecked = servers.some(
+      (server) =>
+        !server.disabled && (!server.state || server.state === 'notchecked'),
+    );
+    $('stat-connected').textContent = String(connected);
+    $('stat-tools').textContent = String(
+      servers.reduce(
+        (sum, server) =>
+          sum +
+          (server.state === 'ready' && Number.isFinite(server.toolCount)
+            ? server.toolCount
+            : 0),
+        0,
+      ),
+    );
+    const errors = servers.filter((server) => server.state === 'error').length;
     $('stat-status').textContent = errors
       ? `${errors} issue${errors === 1 ? '' : 's'}`
-      : 'Ready';
+      : unchecked
+        ? 'Not checked'
+        : connected
+          ? 'Ready'
+          : servers.length
+            ? 'Paused'
+            : 'No servers';
     $('stat-status').classList.toggle('warning-text', !!errors);
     $('stat-subnote').textContent = errors
-      ? 'Check affected connections'
-      : connected || servers.length === 0
-        ? 'Local service connection'
-        : 'Refresh connections to check upstreams';
+      ? 'Review affected connections'
+      : unchecked
+        ? 'Refresh to discover available tools'
+        : connected
+          ? 'Upstreams available'
+          : servers.length
+            ? 'Enable a server to connect'
+            : 'Add or import your first connection';
     const list = $('server-list');
     list.replaceChildren();
-    if (!servers.length) {
+    if (!filtered.length) {
       const empty = el('div', 'empty-card');
       empty.append(
-        el('div', 'empty-graphic', '⌘'),
-        el('h3', '', 'Your workspace is ready for its first server'),
+        el(
+          'div',
+          'empty-index',
+          servers.length ? 'DIRECTORY / NO MATCHES' : 'DIRECTORY / EMPTY',
+        ),
+        el(
+          'h3',
+          '',
+          servers.length
+            ? 'No matching connections.'
+            : 'Start with one connection.',
+        ),
         el(
           'p',
           '',
-          'Add an MCP server or import a supported configuration to bring your tools together.',
-        ),
-        button('Add your first server', 'button button-primary', () =>
-          openServerEditor(),
+          servers.length
+            ? 'Search by server name, command, endpoint, or transport.'
+            : 'Import the MCP config you already use, or add a server by hand.',
         ),
       );
+      const actions = el('div', 'empty-actions');
+      if (servers.length)
+        actions.append(
+          button('Clear search', 'button button-secondary', () => {
+            $('server-filter').value = '';
+            renderState();
+            $('server-filter').focus();
+          }),
+        );
+      else
+        actions.append(
+          button('Import config', 'button button-ink', openImport),
+          button('Add server', 'button button-secondary', () =>
+            openServerEditor(),
+          ),
+        );
+      empty.append(actions);
       list.append(empty);
       return;
     }
-    for (const server of servers) {
+    for (const server of filtered) {
       const card = el('article', 'server-card');
-      const identity = el('div', 'server-identity');
-      identity.append(
-        el('div', 'server-symbol', server.transport === 'http' ? '↔' : '⌘'),
+      card.setAttribute('aria-label', server.name);
+      const index = el(
+        'span',
+        'server-number',
+        String(servers.indexOf(server) + 1).padStart(2, '0'),
       );
-      const nameBox = el('div');
-      nameBox.append(
-        el('div', 'server-name', server.name),
+      index.setAttribute('aria-hidden', 'true');
+      const identity = el('div', 'server-identity');
+      const nameLine = el('div', 'server-name-line');
+      nameLine.append(
+        el('span', 'server-name', server.name),
+        el(
+          'span',
+          'transport-tag',
+          server.transport === 'http' ? 'HTTP' : 'STDIO',
+        ),
+      );
+      identity.append(
+        nameLine,
         el(
           'div',
           'server-subtitle',
@@ -1078,58 +1151,65 @@
             : server.command || 'Command server',
         ),
       );
-      identity.append(nameBox);
+      if (server.error)
+        identity.append(el('div', 'server-error', server.error));
       const metrics = el('div', 'server-metrics');
       const stateLabel =
-        server.state === 'ready'
-          ? 'Connected'
-          : server.state === 'error'
-            ? 'Issue'
-            : server.state === 'disabled' || server.disabled
-              ? 'Disabled'
-              : 'Not refreshed';
+        server.disabled || server.state === 'disabled'
+          ? 'Disabled'
+          : server.state === 'ready'
+            ? 'Connected'
+            : server.state === 'error'
+              ? 'Needs attention'
+              : 'Not checked';
       const status = el(
         'span',
-        `server-state${server.state !== 'ready' ? ' disabled' : ''}`,
+        `server-state${server.state === 'error' ? ' issue' : server.state !== 'ready' ? ' disabled' : ''}`,
       );
-      status.append(el('span', 'status-dot'), el('span', '', stateLabel));
-      metrics.append(
-        status,
-        el(
-          'span',
-          '',
-          server.state === 'ready' && Number.isFinite(server.toolCount)
-            ? `${server.toolCount} tools`
-            : 'Tools not refreshed',
-        ),
-      );
-      if (server.transport === 'http' && server.oauth !== false)
-        metrics.append(el('span', '', 'OAuth'));
+      const dot = el('span', 'status-dot');
+      dot.setAttribute('aria-hidden', 'true');
+      status.append(dot, el('span', '', stateLabel));
+      metrics.append(status);
       if (server.hasPrivateUrlParts)
-        metrics.append(el('span', '', 'Private URL parts saved'));
-      if (server.error) metrics.append(el('span', '', server.error));
+        metrics.append(el('span', 'server-detail', 'Private URL saved'));
+      const tools = el(
+        'span',
+        'server-tools',
+        server.state === 'ready' && Number.isFinite(server.toolCount)
+          ? String(server.toolCount)
+          : '—',
+      );
+      tools.setAttribute(
+        'aria-label',
+        server.state === 'ready' && Number.isFinite(server.toolCount)
+          ? `${server.toolCount} available tools`
+          : 'Tool count unavailable',
+      );
       const actions = el('div', 'server-actions');
       if (server.transport === 'http' && server.oauth !== false)
         actions.append(
-          button('↗', 'icon-button', () => runLogin(server), 'Sign in'),
+          button(
+            'Sign in',
+            'row-action',
+            () => runLogin(server),
+            `Sign in to ${server.name}`,
+          ),
         );
       actions.append(
         button(
-          '✎',
-          'icon-button',
+          'Edit',
+          'row-action',
           () => openServerEditor(server),
-          'Edit server',
+          `Edit ${server.name}`,
         ),
-      );
-      actions.append(
         button(
-          '⌫',
-          'icon-button danger',
+          'Remove',
+          'row-action danger',
           () => confirmRemove(server),
-          'Remove server',
+          `Remove ${server.name}`,
         ),
       );
-      card.append(identity, metrics, actions);
+      card.append(index, identity, metrics, tools, actions);
       list.append(card);
     }
   };
@@ -1152,9 +1232,29 @@
       setConnected(false);
     } finally {
       b.disabled = false;
-      b.replaceChildren(document.createTextNode('↻ Refresh connections'));
+      b.replaceChildren(document.createTextNode('Refresh'));
     }
   };
+  $('server-filter').addEventListener('input', renderState);
+  window.addEventListener('keydown', (event) => {
+    if (
+      event.key !== '/' ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.altKey ||
+      root.childElementCount ||
+      !state
+    )
+      return;
+    const target = event.target;
+    if (
+      target instanceof Element &&
+      target.closest('input, textarea, select, [contenteditable]')
+    )
+      return;
+    event.preventDefault();
+    $('server-filter').focus();
+  });
   $('notice-close').addEventListener('click', () => setNotice(''));
   $('add-server').addEventListener('click', () => openServerEditor());
   $('import-open').addEventListener('click', openImport);
@@ -1163,8 +1263,7 @@
   $('connection-open').addEventListener('click', () => openConnection());
   $('connection-open-bottom').addEventListener('click', () => openConnection());
   window.addEventListener('hashchange', () => {
-    if (location.hash === '#servers')
-      $('servers').scrollIntoView({ behavior: 'smooth' });
+    if (location.hash === '#servers') $('servers').scrollIntoView();
   });
   const fragment = new URLSearchParams(location.hash.slice(1));
   const fragmentToken = fragment.get('token');
