@@ -1,31 +1,32 @@
 # Local search and gateway improvement plan
 
-Research and diagnostic completed 2026-10-10. This document proposes work; the production gateway and frozen public-v9 rankings remain unchanged.
+Research, stage 1 implementation, and the public-v10 retrieval audit completed 2026-10-10. Stage 1 is the first product improvement release. The benchmark is evidence about product retrieval, not an objective to tune rankings against.
 
 ## Decision
 
-Keep TypeScript/Node and the small `search`/`execute` interface. Replace per-query substring scanning with a versioned, local BM25 index. Fix catalogue refresh and request scheduling next. Evaluate an optional small local embedding model only after the lexical path meets its quality and latency gates. An LLM call for every search would add another inference round trip, conflicting with the latency objective.
+Keep TypeScript/Node and the small `search`/`execute` interface. Stage 1 replaces per-query substring scanning with a reusable local BM25 index and lifts the query limit to 8,192 code units. It includes server aliases because users may search by configured connector name. Refresh scheduling is the next product concern; embeddings remain a later optional experiment after operational behavior is measured.
 
-The measured baseline already demonstrates that a conventional local retriever can do much better than the current scorer. It does not demonstrate that a language rewrite, vector database, larger model, or new sandbox is needed.
+The first release improves retrieval without a language rewrite, vector database, larger model, or new sandbox. The ToolRet public benchmark measures this product change; it is not used to introduce benchmark-specific aliases, synonyms, or tuning.
 
 ## Evidence and current limitations
 
-The full public ToolRet run has 44,453 tools and 7,961 queries. Its independently audited nDCG@10 is **0.063799 gateway versus 0.296189 fixed BM25**; Hit@10 is **0.121593 versus 0.479337**. All 360 gateway errors come from its 500 UTF-16-code-unit query limit. On the same accepted 7,601 queries, nDCG@10 remains **0.066821 versus 0.297273**. Raising the limit alone will not close the gap. The longest original query is 4,354 code units; an 8,192 limit accommodates the full current suite without truncation.
+The public-v10 run has 44,453 tools and 7,961 queries. Independent audit reports product nDCG@10 **0.295644** and frozen reference nDCG@10 **0.296189**, with zero errors in both. The product index indexes configured server alias, capability name, and full description; the frozen reference indexes only name and description. Server aliases remain in the product index for connector-name queries; the benchmark run did not isolate their exact effect from other ranking details. The 95% paired query-bootstrap interval for product minus reference is [-0.000887, -0.000234]. All 360 queries over the previous 500-character limit were accepted with the new 8,192-character limit. This is a retrieval benchmark and makes no answer-quality or cost claim.
 
-The original first-1,000-query sequential prefix measured gateway SDK p50/p95 **456.6/786.7 ms**, versus BM25 ranking-only **56.4/86.8 ms**. These cover different work and are not model-answer latency.
+Public-v10 local in-memory SDK latency after ten warmups (then measuring all 7,961 queries, including the ten again) is p50 **2.44 ms**, p95 **6.70 ms**, max **44.56 ms**; first cold search including index construction was **916 ms**. In a separate same-SDK paired sample of 90 seeded queries (30/category, <=500 UTF-16 units, two balanced-order repetitions; 180 paired observations / 360 individual SDK search calls), old gateway p50/p95 were **417.88/834.70 ms** and indexed gateway **2.59/4.92 ms**, with zero errors. Median paired old/new ratio was **177.94×**; ratio of p50s was 161.4×. The mean paired ratio was **191.02×** (query-bootstrap 95% interval **177.84×–205.06×**). This interval reflects query sampling only; the sample is not source-stratified and excludes model/provider, network, and upstream work. First cold search was slower with indexing (**883.6 ms** vs **693.5 ms**). Peak RSS was **631 MiB**, process-wide and including the gateway, index, SDK, and benchmark data. Separate fresh-process index-only measurements report 5,000-tool build **116.5 ms** and retained heap/RSS deltas **12.0/14.3 MiB**, and 44,453-tool build **939.1 ms** with **92.2/220.4 MiB** retained heap/RSS deltas. These direct index calls do not establish 5,000-tool SDK latency. Production discovery remains capped at 5,000 tools, so the 44,453-tool fixture does not establish live discovery capacity. The run passed 65 product tests and six metric checks. See [public-v10 report](../benchmark/results/public-v10/README.md).
 
-A new diagnostic selects five accepted queries spread across each of three categories, runs each twice with reversed direct/SDK order, and verifies identical results. Median direct `searchCatalog` is **655.5 ms**, versus SDK round-trip **623.5 ms**; means are **786.6/780.9 ms**. The small sample and timing noise do not justify subtracting these values to estimate RPC overhead. They do show that direct ranking itself is expensive. Median candidate count is **44,453**, and the top ten have a median of only **three distinct scores**. Selection uses no relevance labels. Raw measurements are in `benchmark/results/public-v9/search-diagnostic.json`; the reusable runner is `benchmark/search-diagnostic.mjs`.
+The public-v9 prefix measurement is historical evidence only: it mixed gateway SDK round trips and BM25 ranking-only timings and is not comparable to the public-v10 post-index SDK latency.
+
+A pre-index v9 diagnostic found expensive direct ranking and many score ties. It is retained as historical context, not as a performance comparison for v10. The v10 report records full-suite, paired old/new SDK, cold-index, and isolated index-memory measurements.
 
 Code inspection identifies these mechanisms:
 
 | Location | Current mechanism | Consequence |
 |---|---|---|
-| `src/server.ts:searchCatalog` | Rebuilds server terms, normalizes names, lowercases full descriptions, scans each term, then sorts all matches | Repeated work proportional to catalogue size and documentation bytes |
-| Same scorer | Boolean substring scores, fixed name boost, no document-frequency weighting | Common words can match almost everything; a short term can match inside another word; many ties fall back to alphabetical order |
-| Same scorer | Removes query tokens matching any server alias and penalizes any documentation containing “deprecated” | Potentially useful connector terms disappear; incidental text can cause demotion |
+| `src/server.ts:searchCatalog` | Reuses an indexed BM25 search object per immutable catalogue array | Search avoids rebuilding terms and scanning/sorting every catalogue entry on each request |
+| `src/search.ts` | Lowercase `[a-z0-9]+` tokens; BM25 over configured server alias, capability name, and full description; deterministic tie order; bounded top-k | Connector aliases remain searchable; explicit server/tool fields perform exact filtering |
 | `src/server.ts:run` | One promise queue for search, direct calls, retained queries, and code | A slow request blocks independent operations; this is code evidence, not yet a measured contribution to agent latency |
 | `src/server.ts:serve` | Reads/parses configuration before every call | Avoidable warm-call IO; reload currently closes all upstreams |
-| `src/upstreams.ts:listTools` | Reaggregates/sorts tools every request; 30-second expiry can trigger blocking rediscovery | Freshness work lies on the request path; unavailable upstreams can amplify tails |
+| `src/upstreams.ts:listTools` | Reuses sorted aggregate array while per-server snapshot references and error state stay unchanged; refresh remains request-triggered after 30-second cache expiry | Repeated sorting is removed; cold/expired discovery can still block a request |
 
 Public-v9 supplies a cached synthetic catalogue and bypasses production upstream discovery. Production discovery currently limits newly discovered tools to 5,000. The 44,453-tool fixture therefore does not establish live discovery capacity or measure OAuth, expiry, config IO, startup, or real stdio overhead. These need separate operational tests.
 
@@ -40,19 +41,19 @@ Public-v9 supplies a cached synthetic catalogue and bypasses production upstream
 
 ## Implementation sequence
 
-### 1. Indexed BM25 and a versioned catalogue
+### 1. Stage 1 delivered: indexed BM25 and a stable catalogue snapshot
 
-Add a `SearchIndex` owned by an immutable catalogue generation, not by each `search` invocation. Build once after discovery and rebuild only when tool names, descriptions, schemas, enabled servers, or access scope change. Explicit server/tool lookup uses a map. Preserve original execution names and schemas; search normalization must never rename an upstream invocation.
+The product now holds a `SearchIndex` per immutable catalogue-array snapshot and reuses it across searches. Upstreams preserve the array identity while tool references and error state remain unchanged, replacing the snapshot when they change. Exact server/tool filters remain available. Search never changes upstream execution names or returned schemas.
 
-Start with the exact frozen reference formula: k1=1.2, b=0.75, log(1+(N-df+0.5)/(df+0.5)), name plus full description, existing ASCII tokenization. This isolates the algorithm change. Store postings, document lengths and inverse document frequencies once. Use numeric document IDs, reusable score storage, and a bounded top-k heap rather than sorting every candidate. Precompute deterministic tie order. Keep double precision initially and verify optimized rankings against the simple reference. Do not return arbitrary zero-score matches as useful discoveries.
+The local BM25 formula is k1=1.2, b=0.75 and log(1+(N-df+0.5)/(df+0.5)), with lowercase ASCII alphanumeric tokenization. Product documents include server alias + capability name + full description. The implementation stores postings and document lengths, uses numeric IDs/reusable score arrays, and selects a bounded top-k with deterministic ties. It only returns positive lexical matches for nonempty queries. Empty queries return the stable catalogue order.
 
-Recommendation: implement this bounded index in TypeScript, using the existing tested reference as the specification. Compare memory/build/query performance before choosing a dependency. MiniSearch is an alternative if it materially simplifies maintenance; SQLite FTS5 is the fallback if a large in-memory index exceeds the memory budget. Either substitution is a distinct ranking experiment and requires its own audit. No database service is required.
+The public-v10 audit uses benchmark queries to measure the product index, not tune it to reproduce the frozen name+description reference. The alias-bearing product index scores 0.295644 nDCG@10 versus 0.296189 for that reference; the user-searchable alias is retained. No database service or embedding dependency is required.
 
-Raise the validated query limit to 8,192 code units in both Zod and the exposed JSON Schema. Preserve a request byte cap, cancellation, and a bounded processing budget; return explicit errors when exceeded. Never silently truncate queries or benchmark inputs. Keep the 24 KiB discovery response ceiling and fixed small tool-definition budgets.
+The validated search-query limit is 8,192 code units in both Zod and the exposed JSON Schema. Queries are rejected rather than truncated when over limit. The 24 KiB discovery response ceiling and fixed small tool-definition budgets remain in place.
 
-Suggested files: new `src/search.ts`, integration in `src/server.ts`, catalogue generations in `src/upstreams.ts`, `test/search.test.ts`, and a separate `public-v10` run. No edits to public-v9 inputs/rankings.
+Validation: 65 product tests and six metric checks passed. Public-v10 covers 44,453 fixture tools, but runtime discovery still caps at 5,000. It does not cover upstream IO, OAuth, TTL expiry, concurrent traffic, end-to-end answer quality, or billing. The local in-memory SDK measurements and cold index build are in the [public-v10 report](../benchmark/results/public-v10/README.md).
 
-### 2. Refresh and scheduling
+### 2. Next: refresh and scheduling
 
 Keep a catalogue snapshot on the warm request path. Rediscover asynchronously on notifications/expiry, deduplicate refreshes, validate a replacement, then atomically install a new generation/index. Failed refreshes mark availability explicitly. Removed/disabled servers or revoked credentials disappear immediately from searchable and executable state; stale snapshots cannot preserve authorization. Preserve valid connections to unchanged upstreams.
 
@@ -78,15 +79,15 @@ Keep existing deterministic direct-call and retained-result filtering paths. Eva
 
 Offer a configuration mode that disables `execute.code` while retaining typed calls/data filtering. If code is enabled, preserve fresh QuickJS state, memory/time/call/output caps and capability-scoped calls. Never replace the sandbox with host `eval`/`new Function`, unrestricted imports, or a shared guest context as a latency shortcut. The currently reused WASM module already avoids repeated module initialization. Tool permissions must apply to both direct and guest calls; sandbox isolation alone does not authorize upstream side effects.
 
-## Success gates: targets, not measured promises
+## Operational follow-up: targets, not measured promises
 
 Pin hardware, Node version, corpus, scripts and query order. Warm latency means a ready catalogue/index and model, but an empty query-result cache. Report build/startup/refresh separately.
 
 | Gate | Initial acceptance target |
 |---|---|
-| Stage 1 retrieval | Full-suite gateway nDCG@10 at least 0.29, approaching the measured 0.2962 BM25 reference; no unexplained precision/recall losses |
-| Query acceptance | All 7,961 original public queries accepted within the new cap; zero infrastructure/tool-search errors |
-| Lexical warm SDK, up to 5,000 tools | p50 ≤20 ms, p95 ≤50 ms on the designated CPU |
+| Stage 1 retrieval | **Measured:** full public suite product nDCG@10 0.295644, zero errors; frozen reference 0.296189. This is a product-usefulness measurement, not a ranking target |
+| Query acceptance | **Measured:** all 7,961 original queries accepted; zero search errors |
+| Lexical warm SDK, up to 5,000 tools | p50 ≤20 ms, p95 ≤50 ms on the designated CPU; not yet verified (the available 5,000-tool measurements are direct index calls, not SDK calls) |
 | Lexical warm SDK, 44,453-tool fixture | p50 ≤50 ms, p95 ≤100 ms; report genuine worst cases and term/posting counts |
 | Catalogue lifecycle | Add/remove/revoke reflected correctly; warm execution not blocked by unrelated discovery; no stale-permission calls |
 | Memory | Initial lexical goal ≤512 MiB RSS at 44,453 tools; separately measure peak rebuild and optional model memory |
@@ -94,7 +95,7 @@ Pin hardware, Node version, corpus, scripts and query order. Warm latency means 
 | Context | Default still two tools; native profile still bounded to five additional tools and its existing definition budget; report schema/result tokens and actual usage separately |
 | Small-result execution | Proposed warm gateway-added p50 ≤5 ms and p95 ≤15 ms versus the same direct upstream; verify over real stdio, not just in-memory transport |
 
-These targets are engineering goals. The existing 56 ms BM25 median has not demonstrated the tighter goals; postings/top-k optimization must be measured. Hybrid inference, runtime memory and speed on Windows/macOS/Linux remain unknown. A faster discovery call cannot guarantee a faster final answer.
+Remaining targets are engineering goals. The v10 full-suite process-wide peak RSS is 631 MiB including benchmark data, above the initial 512 MiB target and not an isolated index measurement; the isolated 44,453-tool index retained 92.2 MiB heap after GC, with allocator-sensitive RSS delta of 220.4 MiB. The first cold SDK search is 916 ms; optimize or move index construction only after an operational startup/expiry study. Hybrid inference and runtime behavior on Windows/macOS/Linux remain unmeasured. Faster local search does not guarantee a faster final answer.
 
 ## Validation and release policy
 
@@ -103,7 +104,7 @@ These targets are engineering goals. The existing 56 ms BM25 median has not demo
 3. For latency, use a prespecified randomized, category/source-stratified query sample with repeated matched runs. Include long/common-term queries, cache misses, 1/4/8 concurrent clients, startup, expiry and refresh storms. Run one full-corpus evaluator at a time within 8 GiB; the previous eight-worker OOM must not recur. Measure current 2/8/16/32-process configurations separately from distinct-implementation coverage.
 4. Treat ToolRet as a public development benchmark once repeatedly used for optimization. Do not claim a fresh unseen test after tuning on it. Select field weights/models using separate development data, then freeze and evaluate previously unused ToolBench/MetaTool and connector-held-out operational tasks. No benchmark qrels or prompts in synthetic training, synonyms, summaries or native selections. Record known training/evaluation overlap and all tried configurations.
 5. Native MCP-Atlas/end-to-end evaluation still needs a usable sandbox and native model/judge endpoint. Compare direct tools, client deferred tools where supported, lexical gateway and optional hybrid using the same model, budgets, permissions, tasks and original tool whitelists. At least three repetitions; retain wrong answers. Prespecify a five-percentage-point noninferiority margin for completion and inspect its paired interval. Measure gateway/direct warm answer latency ratio, actual input/output/cached usage and separately priced judge cost. A target ratio ≤1.10 is conditional on meeting quality; it is not a current result.
-6. Promote a candidate only after accuracy, latency, memory, context and lifecycle checks all pass. A failed stage stays an experiment, and its negative result is retained. Start with stage 1; do not couple it to embeddings, fine-tuning, OAuth redesign or a language rewrite.
+6. Stage 1 is the first retrieval improvement release. Treat benchmark scores as measurements of product behavior, not a leaderboard to optimize. Keep the public-v9 ranks frozen. Complete operational refresh, TTL, concurrency, startup and isolated memory work before considering semantic retrieval; do not couple it to fine-tuning, OAuth redesign or a language rewrite.
 
 ## Primary sources
 

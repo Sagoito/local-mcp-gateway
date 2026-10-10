@@ -47,16 +47,19 @@ test('catalog discovery stays bounded and only expands the exact requested schem
   } finally { await client.close(); }
 });
 
-test('discovery defaults to three schemas and ranks capability terms above server aliases', async () => {
+test('discovery supports exact filters and whole-token capability search', async () => {
   const tools: ToolEntry[] = [
     { server: 'issues-api', name: 'list_open_issues', description: 'Find active issues', inputSchema: { type: 'object', properties: {} } },
     { server: 'issues-api', name: 'search_issue_history', description: 'Search historical issue records', inputSchema: { type: 'object', properties: { phrase: { type: 'string' } } } },
     { server: 'issues-api', name: 'search_issues_legacy', description: 'Deprecated issue search', inputSchema: { type: 'object', properties: { query: { type: 'string' } } } },
     { server: 'builds', name: 'get_build', description: 'Retrieve build status', inputSchema: { type: 'object', properties: { id: { type: 'string' } } } },
   ];
-  const ranked = searchCatalog(tools, { query: 'issues-api search' });
-  const rankedNames = (ranked.results as Array<{ name: string }>).map(item => item.name);
-  assert.deepEqual(rankedNames, ['search_issue_history', 'search_issues_legacy']);
+  const filtered = searchCatalog(tools, { server: 'issues-api', tool: 'search_issue_history' });
+  assert.deepEqual((filtered.results as Array<{ name: string }>).map(item => item.name), ['search_issue_history']);
+  const matched = searchCatalog(tools, { query: 'historical' });
+  assert.deepEqual((matched.results as Array<{ name: string }>).map(item => item.name), ['search_issue_history']);
+  assert.equal(searchCatalog(tools, { query: 'issu' }).matched, 0, 'a token does not match the prefix of issues');
+  assert.ok(searchCatalog(tools, { query: 'issue' }).matched > 0, 'the complete issue token matches');
 
   const client = await connected(createGateway({ listTools: async () => tools, callTool: async () => ({}), close: async () => {} }));
   try {
@@ -68,6 +71,34 @@ test('discovery defaults to three schemas and ranks capability terms above serve
     const compactResult = JSON.parse(textOf(compact));
     assert.equal(compactResult.results.length, 1);
     assert.equal('inputSchema' in compactResult.results[0], false);
+  } finally { await client.close(); }
+});
+
+test('gateway accepts search queries up to 8192 characters and rejects longer values', async () => {
+  const tools: ToolEntry[] = [{server:'s',name:'find',description:'Find a record',inputSchema:{type:'object',properties:{}}}];
+  const client = await connected(createGateway({listTools:async()=>tools,callTool:async()=>({}),close:async()=>{}}));
+  try {
+    const accepted = await client.callTool({name:'search',arguments:{query:'x'.repeat(8192)}});
+    assert.equal(accepted.isError,undefined);
+    const rejected = await client.callTool({name:'search',arguments:{query:'x'.repeat(8193)}});
+    assert.equal(rejected.isError,true);
+  } finally { await client.close(); }
+});
+
+test('search rebuilds its index when an upstream publishes a replacement catalogue snapshot', async () => {
+  const oldCatalog: ToolEntry[] = [{server:'s',name:'old_tool',description:'old capability',inputSchema:{type:'object',properties:{}}}];
+  const newCatalog: ToolEntry[] = [{server:'s',name:'new_tool',description:'new capability',inputSchema:{type:'object',properties:{}}}];
+  let snapshot = oldCatalog;
+  const upstreams: Upstreams = {listTools:async()=>snapshot,callTool:async()=>({}),close:async()=>{}};
+  const client = await connected(createGateway(upstreams));
+  try {
+    const first = JSON.parse(textOf(await client.callTool({name:'search',arguments:{query:'old'}})));
+    assert.deepEqual(first.results.map((tool: ToolEntry)=>tool.name),['old_tool']);
+    snapshot = newCatalog;
+    const second = JSON.parse(textOf(await client.callTool({name:'search',arguments:{query:'new'}})));
+    assert.deepEqual(second.results.map((tool: ToolEntry)=>tool.name),['new_tool']);
+    const removed = JSON.parse(textOf(await client.callTool({name:'search',arguments:{query:'old'}})));
+    assert.equal(removed.matched,0);
   } finally { await client.close(); }
 });
 
@@ -119,6 +150,9 @@ test('stdio gateway searches, returns exact schema, executes across aliases, and
     assert.match(textOf(search), /list_issues/);
     const schema = await gatewayClient.callTool({ name: 'search', arguments: { server: 'issues', tool: 'list_issues', includeSchema: true } });
     assert.match(textOf(schema), /state/);
+    const serverOnly = JSON.parse(textOf(await gatewayClient.callTool({ name: 'search', arguments: { server: 'issues', includeSchema: false } })));
+    assert.equal(serverOnly.matched, 1);
+    assert.deepEqual(serverOnly.results.map((tool: {server:string; name:string}) => [tool.server, tool.name]), [['issues', 'list_issues']]);
     const result = await gatewayClient.callTool({ name: 'execute', arguments: { code: `const [issues,build] = await Promise.all([mcp.call('issues','list_issues',{state:'open'}),mcp.call('builds','get_build',{id:'build-17'})]); const rows=JSON.parse(issues.content[0].text); const b=JSON.parse(build.content[0].text); return {open:rows.filter(x=>x.state==='open').map(x=>x.id), build:b[0].status};` } });
     assert.deepEqual(JSON.parse(textOf(result)), { open: ['issue-1'], build: 'passed' });
     config.servers = { builds: config.servers.builds! };

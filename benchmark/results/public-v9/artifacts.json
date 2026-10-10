@@ -1,0 +1,42 @@
+{
+  "included": {
+    "infrastructure-attempt.json.gz": {
+      "bytes": 1736454,
+      "sha256": "86e681d15bbc293121f9280d70bbee55364b2ae439eaa6298c2e55c6f78ade87"
+    },
+    "README.md": {
+      "bytes": 5868,
+      "sha256": "98aca26fcd05022b3bf5b66405ffa618072a4de1ea39b91376dbe2b552d2e1ef"
+    },
+    "protocol.json": {
+      "bytes": 1876,
+      "sha256": "f07ab4a8b84b14d30b1876aa0fa8cf9cc338ff6c79afa13b6d4153e0ded8e4b2"
+    },
+    "gateway.jsonl.gz": {
+      "bytes": 1009805,
+      "sha256": "02665ce3fa857158cf0c32f3bd809727c46ec73e18789a2fe7f1a7ee5a16ab2b"
+    },
+    "bm25.jsonl.gz": {
+      "bytes": 1084504,
+      "sha256": "4bc2e91c6d1964ce58da7a9afc33a79a52ed5f24909c467918555bfb6c349ec2"
+    },
+    "audit-bundle.tar.gz": {
+      "bytes": 2293994,
+      "sha256": "9a010f3b0d15580be975fbbb89ee9eef18e6e48a0bdd74e6e00df3ac37a9d4e5"
+    },
+    "manifest.json": {
+      "bytes": 767904,
+      "sha256": "4ca0a9c28089e53ddb8585c9c4d1cd51dc9891a150016154310a2c75a3ec3133"
+    },
+    "audit.json": {
+      "bytes": 1846,
+      "sha256": "ecbf801cf8f4d0ec2a6b4ae18e98c647dfd59cad31c2b0bff0a7b573ff78405b"
+    },
+    "execution-deviation.json": {
+      "bytes": 1342,
+      "sha256": "58ad83609a08bd9736b64e9e85b36fb87c61b9bf6cfa8d207ae95cc16369a67e"
+    }
+  },
+  "bundleMembers": 52,
+  "datasetNotRedistributed": true
+}

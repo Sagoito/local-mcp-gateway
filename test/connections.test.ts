@@ -19,7 +19,7 @@ test('stdio upstream is lazy, reusable, paginated-compatible, and returns MCP re
     const result = await upstreams.callTool('issues', 'list_issues', { state: 'open' }) as { content: Array<{ text: string }> };
     assert.match(result.content[0]?.text ?? '', /issue-1/);
     // Cached tool listing must preserve the same usable long-lived connection.
-    assert.deepEqual(await upstreams.listTools(), tools);
+    assert.equal(await upstreams.listTools(), tools, 'cached aggregate catalogue keeps a stable identity');
   } finally {
     await upstreams.close();
     await rm(dir, { recursive: true, force: true });

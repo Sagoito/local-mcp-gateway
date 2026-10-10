@@ -1,0 +1,23 @@
+{
+  "stoppedAt": "2026-10-09T23:50:55.728543",
+  "reason": "Independent remaining retrieval queries move to eight full-corpus workers; product, queries, corpus and scoring remain unchanged.",
+  "preservedQueries": 1000,
+  "interruption": "controller Ctrl-C after first1000-query checkpoint (exit130)",
+  "discardedCompletedAgentAnswers": 0,
+  "note": "No LLM was invoked. Any deterministic calculation after the last checkpoint was interrupted and will be evaluated from original input under the same frozen ranker.",
+  "coordinatorSHA256": "22b310693aeb5e1aa0f9f5e4877db3072d3dfdbbc82dd39453aa27b25f025a29",
+  "recovery": {
+    "recordedAt": "2026-10-10T08:27:42.052277+00:00",
+    "initialFailure": "Eight full-corpus workers exceeded 8 GiB memory; three workers were killed by OOM. Initial aggregate is invalid and preserved in infrastructure-attempt.json.gz.",
+    "failedShards": [
+      1,
+      4,
+      5
+    ],
+    "retryConcurrency": 3,
+    "successfulInitialRowsAndSequentialPrefix": "Preserved unchanged and verified during recovery",
+    "interruptedRecovery": "Previous user-turn interruption stopped the first recovery before any shard completed. The same infrastructure-only retry was restarted; no successful query rows were substituted.",
+    "productOrDatasetChange": false,
+    "metricOrQuerySelectionChange": false
+  }
+}

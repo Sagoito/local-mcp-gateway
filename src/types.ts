@@ -3,6 +3,9 @@ export type ServerConfig = { command: string; args?: string[]; env?: Record<stri
 export interface GatewayConfig { version: 1; servers: Record<string,ServerConfig>; inlineTools?: Array<{ server: string; tool: string }>; nativeTools?: Array<{server: string; tool: string}> }
 export interface ToolEntry { server: string; name: string; description?: string; inputSchema: Record<string,unknown>; annotations?: ToolAnnotations }
 export interface Upstreams {
+ // Each listTools result is an immutable catalogue snapshot: return the same
+ // array while its contents are unchanged, and a new array when tools change.
+ // Consumers may retain indexes keyed by snapshot identity; never mutate one in place.
  listTools(): Promise<ToolEntry[]>;
  callTool(server: string, tool: string, args: Record<string,unknown>, signal?: AbortSignal): Promise<unknown>;
  getResult?(id: string): Promise<unknown>;

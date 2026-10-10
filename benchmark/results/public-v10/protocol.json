@@ -1,0 +1,35 @@
+{
+  "createdAt": "2026-10-10T09:48:12.787031+00:00",
+  "objective": "Test general product improvement; do not optimize benchmark-specific ranking",
+  "change": "Fixed indexed BM25, exactfilters, stable cachedcatalogue identity, querylimit8192",
+  "productDocument": "server alias + capability name + full original documentation",
+  "baselineDocument": "capability name + full original documentation; unchanged published localBM25 reference ranks reused byte-for-byte",
+  "formula": {
+    "k1": 1.2,
+    "b": 0.75,
+    "idf": "log(1+(N-df+0.5)/(df+0.5))",
+    "tokenization": "lowercase [a-z0-9]+",
+    "ties": "server/name locale en then immutable snapshotposition"
+  },
+  "evaluation": "All7961 original publicqueries, no instructions/qrelhints/rewrites/truncation; failures retainedzero",
+  "latency": "Same-query paired actualSDKRPC to oldfrozen andnew gateway, 30 seededrandomqueries percategory, 2 balancedorder repetitions. <=500chars for bothconditioneligibility. No resultcache. Full suite longquerytimings separately.",
+  "runtimeScope": "Localin-memorySDK retrieval fixtures, no model/providerbilling/upstreamIO/Oauth/TTL/concurrencyclaims",
+  "productChecks": {
+    "productTestsPassed": 65,
+    "metricTestsPassed": 6
+  },
+  "sourceHashesBeforeRun": {
+    "src/search.ts": "658a6c08fbb2bf75d4ef00ca6b52d9af6b851bd0d49ac6d4c8646f136e3912f0",
+    "src/server.ts": "daa4489ff9bffc4fa8172e26f9182e19a3b0062a89ef936ae24120c04c5c57e0",
+    "src/upstreams.ts": "34d5eff0cfa969a59a54b02f07c93a90571a9c6e3e7935711deb2e8b00b951f2",
+    "src/types.ts": "b28d57c62db45dfa7121b4b7e6be4ebea2e24dea1f30a6e3b0b7f3fb08f7cd30"
+  },
+  "platform": {
+    "system": "Linux",
+    "machine": "x86_64",
+    "cpuQuota": "800000 100000",
+    "memoryMax": "8589934592"
+  },
+  "benchmarkStatus": "Public development benchmark; no claim of fresh heldout evaluation or exactvendorcomparison",
+  "steering": "Servermetadata includedforrealuseraliasqueries before new scores were observed; do not specialcase synthetic public alias."
+}

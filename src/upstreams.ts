@@ -18,6 +18,9 @@ export function createUpstreams(config: GatewayConfig, configPath: string): Upst
   const errors: Record<string, string> = {};
   const toolCache = new Map<string, { expires: number; tools: ToolEntry[] }>();
   const entries = Object.entries(config.servers).filter(([, value]) => !value.disabled);
+  let snapshotParts = new Map<string, ToolEntry[]>();
+  let snapshotErrors = '';
+  let aggregateSnapshot: ToolEntry[] | undefined;
 
   const connect = async (server: string, serverConfig: ServerConfig): Promise<Connection> => {
     const client = new Client({ name: 'local-mcp-gateway', version: '0.1.0' });
@@ -60,13 +63,13 @@ export function createUpstreams(config: GatewayConfig, configPath: string): Upst
 
   return {
     async listTools(): Promise<ToolEntry[]> {
-      const all: ToolEntry[] = [];
+      const available = new Map<string, ToolEntry[]>();
       let discovered = 0;
       for (const name of Object.keys(errors)) delete errors[name];
       for (let i = 0; i < entries.length; i += 4) {
         await Promise.all(entries.slice(i, i + 4).map(async ([server]) => {
           const cached = toolCache.get(server);
-          if (cached && cached.expires > Date.now()) { all.push(...cached.tools); return; }
+          if (cached && cached.expires > Date.now()) { available.set(server, cached.tools); return; }
           const tools: ToolEntry[] = [];
         try {
           const { client } = await get(server);
@@ -82,13 +85,23 @@ export function createUpstreams(config: GatewayConfig, configPath: string): Upst
             cursor = result.nextCursor;
           } while (cursor);
           toolCache.set(server, { expires: Date.now() + TOOL_CACHE_TTL_MS, tools });
-          all.push(...tools);
+          available.set(server, tools);
         } catch {
           errors[server] = serverConfigError(config.servers[server]);
         }
         }));
       }
-      return all.sort((a, b) => a.server.localeCompare(b.server) || a.name.localeCompare(b.name));
+      const errorState = JSON.stringify(errors);
+      let changed = errorState !== snapshotErrors || available.size !== snapshotParts.size;
+      if (!changed) for (const [server, tools] of available) {
+        if (snapshotParts.get(server) !== tools) { changed = true; break; }
+      }
+      if (changed || !aggregateSnapshot) {
+        snapshotParts = available;
+        snapshotErrors = errorState;
+        aggregateSnapshot = [...available.values()].flat().sort((a, b) => a.server.localeCompare(b.server) || a.name.localeCompare(b.name));
+      }
+      return aggregateSnapshot;
     },
     getErrors(): Record<string, string> { return { ...errors }; },
     async callTool(server: string, tool: string, args: Record<string, unknown>, signal?: AbortSignal): Promise<unknown> {
@@ -108,6 +121,9 @@ export function createUpstreams(config: GatewayConfig, configPath: string): Upst
       const connections = await Promise.allSettled([...live.values()]);
       await Promise.all(connections.flatMap(r => r.status === 'fulfilled' ? [r.value.transport.close().catch(() => undefined)] : []));
       live.clear();
+      toolCache.clear();
+      snapshotParts.clear();
+      aggregateSnapshot = undefined;
     },
   };
 }

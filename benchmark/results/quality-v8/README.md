@@ -1,4 +1,8 @@
-# Fresh factual-answer quality pilot
+# Historical local smoke/regression pilot
+
+This eight-task pilot is retained for regression diagnosis. It is not a competitor-comparable benchmark; some prompts identify tools, the catalog has only two server implementations, and the model receives definitions through a shell bridge. Its frozen scores and raw outcomes remain unchanged. See [the public comparison protocol](../../COMPARABILITY_PLAN.md) and [public-v9](../public-v9/README.md) for the replacement main evaluation.
+
+## Fresh factual-answer quality pilot
 
 32 fresh Luna attempts compared direct MCPs with the unchanged gateway on eight new task types. The frozen grader scored **14/16 exact factual answers direct versus 13/16 gateway**. The gateway had one additional extraction mismatch. This small pilot does **not** establish quality equivalence, superiority or a statistically reliable regression.
 

@@ -1,5 +1,7 @@
 # Paired local MCP benchmark
 
+**Historical local smoke test.** This small, synthetic, shell-bridge experiment is not the main competitive evaluation. See [COMPARABILITY_PLAN.md](COMPARABILITY_PLAN.md) for the public benchmark protocol and comparison limits.
+
 Compare official filesystem and memory MCP servers connected directly (all tool schemas listed eagerly) with the same servers behind this gateway (only search and execute listed). No fixture content is injected into either prompt. Both use an identical generic shell mailbox bridge to real SDK clients and real stdio processes.
 
 ## Questions and data

@@ -1,0 +1,69 @@
+{
+  "passed": true,
+  "backend": "pytrec-eval-terrier 0.5.10 (pytrec_eval API)",
+  "authorProtocol": "toolret/eval.py trec_eval",
+  "conditions": {
+    "gateway": {
+      "queriesAudited": 7961,
+      "maxMetricDifference": 0.0,
+      "officialBackendMacroScores": {
+        "ndcg5": 0.056845777098840845,
+        "ndcg10": 0.06379929670663363,
+        "recall5": 0.0715718293346732,
+        "recall10": 0.09082820416195621,
+        "precision5": 0.020298957417409877,
+        "precision10": 0.013151614118829293
+      },
+      "errors": 360,
+      "noErrorSubset": {
+        "queries": 7601,
+        "ndcg10": 0.06682097106716357
+      }
+    },
+    "bm25": {
+      "queriesAudited": 7961,
+      "maxMetricDifference": 0.0,
+      "officialBackendMacroScores": {
+        "ndcg5": 0.27564443665013094,
+        "ndcg10": 0.2961891101577493,
+        "recall5": 0.3181732672971211,
+        "recall10": 0.37375015701545033,
+        "precision5": 0.09923376460243688,
+        "precision10": 0.059603064941590254
+      },
+      "errors": 0,
+      "noErrorSubset": {
+        "queries": 7961,
+        "ndcg10": 0.2961891101577493
+      }
+    }
+  },
+  "matchedAcceptedInputDiagnostic": {
+    "queries": 7601,
+    "primary": false,
+    "definition": "queries with no errors in either condition",
+    "scores": {
+      "gateway": 0.06682097106716357,
+      "bm25": 0.2972728954499085
+    }
+  },
+  "pairedQueryBootstrap": {
+    "seed": 901,
+    "samples": 1000,
+    "percentile95CI": {
+      "gateway": [
+        0.05917750059123024,
+        0.06814169680230751
+      ],
+      "bm25": [
+        0.28786563902417234,
+        0.304904636029672
+      ],
+      "gatewayMinusBM25": [
+        -0.24082340176645417,
+        -0.22525650963911215
+      ]
+    },
+    "note": "Query resampling only; not model variance, vendor comparison, or latency significance."
+  }
+}

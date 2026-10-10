@@ -187,12 +187,6 @@ Browser callback handling and real vendor OAuth interoperability have not been e
 
 [MIT](LICENSE). Copyright (c) 2026 Sagoito. Dependencies retain their respective licenses.
 
-## Agent benchmark
-
-[24-run Luna pilot](benchmark/results/local-luna/README.md): two official MCP servers, direct versus gateway. Initial tool-list bytes fell 88%; median answers were slower (19.83 s versus 7.85 s). Large-response filtering helped, but actual billed savings are unmeasured. Includes [test plan](benchmark/PLAN.md), [questions](benchmark/questions.json), harness and raw audit logs.
-
-[Latency follow-up](benchmark/results/latency-v2/README.md): another 24 runs after discovery/parsing changes. Gateway median was 18.33 s versus 19.83 s historically and 7.58 s for the current direct control; the latency gap remains. 26 tests pass.
-
 ## Discovery architecture
 
 See the [research and design notes](docs/latency-design.md) for the inline-catalogue fast path, large-catalogue fallback, startup tradeoffs and benchmark method. Compact signatures are hints; upstream validation and authorization still apply.
@@ -215,9 +209,6 @@ Set optional `inlineTools` in your gateway config to select up to five existing 
 ```
 
 This controls context hints, **not access permissions**. Other tools remain discoverable and callable. Removing a server also removes its inline selections. Signatures for missing tools are omitted; use search or doctor to check what the upstream actually exposes.
-
-[Earlier latency experiments](benchmark/results/typed-v4/README.md): 36 comparative runs plus 12 exploratory runs. Structured-call gateway median 10.66 s; prior gateway control 17.09 s; direct control 8.28 s. The structured-call pass was not interleaved with controls. See the reports for regressions and limitations.
-
 
 ### Expose common tools directly for lower latency
 
@@ -267,8 +258,16 @@ For ordinary filtering prefer `execute` with `result`. It operates on a previous
 Use `action:"first"` to return a matching record or null, or `action:"all"` for the matching array. Optional `fields:["id","status"]` projects top-level keys. Comparisons support `eq`, `ne`, `lt`, `lte`, `gt` and `gte`; ordering compares strings lexically or numbers numerically, without coercion. Missing fields never match, including `ne`. Field/path traversal reads only own JSON properties. The selected array may contain at most 100,000 records, and evaluation permits at most 1,000,000 visits; exceeding either fails rather than returning an incomplete answer. Output remains capped at 32 KiB. This route neither evaluates generated code nor invokes an upstream operation.
 
 
-[Final latency pilot](benchmark/results/query-v6/README.md): 24 fresh paired runs with five native tools and structured retained-result filtering. Gateway median 7.80 s versus 9.52 s direct; mean 8.01 s versus 9.27 s; 12/12 correct versus 10/12, with no gateway tool errors. Initial definition bytes fell 43.9%. The join remained slower (10.40 s versus 7.78 s), so this demonstrates near-direct aggregate latency in the curated pilot, not guaranteed parity across tools/clients. Payload proxies are not provider usage or billed costs. One interrupted incomplete run was archived and replaced. All 58 tests pass. See [native-v5](benchmark/results/native-v5/README.md) for the preceding profile and quoting-related tail latency.
+## Evaluation and comparison limits
 
-[Many-server context measurement](benchmark/results/scale-v7/README.md): actual 2, 8, 16 and 32 local MCP processes. At 32 servers / 368 tools, complete direct definitions measured 44,959 token proxies versus 1,647 with the five-tool native profile (96.3% smaller), or 754 in default discovery mode (98.3% smaller). Two server implementations were replicated as isolated endpoints. Large-catalogue task trials were clipped by the host, so they do not establish a fair latency comparison or billed savings. Raw catalogues and all completed trial outcomes are retained. The current suite passes 59 tests.
+Stage 1 adds a cached local BM25 index. The full ToolRet development fixture contains 44,453 tools and 7,961 queries.
 
-[Fresh quality pilot](benchmark/results/quality-v8/README.md): 32 fresh Luna attempts on eight new task types with complete, small source responses. Frozen exact factual scores were 14/16 direct and 13/16 gateway; all required fields were present, and one additional gateway mismatch involved extracting a fallback identifier. Two grading ambiguities are explicitly recorded. Both arms passed the six other task types in all 12 attempts, invoked unfamiliar tools and recovered from expected errors. This does not establish quality equivalence or superiority. Median elapsed was 6.78 s direct versus 7.37 s gateway; median accumulated payload proxy fell 34.6%. Includes all outcomes, raw traces and frozen manifests.
+| Retrieval condition | nDCG@10 / errors, full suite | Full-suite warm SDK p50 / p95 | Paired-sample SDK p50 / p95 |
+|---|---:|---:|---:|
+| Indexed product search | 0.295644 / 0 | 2.44 / 6.70 ms | 2.59 / 4.92 ms |
+| Frozen BM25 reference | 0.296189 / 0 | — | — |
+| Historical v9 gateway | 0.063799 / 360 | — | 417.88 / 834.70 ms |
+
+The full-suite run took 916 ms for its first cold search; its warm latency covers all 7,961 queries after ten fixed warmup calls. The paired sample uses 90 category-stratified queries and two balanced repetitions; it was not source-stratified. The historical row’s latency comes from that sample, while retrieval scores cover the full suite. A separate index-only diagnostic measured a 116.5 ms build for 5,000 tools; this is not a 5,000-tool SDK latency result. Production discovery remains capped at 5,000 tools. Full-suite peak RSS was 631 MiB, including the index, SDK, and benchmark data. Initial MCP definitions remain two tools and measured 3,131 JSON bytes (753 o200k token proxy); the proxy is not provider usage or billed cost. Cold search was slower than v9 (883.6 vs 693.5 ms). The new 8,192-character limit accepted the 360 queries the old v9 interface rejected.
+
+ToolRet measures retrieval behavior, not answer quality, competitor parity, provider usage, or cost. Server aliases remain searchable for users who query connector names; the benchmark is a measurement, not a ranking target. See the [public-v10 report](benchmark/results/public-v10/README.md) and [comparison protocol](benchmark/COMPARABILITY_PLAN.md) for full results, scope, and reproduction instructions. Historical task and context pilots remain limited local studies: [initial task pilot](benchmark/results/local-luna/README.md), [latency follow-up](benchmark/results/latency-v2/README.md), [structured-call latency](benchmark/results/typed-v4/README.md), [final latency pilot](benchmark/results/query-v6/README.md), [many-server context](benchmark/results/scale-v7/README.md), and [quality pilot](benchmark/results/quality-v8/README.md). Their results do not establish general answer quality or billed savings.

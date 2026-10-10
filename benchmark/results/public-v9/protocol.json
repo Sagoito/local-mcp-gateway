@@ -1,0 +1,36 @@
+{
+  "createdBeforeRun": "2026-10-09",
+  "suite": "ToolRet-full",
+  "primaryMetric": "macro nDCG@10 over all 7961 public queries",
+  "secondaryMetrics": [
+    "Hit@1/5/10",
+    "Recall@5/10",
+    "Precision@5/10",
+    "Completeness@5/10",
+    "MRR@10"
+  ],
+  "conditions": [
+    "unchanged production gateway via SDK InMemoryTransport",
+    "fixed BM25 k1=1.2 b=.75"
+  ],
+  "queryMode": "original query only; no generated instruction, label hints, rewriting, or truncation",
+  "errors": "zero primary score retained in full denominator, including 360 over current500character limit",
+  "corpus": "all44453 tools; verbatim documentation; sanitized original names plusopaque IDhash; same name+documentation for BM25",
+  "scope": "retrieval only; no LLM or vendor execution; gatewaynativeprofileoff; processIO/upstreamstartupnotmeasured",
+  "productChangeAllowed": false,
+  "authorProtocol": "https://github.com/mangopy/tool-retrieval-benchmark/blob/c4181d914a227134705ecb6bab13fbd92ccd2938/toolret/eval.py",
+  "datasetSHA256": "da9b96e52472638513c1005f176afbc098e9e0b6b2efe8068d765ee2eef6b203",
+  "runnerSHA256": "bf37c2641514eaa557ca8ea3ecfb5f175a7ec180f2f152f995812c7934e1654a",
+  "fullCorpusLockedBeforeRun": true,
+  "executionAmendment": {
+    "date": "2026-10-09T23:51:50.182165",
+    "method": "retain first1000sequentialquery results then round-robin remaining6961 into8 independentfull-corpusworkers",
+    "reason": "reduce fullsuite elapsedcompute time withoutchanging retrieval functions oraccuracyprotocol",
+    "querySelectionChanged": false,
+    "qualityMetricsChanged": false,
+    "productChanged": false,
+    "latency": "sequentialfirst1000reported separately; parallel timings undercontention are not user-answer latency",
+    "record": "execution-deviation.json",
+    "coordinatorSHA256": "22b310693aeb5e1aa0f9f5e4877db3072d3dfdbbc82dd39453aa27b25f025a29"
+  }
+}

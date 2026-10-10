@@ -10,6 +10,7 @@ import { createUpstreams } from './upstreams.js';
 import { renderCatalog } from './catalog.js';
 import { executeCode } from './sandbox.js';
 import type { GatewayConfig, ToolEntry, Upstreams } from './types.js';
+import { createSearchIndex } from './search.js';
 
 const SEARCH_BYTES = 24 * 1024;
 const textResult = (value: unknown, isError = false) => ({
@@ -19,22 +20,12 @@ const textResult = (value: unknown, isError = false) => ({
 export function searchCatalog(tools: ToolEntry[], options: {
   query?: string; server?: string; tool?: string; includeSchema?: boolean; limit?: number;
 }) {
-  const rawTerms = (options.query ?? '').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
-  const serverTerms = new Set(tools.flatMap(t => t.server.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean)));
-  // A server alias is useful for narrowing, but shouldn't crowd out capability terms.
-  const terms = rawTerms.some(term => !serverTerms.has(term)) ? rawTerms.filter(term => !serverTerms.has(term)) : rawTerms;
-  const matches = tools.filter(t => (!options.server || t.server === options.server) && (!options.tool || t.name === options.tool))
-    .map(t => {
-      const name = `${t.server} ${t.name}`.toLowerCase().split(/[^a-z0-9]+/).join(' ');
-      const description = (t.description ?? '').toLowerCase();
-      const score = terms.reduce((n, term) => n + (name.includes(term) ? 3 : description.includes(term) ? 1 : 0), 0);
-      const deprecated = /\bdeprecated\b/i.test(`${t.name} ${description}`);
-      return { t, score: score - (deprecated ? 2 : 0) };
-    }).filter(x => terms.length === 0 || x.score > 0)
-    .sort((a,b) => b.score - a.score || `${a.t.server}/${a.t.name}`.localeCompare(`${b.t.server}/${b.t.name}`));
+  const index = searchIndexes.get(tools) ?? createSearchIndex(tools);
+  searchIndexes.set(tools, index);
+  const matches = index.search({ query: options.query, server: options.server, tool: options.tool, limit: options.limit });
   const results: unknown[] = [];
   let used = 4096;
-  for (const { t } of matches.slice(0, options.limit ?? 3)) {
+  for (const t of matches.tools) {
     const entry = { ...t, description: (t.description ?? '').slice(0,240) };
     const selected = options.includeSchema === false
       ? { server: t.server, name: t.name, description: entry.description }
@@ -47,13 +38,17 @@ export function searchCatalog(tools: ToolEntry[], options: {
     used += size;
     results.push(selected);
   }
-  return { results, matched: matches.length, hint: options.includeSchema === false
+  return { results, matched: matches.matched, hint: options.includeSchema === false
     ? 'Compact summaries omit argument schemas. Search once for all needed capabilities, then request includeSchema:true for tools you will call. Returned tools are callable only inside execute; reuse the schemas there.'
     : 'Search once for all needed capabilities and reuse these schemas. Returned tools are callable only inside execute, for example mcp.call(server, name, {}). Narrow by server and tool if needed.' };
 }
 
+// A gateway request repeatedly receives the same immutable catalogue snapshot.
+// Keep its index alongside that snapshot instead of rebuilding on each search.
+const searchIndexes = new WeakMap<ToolEntry[], ReturnType<typeof createSearchIndex>>();
+
 const searchInput = z.object({
-  query: z.string().max(500).optional(), server: z.string().max(100).optional(), tool: z.string().max(200).optional(),
+  query: z.string().max(8192).optional(), server: z.string().max(100).optional(), tool: z.string().max(200).optional(),
   includeSchema: z.boolean().default(true), limit: z.number().int().min(1).max(20).default(3),
 });
 const executeInput = z.object({
@@ -63,7 +58,7 @@ const executeInput = z.object({
   timeoutMs: z.number().int().min(100).max(60000).default(15000),
 });
 const searchSchema: Tool['inputSchema'] = {type:'object',properties:{
-  query:{type:'string',maxLength:500}, server:{type:'string',maxLength:100},tool:{type:'string',maxLength:200},
+  query:{type:'string',maxLength:8192}, server:{type:'string',maxLength:100},tool:{type:'string',maxLength:200},
   includeSchema:{type:'boolean',default:true},limit:{type:'integer',minimum:1,maximum:20,default:3},
 }};
 const executeSchema: Tool['inputSchema'] = {type:'object',properties:{

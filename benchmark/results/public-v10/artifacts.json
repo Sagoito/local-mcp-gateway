@@ -1,0 +1,110 @@
+{
+  "auditBundle": {
+    "bytes": 109501,
+    "compression": "gzip level 9, mtime 0; tar members sorted, mtime 0, mode 0644, uid/gid 0",
+    "fileIndexBytes": 7958,
+    "fileIndexPath": "file-index.json",
+    "fileIndexSha256": "c4d1225a99987350e7e3077a656e6373d33df4d9277f54741d982cd60d109c97",
+    "members": 57,
+    "path": "audit-bundle.tar.gz",
+    "sha256": "3ee75886e9dd4daee46053b2b833baa0fbd551a84cb13a10bf48387bdaa78387"
+  },
+  "formatVersion": 1,
+  "note": "artifacts.json intentionally does not contain its own hash.",
+  "provenanceChecks": {
+    "distFilesMatchBeforeAndAfterRun": true,
+    "distFilesSha256": {
+      "auth.d.ts": "d9c67e85b43f91c125e86e42461dd63a7e0a04f275fefae6032bfab8579dcba8",
+      "auth.js": "deeed4d52c783c33d0417e666d87603f28325c43364e2586a1c94dae8419e22a",
+      "catalog.d.ts": "1422a7ca73085e49fbaa9df203252aedea7112ea970415c3c2c58b177a5e559f",
+      "catalog.js": "d32f109019ee65c6c15313d71e6d3d70ad8fdad43434a447f80d1a3058c35c25",
+      "cli.d.ts": "43e818adf60173644896298637f47b01d5819b17eda46eaa32d0c7d64724d012",
+      "cli.js": "f07abf9af9fd4f6d5c19dba5f13c3620d9e04a2a20f96cd9ebcd5afcbbf773af",
+      "config.d.ts": "85562b0e75e3eaf636471714ad4deb2ad53eeeca5c00c69c56e72bc65718b87c",
+      "config.js": "4fa501b6e3ee706a4a797d5ce23c3fec146e6c9edfb3479b5c8357991649be2b",
+      "query.d.ts": "497d76f5782a1b75d209ffa387dedc0aa7031946bd89b3dcb405114e3dc60621",
+      "query.js": "95198d83ce54bdb31179642b98223d5835d5504612e1330a3a01a6a5793c2f3d",
+      "results.d.ts": "aab05ab12437166cb1db78844a4b0f891914d5df18d95a2001d3de7c2966694c",
+      "results.js": "a5f8c64b866fce2ef1197f2f127585c010cc812dfd199e270c8129bf38b79e35",
+      "sandbox.d.ts": "5166649a3366d4db828da50a5c5d404e9c4d633d918f8f12c59e10703c701701",
+      "sandbox.js": "7a26cee18a5028734733d0e57185eaaa5ea19384f7093b6f8441524f92768203",
+      "search.d.ts": "655215288a6f08fd3824cd8d002bad59f9e6c2add32cda0c6e728fde3793d052",
+      "search.js": "8c7185fecac5d0c892797ad7a44b3fff9116b5bbd44b2ce165a03031de3465a0",
+      "server.d.ts": "f62c96d9ea2f745a92d8263d773d4b83b59f62258771ba2f065e22a84e4cd1b2",
+      "server.js": "eeeaa20e4261a06417550654b896441d1497377cc2b5c9548e51f590bde957c1",
+      "types.d.ts": "f8a35d3412f1f72cfe6dd2a5514c6a57563b6feb7ee72397f054c8c2363a0b5a",
+      "types.js": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+      "upstreams.d.ts": "275c3f9a29f729e48b69fbe6c01db8344d319255a846ba5ca28081c989ca17cc",
+      "upstreams.js": "6425062ddd5ca9b70b5ef0af6ae6b415d3f68ae6e3db27c28098d73c2ded7cd0"
+    },
+    "sourceHashesAfterRunMatch": true,
+    "sourceHashesBeforeRunMatch": true,
+    "sourceSnapshotHashes": {
+      "src/search.ts": "658a6c08fbb2bf75d4ef00ca6b52d9af6b851bd0d49ac6d4c8646f136e3912f0",
+      "src/server.ts": "daa4489ff9bffc4fa8172e26f9182e19a3b0062a89ef936ae24120c04c5c57e0"
+    }
+  },
+  "publishedFiles": {
+    "README.md": {
+      "bytes": 8263,
+      "sha256": "416b1f7999c72af291424d1524677cf698970b2ac5c100767c785680b50798b7"
+    },
+    "audit-bundle.tar.gz": {
+      "bytes": 109501,
+      "sha256": "3ee75886e9dd4daee46053b2b833baa0fbd551a84cb13a10bf48387bdaa78387"
+    },
+    "audit.json": {
+      "bytes": 1840,
+      "sha256": "44daeeb639c24e2412f4ba869f2a1ea3290adb7627bb78dbd23df0837c7a91ca"
+    },
+    "gateway.jsonl.gz": {
+      "bytes": 1074732,
+      "sha256": "ed621ff445c466e000e7b4e3f50e99f49196a346387c7c0816ddb07132a0e474"
+    },
+    "latency/manifest.json": {
+      "bytes": 23676,
+      "sha256": "9ccc4185e8e76ddd04c5cab86be94adcfe3bf2a8550b2d3300461589e7f766af"
+    },
+    "latency/pairs.jsonl": {
+      "bytes": 56927,
+      "sha256": "5229cca94c22711fbfef142cfe6deb1240fab44cbffb8ebcdd0e22d2aa50a5fa"
+    },
+    "latency/trials.jsonl": {
+      "bytes": 116759,
+      "sha256": "045704295bea813f97e916d1e216dc838f340d8a40c47b28eae08890b1282140"
+    },
+    "manifest.json": {
+      "bytes": 55108,
+      "sha256": "17281a19f190f6d4127c64bae2254f594e1f759f8883e00c49d60945f18b0c11"
+    },
+    "memory.json": {
+      "bytes": 11995,
+      "sha256": "b1955ab7d596c190ffb73143ca5af4e85a3a4ed0c0ac745427ef2ae38f7e3ed4"
+    },
+    "protocol.json": {
+      "bytes": 2015,
+      "sha256": "aa90e9de35baa1f204679083b7d9464eb393067fe59446d266c08ab2261ba431"
+    }
+  },
+  "referenceBaseline": {
+    "bytes": 1084504,
+    "path": "../public-v9/bm25.jsonl.gz",
+    "sha256": "4bc2e91c6d1964ce58da7a9afc33a79a52ed5f24909c467918555bfb6c349ec2",
+    "source": "Reused byte-for-byte from public-v9; referenced by path and not duplicated in the v10 published artifact set."
+  },
+  "verification": {
+    "metricChecks": {
+      "passed": 6,
+      "source": "Verification completed before evaluation; no test log artifact was retained."
+    },
+    "productTests": {
+      "passed": 65,
+      "source": "Verification completed before evaluation; no test log artifact was retained."
+    },
+    "queryMetricAudit": {
+      "passed": true,
+      "queries": 7961,
+      "source": "audit.json; independent pytrec-eval audit of the published ranking rows."
+    }
+  }
+}

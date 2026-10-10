@@ -1,0 +1,316 @@
+{
+  "metadata": {
+    "benchmark": "indexed BM25 memory and initialization diagnostic",
+    "startedAt": "2026-10-10T09:56:46.940Z",
+    "node": "v24.19.0",
+    "measures": [
+      5000,
+      44453
+    ],
+    "processIsolation": "one fresh --expose-gc Node child process per catalog size",
+    "scope": "local product index only; no quality or ranking claim"
+  },
+  "hashes": {
+    "datasetSha256": "da9b96e52472638513c1005f176afbc098e9e0b6b2efe8068d765ee2eef6b203",
+    "indexedMemoryRunnerSha256": "328fb14681a3497b7942b8af561196c22d70718ccc6faf77929eec419204c186",
+    "publicV10ProtocolSha256": "aa90e9de35baa1f204679083b7d9464eb393067fe59446d266c08ab2261ba431",
+    "distFilesBeforeSha256": {
+      "auth.d.ts": "d9c67e85b43f91c125e86e42461dd63a7e0a04f275fefae6032bfab8579dcba8",
+      "auth.js": "deeed4d52c783c33d0417e666d87603f28325c43364e2586a1c94dae8419e22a",
+      "catalog.d.ts": "1422a7ca73085e49fbaa9df203252aedea7112ea970415c3c2c58b177a5e559f",
+      "catalog.js": "d32f109019ee65c6c15313d71e6d3d70ad8fdad43434a447f80d1a3058c35c25",
+      "cli.d.ts": "43e818adf60173644896298637f47b01d5819b17eda46eaa32d0c7d64724d012",
+      "cli.js": "f07abf9af9fd4f6d5c19dba5f13c3620d9e04a2a20f96cd9ebcd5afcbbf773af",
+      "config.d.ts": "85562b0e75e3eaf636471714ad4deb2ad53eeeca5c00c69c56e72bc65718b87c",
+      "config.js": "4fa501b6e3ee706a4a797d5ce23c3fec146e6c9edfb3479b5c8357991649be2b",
+      "query.d.ts": "497d76f5782a1b75d209ffa387dedc0aa7031946bd89b3dcb405114e3dc60621",
+      "query.js": "95198d83ce54bdb31179642b98223d5835d5504612e1330a3a01a6a5793c2f3d",
+      "results.d.ts": "aab05ab12437166cb1db78844a4b0f891914d5df18d95a2001d3de7c2966694c",
+      "results.js": "a5f8c64b866fce2ef1197f2f127585c010cc812dfd199e270c8129bf38b79e35",
+      "sandbox.d.ts": "5166649a3366d4db828da50a5c5d404e9c4d633d918f8f12c59e10703c701701",
+      "sandbox.js": "7a26cee18a5028734733d0e57185eaaa5ea19384f7093b6f8441524f92768203",
+      "search.d.ts": "655215288a6f08fd3824cd8d002bad59f9e6c2add32cda0c6e728fde3793d052",
+      "search.js": "8c7185fecac5d0c892797ad7a44b3fff9116b5bbd44b2ce165a03031de3465a0",
+      "server.d.ts": "f62c96d9ea2f745a92d8263d773d4b83b59f62258771ba2f065e22a84e4cd1b2",
+      "server.js": "eeeaa20e4261a06417550654b896441d1497377cc2b5c9548e51f590bde957c1",
+      "types.d.ts": "f8a35d3412f1f72cfe6dd2a5514c6a57563b6feb7ee72397f054c8c2363a0b5a",
+      "types.js": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+      "upstreams.d.ts": "275c3f9a29f729e48b69fbe6c01db8344d319255a846ba5ca28081c989ca17cc",
+      "upstreams.js": "6425062ddd5ca9b70b5ef0af6ae6b415d3f68ae6e3db27c28098d73c2ded7cd0"
+    },
+    "distFilesAfterSha256": {
+      "auth.d.ts": "d9c67e85b43f91c125e86e42461dd63a7e0a04f275fefae6032bfab8579dcba8",
+      "auth.js": "deeed4d52c783c33d0417e666d87603f28325c43364e2586a1c94dae8419e22a",
+      "catalog.d.ts": "1422a7ca73085e49fbaa9df203252aedea7112ea970415c3c2c58b177a5e559f",
+      "catalog.js": "d32f109019ee65c6c15313d71e6d3d70ad8fdad43434a447f80d1a3058c35c25",
+      "cli.d.ts": "43e818adf60173644896298637f47b01d5819b17eda46eaa32d0c7d64724d012",
+      "cli.js": "f07abf9af9fd4f6d5c19dba5f13c3620d9e04a2a20f96cd9ebcd5afcbbf773af",
+      "config.d.ts": "85562b0e75e3eaf636471714ad4deb2ad53eeeca5c00c69c56e72bc65718b87c",
+      "config.js": "4fa501b6e3ee706a4a797d5ce23c3fec146e6c9edfb3479b5c8357991649be2b",
+      "query.d.ts": "497d76f5782a1b75d209ffa387dedc0aa7031946bd89b3dcb405114e3dc60621",
+      "query.js": "95198d83ce54bdb31179642b98223d5835d5504612e1330a3a01a6a5793c2f3d",
+      "results.d.ts": "aab05ab12437166cb1db78844a4b0f891914d5df18d95a2001d3de7c2966694c",
+      "results.js": "a5f8c64b866fce2ef1197f2f127585c010cc812dfd199e270c8129bf38b79e35",
+      "sandbox.d.ts": "5166649a3366d4db828da50a5c5d404e9c4d633d918f8f12c59e10703c701701",
+      "sandbox.js": "7a26cee18a5028734733d0e57185eaaa5ea19384f7093b6f8441524f92768203",
+      "search.d.ts": "655215288a6f08fd3824cd8d002bad59f9e6c2add32cda0c6e728fde3793d052",
+      "search.js": "8c7185fecac5d0c892797ad7a44b3fff9116b5bbd44b2ce165a03031de3465a0",
+      "server.d.ts": "f62c96d9ea2f745a92d8263d773d4b83b59f62258771ba2f065e22a84e4cd1b2",
+      "server.js": "eeeaa20e4261a06417550654b896441d1497377cc2b5c9548e51f590bde957c1",
+      "types.d.ts": "f8a35d3412f1f72cfe6dd2a5514c6a57563b6feb7ee72397f054c8c2363a0b5a",
+      "types.js": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+      "upstreams.d.ts": "275c3f9a29f729e48b69fbe6c01db8344d319255a846ba5ca28081c989ca17cc",
+      "upstreams.js": "6425062ddd5ca9b70b5ef0af6ae6b415d3f68ae6e3db27c28098d73c2ded7cd0"
+    }
+  },
+  "measurements": [
+    {
+      "toolCount": 5000,
+      "corpusSelection": "deterministic first N original tools in normalized dataset order; scale diagnostic only",
+      "normalizedToolCount": 44453,
+      "corpusSha256": "396a60eacb4215027f40006af3a5e4845a3a35b66e0811b28de4e7568418a4fc",
+      "beforeIndex": {
+        "memory": {
+          "rssBytes": 88334336,
+          "heapUsedBytes": 11420488,
+          "externalBytes": 3920572,
+          "arrayBuffersBytes": 146559
+        },
+        "osPeakRssBytes": 216350720
+      },
+      "indexBuildMs": 116.51740000000001,
+      "afterIndexGc": {
+        "memory": {
+          "rssBytes": 103284736,
+          "heapUsedBytes": 23967008,
+          "externalBytes": 3980612,
+          "arrayBuffersBytes": 206559
+        },
+        "osPeakRssBytes": 216350720
+      },
+      "retainedIndexDeltaAfterGc": {
+        "rssBytes": 14950400,
+        "heapUsedBytes": 12546520,
+        "externalBytes": 60040,
+        "arrayBuffersBytes": 60000
+      },
+      "browseTimings": {
+        "exactServerBrowse": {
+          "elapsedMs": 1.3605510000000436,
+          "matched": 5000,
+          "resultCount": 10
+        },
+        "exactToolBrowse": {
+          "elapsedMs": 0.04803300000003219,
+          "matched": 1,
+          "resultCount": 1
+        },
+        "exactServerAndToolBrowse": {
+          "elapsedMs": 0.0067499999999540705,
+          "matched": 1,
+          "resultCount": 1
+        }
+      },
+      "generalQueryTimings": [
+        {
+          "query": "search",
+          "elapsedMs": 0.5171500000000151,
+          "matched": 216,
+          "resultCount": 10
+        },
+        {
+          "query": "read",
+          "elapsedMs": 0.07673600000003944,
+          "matched": 51,
+          "resultCount": 10
+        },
+        {
+          "query": "create",
+          "elapsedMs": 0.043115000000000236,
+          "matched": 51,
+          "resultCount": 10
+        },
+        {
+          "query": "list",
+          "elapsedMs": 0.2793009999999754,
+          "matched": 809,
+          "resultCount": 10
+        },
+        {
+          "query": "calendar",
+          "elapsedMs": 0.008073000000024422,
+          "matched": 2,
+          "resultCount": 2
+        },
+        {
+          "query": "file",
+          "elapsedMs": 0.041362999999989825,
+          "matched": 102,
+          "resultCount": 10
+        },
+        {
+          "query": "weather",
+          "elapsedMs": 0.01623499999999467,
+          "matched": 23,
+          "resultCount": 10
+        },
+        {
+          "query": "database",
+          "elapsedMs": 0.010335999999995238,
+          "matched": 14,
+          "resultCount": 10
+        },
+        {
+          "query": "tool",
+          "elapsedMs": 0.014101000000039221,
+          "matched": 45,
+          "resultCount": 10
+        },
+        {
+          "query": "user",
+          "elapsedMs": 0.03963999999996304,
+          "matched": 150,
+          "resultCount": 10
+        }
+      ],
+      "afterWarmSearches": {
+        "memory": {
+          "rssBytes": 103809024,
+          "heapUsedBytes": 24023768,
+          "externalBytes": 3980612,
+          "arrayBuffersBytes": 206559
+        },
+        "osPeakRssBytes": 216350720
+      },
+      "elapsedSinceProcessStartMs": 494.071559,
+      "startedAt": "2026-10-10T09:56:47.052Z"
+    },
+    {
+      "toolCount": 44453,
+      "corpusSelection": "deterministic first N original tools in normalized dataset order; scale diagnostic only",
+      "normalizedToolCount": 44453,
+      "corpusSha256": "4b3e86bfb78189ab137c1805c3e24f168c5f09adb3121a112aeac05fed621cff",
+      "beforeIndex": {
+        "memory": {
+          "rssBytes": 101019648,
+          "heapUsedBytes": 46561216,
+          "externalBytes": 3920572,
+          "arrayBuffersBytes": 146559
+        },
+        "osPeakRssBytes": 297086976
+      },
+      "indexBuildMs": 939.127614,
+      "afterIndexGc": {
+        "memory": {
+          "rssBytes": 332115968,
+          "heapUsedBytes": 143209528,
+          "externalBytes": 4454048,
+          "arrayBuffersBytes": 679995
+        },
+        "osPeakRssBytes": 351293440
+      },
+      "retainedIndexDeltaAfterGc": {
+        "rssBytes": 231096320,
+        "heapUsedBytes": 96648312,
+        "externalBytes": 533476,
+        "arrayBuffersBytes": 533436
+      },
+      "browseTimings": {
+        "exactServerBrowse": {
+          "elapsedMs": 10.62903499999993,
+          "matched": 44453,
+          "resultCount": 10
+        },
+        "exactToolBrowse": {
+          "elapsedMs": 0.05561400000010508,
+          "matched": 1,
+          "resultCount": 1
+        },
+        "exactServerAndToolBrowse": {
+          "elapsedMs": 0.00907399999982772,
+          "matched": 1,
+          "resultCount": 1
+        }
+      },
+      "generalQueryTimings": [
+        {
+          "query": "search",
+          "elapsedMs": 1.5652500000001055,
+          "matched": 3976,
+          "resultCount": 10
+        },
+        {
+          "query": "read",
+          "elapsedMs": 0.12853399999994508,
+          "matched": 243,
+          "resultCount": 10
+        },
+        {
+          "query": "create",
+          "elapsedMs": 0.17408199999999852,
+          "matched": 535,
+          "resultCount": 10
+        },
+        {
+          "query": "list",
+          "elapsedMs": 2.57172700000001,
+          "matched": 11897,
+          "resultCount": 10
+        },
+        {
+          "query": "calendar",
+          "elapsedMs": 0.061602999999877284,
+          "matched": 164,
+          "resultCount": 10
+        },
+        {
+          "query": "file",
+          "elapsedMs": 0.1404210000000603,
+          "matched": 714,
+          "resultCount": 10
+        },
+        {
+          "query": "weather",
+          "elapsedMs": 0.08733200000006036,
+          "matched": 620,
+          "resultCount": 10
+        },
+        {
+          "query": "database",
+          "elapsedMs": 0.096225000000004,
+          "matched": 854,
+          "resultCount": 10
+        },
+        {
+          "query": "tool",
+          "elapsedMs": 0.10703100000000632,
+          "matched": 914,
+          "resultCount": 10
+        },
+        {
+          "query": "user",
+          "elapsedMs": 0.4493969999998626,
+          "matched": 2844,
+          "resultCount": 10
+        }
+      ],
+      "afterWarmSearches": {
+        "memory": {
+          "rssBytes": 333950976,
+          "heapUsedBytes": 143347728,
+          "externalBytes": 4454048,
+          "arrayBuffersBytes": 679995
+        },
+        "osPeakRssBytes": 351293440
+      },
+      "elapsedSinceProcessStartMs": 1624.783813,
+      "startedAt": "2026-10-10T09:56:47.546Z"
+    }
+  ],
+  "interpretation": {
+    "gc": "Input buffers and normalized dataset references are dropped before a three-cycle explicit GC. The retained catalog entries remain live; index deltas are measured after another three-cycle GC.",
+    "rss": "RSS is process-wide. OS maxRSS is a cumulative peak since process start and can include JSON parsing; pre-index and post-index peak snapshots make that scope visible.",
+    "allocator": "Garbage collection releases unreachable objects, but the runtime allocator may retain pages, so RSS deltas can understate or overstate index-owned memory.",
+    "searches": "Browse and ten fixed lexical-search timings are local index calls after construction. They are diagnostic warm calls, not user-facing latency or quality measurements."
+  }
+}

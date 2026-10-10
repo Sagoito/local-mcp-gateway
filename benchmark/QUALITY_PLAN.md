@@ -1,5 +1,7 @@
 # Fresh factual-answer quality pilot
 
+**Historical smoke/regression pilot, not a competitive quality benchmark.** See [COMPARABILITY_PLAN.md](COMPARABILITY_PLAN.md) for the public retrieval evaluation and the separate native end-to-end protocol. This pilot's frozen results and grading limitations remain unchanged.
+
 Prespecified on 2026-10-09 before task dispatch. Primary question: does the gateway preserve factual answer correctness, required details and evidence references on tasks that were not used to tune the implementation?
 
 ## Design
