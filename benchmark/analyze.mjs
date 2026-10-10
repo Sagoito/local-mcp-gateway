@@ -49,7 +49,13 @@ for (const runId of dirs) {
       try { const event = JSON.parse(line); if (!events.some(e => e.id === event.id)) events.push(event); } catch { /* malformed event retained via status below */ }
     }
   } catch { /* run can be incomplete */ }
-  const answerFile = await maybeJson(path.join(dir, 'answer.json'));
+  // Preserve the first completed attempt if a controller mistakenly redispatches a run ID.
+  const firstFinishIndex = events.findIndex(e => e.op === 'finish' && !e.error);
+  const firstFinish = firstFinishIndex >= 0 ? events[firstFinishIndex] : null;
+  const ignoredAfterFinishEvents = firstFinishIndex >= 0 ? events.length - firstFinishIndex - 1 : 0;
+  if (firstFinishIndex >= 0) events.splice(firstFinishIndex + 1);
+  const persistedAnswer = await maybeJson(path.join(dir, 'answer.json'));
+  const answerFile = firstFinish ? { answer: firstFinish.answer } : persistedAnswer;
   const question = cfg.question ?? {};
   const questionId = question.id ?? cfg.questionId ?? cfg.question_id ?? 'unknown';
   const prompt = await readFile(path.join(dir, 'prompt.txt'), 'utf8').catch(() => question.prompt ?? cfg.prompt ?? '');
@@ -89,7 +95,7 @@ for (const runId of dirs) {
     runId, questionId, mode: cfg.mode ?? 'unknown', repetition: cfg.repetition ?? cfg.repetitionId ?? '', status,
     pass: status === 'complete' ? Boolean(pass) : null,
     expected: expected ?? null, answer: finalValue, error: events.find(e => e.error)?.error ?? null,
-    toolCalls: callEvents.length, toolErrors: callEvents.filter(e => e.error || e.response?.isError).length,
+    ignoredAfterFinishEvents, toolCalls: callEvents.length, toolErrors: callEvents.filter(e => e.error || e.response?.isError).length,
     initialToolListBytes: bytes(definitionJson), initialToolListTokens: definitionTokens,
     toolResponseTokens, requestArgumentTokens: requestTokens, finalAnswerTokens,
     finalPayloadTokenProxy: promptTokens + definitionTokens + responseAndRequestTokens + finalAnswerTokens,
@@ -105,7 +111,7 @@ for (const runId of dirs) {
   });
 }
 
-const fields = ['runId','questionId','mode','repetition','status','pass','toolCalls','toolErrors','initialToolListBytes','initialToolListTokens','toolResponseTokens','requestArgumentTokens','finalAnswerTokens','finalPayloadTokenProxy','cumulativeInputTokenProxy','outputTokenProxy','inputProxyCostAt1USDPerMTokens','outputProxyCostAt1USDPerMTokens','firstListColdSetupMs','listRpcMs','callRpcTotalMs','callRpcMedianMs','rpcTotalMs','agentElapsedMs','error'];
+const fields = ['runId','questionId','mode','repetition','status','pass','ignoredAfterFinishEvents','toolCalls','toolErrors','initialToolListBytes','initialToolListTokens','toolResponseTokens','requestArgumentTokens','finalAnswerTokens','finalPayloadTokenProxy','cumulativeInputTokenProxy','outputTokenProxy','inputProxyCostAt1USDPerMTokens','outputProxyCostAt1USDPerMTokens','firstListColdSetupMs','listRpcMs','callRpcTotalMs','callRpcMedianMs','rpcTotalMs','agentElapsedMs','error'];
 await mkdir(outputDir, { recursive: true });
 await writeFile(path.join(outputDir, 'runs.csv'), [fields.join(','), ...rows.map(r => fields.map(f => csvCell(r[f])).join(','))].join('\n') + '\n');
 const overall = {};

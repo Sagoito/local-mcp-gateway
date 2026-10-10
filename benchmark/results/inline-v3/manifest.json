@@ -1,0 +1,175 @@
+{
+  "model": "gpt-6-luna",
+  "reasoningEffort": "medium",
+  "repetitions": 2,
+  "conditions": [
+    "direct",
+    "previous gateway 6f09ea5",
+    "bounded inline gateway"
+  ],
+  "sourceHashes": {
+    "src/auth.ts": "08394fdd7a82d2dbbc4e7999c64c464dac3241e1ba7c3f6f814110d6784b7705",
+    "src/types.ts": "03888b03662dbe8fa3257a3de62d6a1377dc6c436801cf759c820ec17d88e88f",
+    "src/server.ts": "d5d2614f33675f01a71c1290764dddd322ac6ae54168341ddf0a296a637c2322",
+    "src/sandbox.ts": "d62742f1150515429fa16120ee8b3409437109be7d7c933791e1b599b8399d18",
+    "src/cli.ts": "a926cd7e104d58af1bda8d3bb9c1b659dba6f42e3296dcc0ed58fe1ec9920397",
+    "src/upstreams.ts": "0d3a6b29d35e9efbf0b6ccd0411150ed521eb53ca03d12afabdc503423567688",
+    "src/config.ts": "9bfa2c03c12514ecb84bf518718fd28c050c9bb1857a7627f5aa92f51af77b5b",
+    "src/catalog.ts": "231f0228b6b20f2f8dbf7acf1492221136528b936e041dde3f2a9b189f92105a"
+  },
+  "controlDistHashes": {
+    "config.js": "a930f6db5691ff650d4fbcebce64a63121ae571c83e171a67755daf849ad1b42",
+    "upstreams.js": "904be4ca59fc3dbfea093c9c1cbec3a03f926bc2bbd56003e896326213c55fee",
+    "sandbox.js": "5644b58c84379d991d6d53b90ea8715ff76bb791938c8b340fd0eefc0b97dd9a",
+    "server.js": "561e499aa914141a04b8f1fad166744ac7e9627deda282bca661ee531cd04d26",
+    "types.js": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "cli.js": "88c420bede26df95f6e347db8ffd66ca1240aeff3afa3a2b9426574de756e44b",
+    "auth.js": "deeed4d52c783c33d0417e666d87603f28325c43364e2586a1c94dae8419e22a"
+  },
+  "order": [
+    {
+      "directory": "mcp-control-runs",
+      "id": "q1-gateway-r1"
+    },
+    {
+      "directory": "mcp-inline-runs",
+      "id": "q1-direct-r1"
+    },
+    {
+      "directory": "mcp-inline-runs",
+      "id": "q1-gateway-r1"
+    },
+    {
+      "directory": "mcp-inline-runs",
+      "id": "q2-direct-r1"
+    },
+    {
+      "directory": "mcp-inline-runs",
+      "id": "q2-gateway-r1"
+    },
+    {
+      "directory": "mcp-control-runs",
+      "id": "q2-gateway-r1"
+    },
+    {
+      "directory": "mcp-inline-runs",
+      "id": "q3-gateway-r1"
+    },
+    {
+      "directory": "mcp-control-runs",
+      "id": "q3-gateway-r1"
+    },
+    {
+      "directory": "mcp-inline-runs",
+      "id": "q3-direct-r1"
+    },
+    {
+      "directory": "mcp-control-runs",
+      "id": "q4-gateway-r1"
+    },
+    {
+      "directory": "mcp-inline-runs",
+      "id": "q4-direct-r1"
+    },
+    {
+      "directory": "mcp-inline-runs",
+      "id": "q4-gateway-r1"
+    },
+    {
+      "directory": "mcp-inline-runs",
+      "id": "q5-direct-r1"
+    },
+    {
+      "directory": "mcp-inline-runs",
+      "id": "q5-gateway-r1"
+    },
+    {
+      "directory": "mcp-control-runs",
+      "id": "q5-gateway-r1"
+    },
+    {
+      "directory": "mcp-inline-runs",
+      "id": "q6-gateway-r1"
+    },
+    {
+      "directory": "mcp-control-runs",
+      "id": "q6-gateway-r1"
+    },
+    {
+      "directory": "mcp-inline-runs",
+      "id": "q6-direct-r1"
+    },
+    {
+      "directory": "mcp-inline-runs",
+      "id": "q1-direct-r2"
+    },
+    {
+      "directory": "mcp-inline-runs",
+      "id": "q1-gateway-r2"
+    },
+    {
+      "directory": "mcp-control-runs",
+      "id": "q1-gateway-r2"
+    },
+    {
+      "directory": "mcp-inline-runs",
+      "id": "q2-gateway-r2"
+    },
+    {
+      "directory": "mcp-control-runs",
+      "id": "q2-gateway-r2"
+    },
+    {
+      "directory": "mcp-inline-runs",
+      "id": "q2-direct-r2"
+    },
+    {
+      "directory": "mcp-control-runs",
+      "id": "q3-gateway-r2"
+    },
+    {
+      "directory": "mcp-inline-runs",
+      "id": "q3-direct-r2"
+    },
+    {
+      "directory": "mcp-inline-runs",
+      "id": "q3-gateway-r2"
+    },
+    {
+      "directory": "mcp-inline-runs",
+      "id": "q4-direct-r2"
+    },
+    {
+      "directory": "mcp-inline-runs",
+      "id": "q4-gateway-r2"
+    },
+    {
+      "directory": "mcp-control-runs",
+      "id": "q4-gateway-r2"
+    },
+    {
+      "directory": "mcp-inline-runs",
+      "id": "q5-gateway-r2"
+    },
+    {
+      "directory": "mcp-control-runs",
+      "id": "q5-gateway-r2"
+    },
+    {
+      "directory": "mcp-inline-runs",
+      "id": "q5-direct-r2"
+    },
+    {
+      "directory": "mcp-control-runs",
+      "id": "q6-gateway-r2"
+    },
+    {
+      "directory": "mcp-inline-runs",
+      "id": "q6-direct-r2"
+    },
+    {
+      "directory": "mcp-inline-runs",
+      "id": "q6-gateway-r2"
+    }
+  ]
+}

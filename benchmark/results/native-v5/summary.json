@@ -1,0 +1,269 @@
+{
+  "generatedAt": "2026-10-09T19:00:28.537Z",
+  "runsDir": "/workspace/scratch/ec180a675233/mcp-native-runs",
+  "runCount": 24,
+  "metrics": {
+    "direct": {
+      "totalRuns": 12,
+      "completeRuns": 12,
+      "missingRuns": 0,
+      "failedRuns": 0,
+      "passes": 11,
+      "passRateAmongComplete": 0.9166666666666666,
+      "medianAgentElapsedMs": 8304.5,
+      "medianCallRpcMs": 14,
+      "medianFinalPayloadTokenProxy": 4278,
+      "cumulativeInputTokenProxy": 1374069,
+      "outputTokenProxy": 913,
+      "inputProxyCostAt1USDPerMTokens": 1.374069,
+      "outputProxyCostAt1USDPerMTokens": 0.000913
+    },
+    "gateway": {
+      "totalRuns": 12,
+      "completeRuns": 12,
+      "missingRuns": 0,
+      "failedRuns": 0,
+      "passes": 12,
+      "passRateAmongComplete": 1,
+      "medianAgentElapsedMs": 7500.5,
+      "medianCallRpcMs": 24,
+      "medianFinalPayloadTokenProxy": 2242,
+      "cumulativeInputTokenProxy": 102410,
+      "outputTokenProxy": 1519,
+      "inputProxyCostAt1USDPerMTokens": 0.10241,
+      "outputProxyCostAt1USDPerMTokens": 0.001519
+    }
+  },
+  "perQuestionMode": [
+    {
+      "questionId": "filesystem-memory-join",
+      "mode": "direct",
+      "runs": 2,
+      "complete": 2,
+      "passRateAmongComplete": 1,
+      "medianAgentElapsedMs": 9305.5,
+      "medianCallRpcMs": 16,
+      "medianFinalPayloadTokenProxy": 127472
+    },
+    {
+      "questionId": "filesystem-memory-join",
+      "mode": "gateway",
+      "runs": 2,
+      "complete": 2,
+      "passRateAmongComplete": 1,
+      "medianAgentElapsedMs": 19680,
+      "medianCallRpcMs": 87.5,
+      "medianFinalPayloadTokenProxy": 2750
+    },
+    {
+      "questionId": "large-filter-aggregation",
+      "mode": "direct",
+      "runs": 2,
+      "complete": 2,
+      "passRateAmongComplete": 0.5,
+      "medianAgentElapsedMs": 18994.5,
+      "medianCallRpcMs": 22,
+      "medianFinalPayloadTokenProxy": 189451.5
+    },
+    {
+      "questionId": "large-filter-aggregation",
+      "mode": "gateway",
+      "runs": 2,
+      "complete": 2,
+      "passRateAmongComplete": 1,
+      "medianAgentElapsedMs": 8865,
+      "medianCallRpcMs": 57.5,
+      "medianFinalPayloadTokenProxy": 2182.5
+    },
+    {
+      "questionId": "multi-hop-dependency-runbook",
+      "mode": "direct",
+      "runs": 2,
+      "complete": 2,
+      "passRateAmongComplete": 1,
+      "medianAgentElapsedMs": 11425,
+      "medianCallRpcMs": 18,
+      "medianFinalPayloadTokenProxy": 4016.5
+    },
+    {
+      "questionId": "multi-hop-dependency-runbook",
+      "mode": "gateway",
+      "runs": 2,
+      "complete": 2,
+      "passRateAmongComplete": 1,
+      "medianAgentElapsedMs": 11014.5,
+      "medianCallRpcMs": 32,
+      "medianFinalPayloadTokenProxy": 2284
+    },
+    {
+      "questionId": "parallel-small-reads",
+      "mode": "direct",
+      "runs": 2,
+      "complete": 2,
+      "passRateAmongComplete": 1,
+      "medianAgentElapsedMs": 6147.5,
+      "medianCallRpcMs": 7,
+      "medianFinalPayloadTokenProxy": 4539
+    },
+    {
+      "questionId": "parallel-small-reads",
+      "mode": "gateway",
+      "runs": 2,
+      "complete": 2,
+      "passRateAmongComplete": 1,
+      "medianAgentElapsedMs": 6836.5,
+      "medianCallRpcMs": 11,
+      "medianFinalPayloadTokenProxy": 2792
+    },
+    {
+      "questionId": "small-direct-lookup",
+      "mode": "direct",
+      "runs": 2,
+      "complete": 2,
+      "passRateAmongComplete": 1,
+      "medianAgentElapsedMs": 5052.5,
+      "medianCallRpcMs": 5,
+      "medianFinalPayloadTokenProxy": 3446
+    },
+    {
+      "questionId": "small-direct-lookup",
+      "mode": "gateway",
+      "runs": 2,
+      "complete": 2,
+      "passRateAmongComplete": 1,
+      "medianAgentElapsedMs": 5326.5,
+      "medianCallRpcMs": 8.5,
+      "medianFinalPayloadTokenProxy": 1934
+    },
+    {
+      "questionId": "unfamiliar-file-search",
+      "mode": "direct",
+      "runs": 2,
+      "complete": 2,
+      "passRateAmongComplete": 1,
+      "medianAgentElapsedMs": 7333,
+      "medianCallRpcMs": 17,
+      "medianFinalPayloadTokenProxy": 3748.5
+    },
+    {
+      "questionId": "unfamiliar-file-search",
+      "mode": "gateway",
+      "runs": 2,
+      "complete": 2,
+      "passRateAmongComplete": 1,
+      "medianAgentElapsedMs": 6922.5,
+      "medianCallRpcMs": 17.5,
+      "medianFinalPayloadTokenProxy": 2200
+    }
+  ],
+  "pairedCompleteCount": 12,
+  "pairedPassRateDifferenceGatewayMinusDirect": 0.08333333333333337,
+  "pairedRuns": [
+    {
+      "questionId": "small-direct-lookup",
+      "repetition": "1",
+      "directPass": true,
+      "gatewayPass": true,
+      "directElapsedMs": 6249,
+      "gatewayElapsedMs": 3803
+    },
+    {
+      "questionId": "small-direct-lookup",
+      "repetition": "2",
+      "directPass": true,
+      "gatewayPass": true,
+      "directElapsedMs": 3856,
+      "gatewayElapsedMs": 6850
+    },
+    {
+      "questionId": "unfamiliar-file-search",
+      "repetition": "1",
+      "directPass": true,
+      "gatewayPass": true,
+      "directElapsedMs": 6510,
+      "gatewayElapsedMs": 6316
+    },
+    {
+      "questionId": "unfamiliar-file-search",
+      "repetition": "2",
+      "directPass": true,
+      "gatewayPass": true,
+      "directElapsedMs": 8156,
+      "gatewayElapsedMs": 7529
+    },
+    {
+      "questionId": "large-filter-aggregation",
+      "repetition": "1",
+      "directPass": false,
+      "gatewayPass": true,
+      "directElapsedMs": 12966,
+      "gatewayElapsedMs": 10577
+    },
+    {
+      "questionId": "large-filter-aggregation",
+      "repetition": "2",
+      "directPass": true,
+      "gatewayPass": true,
+      "directElapsedMs": 25023,
+      "gatewayElapsedMs": 7153
+    },
+    {
+      "questionId": "filesystem-memory-join",
+      "repetition": "1",
+      "directPass": true,
+      "gatewayPass": true,
+      "directElapsedMs": 10158,
+      "gatewayElapsedMs": 11111
+    },
+    {
+      "questionId": "filesystem-memory-join",
+      "repetition": "2",
+      "directPass": true,
+      "gatewayPass": true,
+      "directElapsedMs": 8453,
+      "gatewayElapsedMs": 28249
+    },
+    {
+      "questionId": "parallel-small-reads",
+      "repetition": "1",
+      "directPass": true,
+      "gatewayPass": true,
+      "directElapsedMs": 4963,
+      "gatewayElapsedMs": 6201
+    },
+    {
+      "questionId": "parallel-small-reads",
+      "repetition": "2",
+      "directPass": true,
+      "gatewayPass": true,
+      "directElapsedMs": 7332,
+      "gatewayElapsedMs": 7472
+    },
+    {
+      "questionId": "multi-hop-dependency-runbook",
+      "repetition": "1",
+      "directPass": true,
+      "gatewayPass": true,
+      "directElapsedMs": 11183,
+      "gatewayElapsedMs": 10345
+    },
+    {
+      "questionId": "multi-hop-dependency-runbook",
+      "repetition": "2",
+      "directPass": true,
+      "gatewayPass": true,
+      "directElapsedMs": 11667,
+      "gatewayElapsedMs": 11684
+    }
+  ],
+  "caveats": [
+    "Token values are UTF-8 text tokenization proxies using o200k_base, not Luna/provider-reported usage.",
+    "No billed tokens, provider usage records, or actual Luna pricing are available; cost is unpriced and must not be presented as billed cost.",
+    "Agent elapsed time spans first list request to finish request start and includes generic bridge orchestration; it is not model-only latency.",
+    "First list RPC duration includes cold connection/setup. Subsequent RPC timings are reported separately.",
+    "Accumulated payload and cumulative input are payload estimates and exclude system prompts, built-in tool definitions, reasoning, and provider framing.",
+    "Both conditions use the same generic bridge; this is not a native tool registry injection or Copilot deferred-definition baseline.",
+    "Daemon payload proxies can exceed model-visible content when the host truncates output; no actual billing savings are established.",
+    "The planned design has two repetitions per question and condition, too few to support statistical significance claims."
+  ]
+}

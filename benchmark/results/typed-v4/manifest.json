@@ -1,0 +1,64 @@
+{
+  "model": "gpt-6-luna",
+  "reasoningEffort": "medium",
+  "order": [
+    {
+      "directory": "mcp-typed-runs",
+      "id": "q1-gateway-r1"
+    },
+    {
+      "directory": "mcp-typed-runs",
+      "id": "q2-gateway-r1"
+    },
+    {
+      "directory": "mcp-typed-runs",
+      "id": "q3-gateway-r1"
+    },
+    {
+      "directory": "mcp-typed-runs",
+      "id": "q4-gateway-r1"
+    },
+    {
+      "directory": "mcp-typed-runs",
+      "id": "q5-gateway-r1"
+    },
+    {
+      "directory": "mcp-typed-runs",
+      "id": "q6-gateway-r1"
+    },
+    {
+      "directory": "mcp-typed-runs",
+      "id": "q1-gateway-r2"
+    },
+    {
+      "directory": "mcp-typed-runs",
+      "id": "q2-gateway-r2"
+    },
+    {
+      "directory": "mcp-typed-runs",
+      "id": "q3-gateway-r2"
+    },
+    {
+      "directory": "mcp-typed-runs",
+      "id": "q4-gateway-r2"
+    },
+    {
+      "directory": "mcp-typed-runs",
+      "id": "q5-gateway-r2"
+    },
+    {
+      "directory": "mcp-typed-runs",
+      "id": "q6-gateway-r2"
+    }
+  ],
+  "sourceHashes": {
+    "src/config.ts": "acb682e56719a2caf908b3fab21a657fc8e3992b682df046de74da5c4ed5b504",
+    "src/server.ts": "c66b6943eb5fa8f81efec6285052d871d8e8a840e3d3b9d8dffcab9d3015c0ee",
+    "src/auth.ts": "08394fdd7a82d2dbbc4e7999c64c464dac3241e1ba7c3f6f814110d6784b7705",
+    "src/sandbox.ts": "d62742f1150515429fa16120ee8b3409437109be7d7c933791e1b599b8399d18",
+    "src/types.ts": "46a682f1bc2e656b271b15a8fb74942cae21f6187823d19721b425b6aba0d236",
+    "src/catalog.ts": "231f0228b6b20f2f8dbf7acf1492221136528b936e041dde3f2a9b189f92105a",
+    "src/upstreams.ts": "0d3a6b29d35e9efbf0b6ccd0411150ed521eb53ca03d12afabdc503423567688",
+    "src/cli.ts": "02eb441e534b206dcadd11a16ce8870196596b368611ec8b03718095c0a791d8"
+  }
+}

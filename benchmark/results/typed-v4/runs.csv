@@ -1,0 +1,13 @@
+runId,questionId,mode,repetition,status,pass,ignoredAfterFinishEvents,toolCalls,toolErrors,initialToolListBytes,initialToolListTokens,toolResponseTokens,requestArgumentTokens,finalAnswerTokens,finalPayloadTokenProxy,cumulativeInputTokenProxy,outputTokenProxy,inputProxyCostAt1USDPerMTokens,outputProxyCostAt1USDPerMTokens,firstListColdSetupMs,listRpcMs,callRpcTotalMs,callRpcMedianMs,rpcTotalMs,agentElapsedMs,error
+q1-gateway-r1,small-direct-lookup,gateway,1,complete,true,0,3,2,5128,1231,149,105,9,1919,7490,114,0.00749,0.000114,529,529,13,4,2563,10210,
+q1-gateway-r2,small-direct-lookup,gateway,2,complete,true,0,2,1,5128,1231,119,74,9,1858,5650,83,0.00565,0.000083,411,411,10,5,2436,7817,
+q2-gateway-r1,unfamiliar-file-search,gateway,1,complete,true,0,3,0,5128,1231,258,135,10,2068,7757,145,0.007757,0.000145,425,425,22,5,2464,9348,
+q2-gateway-r2,unfamiliar-file-search,gateway,2,complete,true,0,5,1,5128,1231,305,217,10,2197,11667,227,0.011667,0.000227,412,412,48,6,2477,19855,
+q3-gateway-r1,large-filter-aggregation,gateway,1,complete,true,0,4,2,5128,1231,114,330,5,2145,9950,335,0.00995,0.000335,442,442,110,22,2569,14570,
+q3-gateway-r2,large-filter-aggregation,gateway,2,complete,true,0,7,4,5128,1231,372,671,5,2744,17817,676,0.017817,0.000676,500,500,133,19,2666,26732,
+q4-gateway-r1,filesystem-memory-join,gateway,1,complete,true,0,3,1,5128,1231,357,148,15,2204,8169,163,0.008169,0.000163,486,486,63,16,2566,9178,
+q4-gateway-r2,filesystem-memory-join,gateway,2,complete,true,0,3,1,5128,1231,407,179,15,2285,8331,194,0.008331,0.000194,447,447,89,15,2554,10551,
+q5-gateway-r1,parallel-small-reads,gateway,1,complete,true,0,2,1,5128,1231,921,118,15,2744,6655,133,0.006655,0.000133,436,436,11,5.5,2464,12343,
+q5-gateway-r2,parallel-small-reads,gateway,2,complete,true,0,1,0,5128,1231,890,65,15,2660,4796,80,0.004796,0.00008,481,481,11,11,2511,6879,
+q6-gateway-r1,multi-hop-dependency-runbook,gateway,1,complete,true,0,4,0,5128,1231,304,142,11,2145,10070,153,0.01007,0.000153,433,433,24,5.5,2476,13238,
+q6-gateway-r2,multi-hop-dependency-runbook,gateway,2,complete,true,0,4,0,5128,1231,304,143,11,2146,10073,154,0.010073,0.000154,503,503,32,8.5,2585,10771,

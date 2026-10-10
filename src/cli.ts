@@ -102,6 +102,8 @@ async function run(argv: string[]): Promise<void> {
     const config = await loadConfig(configPath);
     if (!Object.hasOwn(config.servers, positional[0]!)) throw new Error(`No server named ${positional[0]}`);
     delete config.servers[positional[0]!];
+    if (config.inlineTools) config.inlineTools = config.inlineTools.filter(t => t.server !== positional[0]);
+    if (config.nativeTools) config.nativeTools = config.nativeTools.filter(t => t.server !== positional[0]);
     await saveConfig(configPath, config);
     console.log(`Removed ${positional[0]}`); return;
   }

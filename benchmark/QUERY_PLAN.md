@@ -1,0 +1,7 @@
+# Structured retained-query follow-up
+
+Prespecified before dispatch on 2026-10-09. Native-v5 reached near-direct aggregate latency, but one join took 28.25 s due to four code quoting errors. Follow-up adds an optional structured `execute.result` route over retained JSON snapshots: own-property paths, AND scalar comparisons, all/first/count and field selection. No generated JavaScript or upstream fetch is required for this route. Host work is capped at 100,000 records and 1,000,000 visits; final output is 32 KiB.
+
+Repeat all 24 fresh runs with the same questions, five-tool native profile, two repetitions, alternating condition order, medium-reasoning gpt-6-luna and at most four benchmark workers. Freeze code before launch; no completed wrong answers are retried. Direct control runs again, not a historical comparison. Use the same bridge and collect full audit logs.
+
+Primary descriptive goal remains end-to-end median within 10% of direct. Also inspect means, every question median, tool errors, cold setup and per-call time to avoid hiding tail regressions. Compare native-v5 historically only with that timing caveat. Report actual payload proxies, not actual model usage or billed costs. No task-specific tool, hardcoded answer, or question-specific profile is introduced. The common working set is intentionally curated from earlier traces; default two-tool discovery and production/client OAuth are not measured. See NATIVE_PLAN.md for all shared controls and limitations.

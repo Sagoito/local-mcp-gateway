@@ -3,8 +3,8 @@ import assert from "node:assert/strict";
 import { executeCode } from "../src/sandbox.js";
 import type { Upstreams } from "../src/types.js";
 
-function mock(call: Upstreams["callTool"] = async (_server, tool, args) => ({ tool, args })): Upstreams {
-  return { listTools: async () => [], callTool: call, close: async () => {} };
+function mock(call: Upstreams["callTool"] = async (_server, tool, args) => ({ tool, args }), getResult?: Upstreams["getResult"]): Upstreams {
+  return { listTools: async () => [], callTool: call, ...(getResult ? { getResult } : {}), close: async () => {} };
 }
 
 test("bridges calls and supports parallel MCP calls", async () => {
@@ -46,6 +46,32 @@ test("keeps mcp.call raw and adds text and JSON result helpers", async () => {
     structuredContent: { answer: 42 },
   })));
   assert.deepEqual(structured, { answer: 42 });
+});
+
+test("retrieves retained raw results through mcp.result", async () => {
+  const retained = {
+    content: [{ type: "text", text: '{"answer":42}' }],
+    structuredContent: { answer: 42 },
+  };
+  const ids: string[] = [];
+  const upstreams = mock(undefined, async (id) => {
+    ids.push(id);
+    return retained;
+  });
+  const out = await executeCode("return mcp.json(await mcp.result('result-17'));", upstreams);
+  assert.deepEqual(out, { answer: 42 });
+  assert.deepEqual(ids, ["result-17"]);
+
+  await assert.rejects(executeCode("return await mcp.result('missing');", mock(undefined, async () => undefined)), /Unknown MCP result handle/i);
+  await assert.rejects(executeCode("return await mcp.result('result-17');", mock()), /retained results are unavailable/i);
+});
+
+test("mcp.call and mcp.result share the sandbox call budget", async () => {
+  const upstreams = mock(async () => ({ ok: true }), async () => ({ ok: true }));
+  await assert.rejects(executeCode(`
+    await mcp.call('a', 'x');
+    return await mcp.result('result-17');
+  `, upstreams, { maxCalls: 1 }), /call limit \(1\) exceeded/i);
 });
 
 test("result helpers report tool errors, missing text, and malformed JSON clearly", async () => {

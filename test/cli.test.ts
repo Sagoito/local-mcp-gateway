@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
@@ -85,4 +85,18 @@ test('add refuses to overwrite an existing server', async () => {
     const config = JSON.parse(await readFile(configPath, 'utf8'));
     assert.equal(config.servers.worker.command, 'first-command');
   } finally { await rm(dir, { recursive: true, force: true }); }
+});
+
+
+test('removing an upstream prunes only its inline and native selections', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'local-mcp-inline-remove-'));
+  const configPath = join(dir, 'config.json');
+  try {
+    await writeFile(configPath, JSON.stringify({version: 1, servers: {a: {command: 'echo'}, b: {command: 'echo'}}, inlineTools: [{server: 'a', tool: 'one'}, {server: 'b', tool: 'two'}], nativeTools: [{server: 'a', tool: 'three'}, {server: 'b', tool: 'four'}]}));
+    const result = await cli(configPath, 'remove', 'a');
+    assert.equal(result.code, 0, result.stderr);
+    const config = JSON.parse(await readFile(configPath, 'utf8'));
+    assert.deepEqual(config.inlineTools, [{server: 'b', tool: 'two'}]);
+    assert.deepEqual(config.nativeTools, [{server: 'b', tool: 'four'}]);
+  } finally { await rm(dir, {recursive: true, force: true}); }
 });

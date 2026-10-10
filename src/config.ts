@@ -58,7 +58,25 @@ function validateConfig(input: unknown): GatewayConfig {
       servers[name] = { url: entry.url, ...(entry.headers ? { headers: { ...entry.headers as Record<string,string> } } : {}), ...(oauth ? { oauth } : {}), ...(entry.disabled === true ? { disabled: true } : {}) };
     } else throw new Error(`Server ${name} must specify command or url`);
   }
-  return { version: 1, servers };
+  const validateToolEntries = (value: unknown, selectorName: 'inlineTools' | 'nativeTools'): Array<{ server: string; tool: string }> => {
+    if (!Array.isArray(value) || value.length > 5) throw new Error(`${selectorName} must be an array with at most 5 entries`);
+    const seen = new Set<string>();
+    return value.map((raw, index) => {
+      if (!raw || typeof raw !== 'object' || Array.isArray(raw)) throw new Error(`Invalid ${selectorName} entry at index ${index}`);
+      const entry = raw as Record<string, unknown>;
+      if (Object.keys(entry).length !== 2 || !Object.hasOwn(entry, 'server') || !Object.hasOwn(entry, 'tool')) throw new Error(`Invalid ${selectorName} entry at index ${index}`);
+      if (typeof entry.server !== 'string' || !validServerName(entry.server)) throw new Error(`Invalid server name in ${selectorName} entry at index ${index}`);
+      if (!Object.hasOwn(servers, entry.server)) throw new Error(`Unknown ${selectorName} server: ${entry.server}`);
+      if (typeof entry.tool !== 'string' || entry.tool.length === 0 || entry.tool.length > 200 || /[\u0000-\u001f\u007f-\u009f]/.test(entry.tool)) throw new Error(`Invalid tool name in ${selectorName} entry at index ${index}`);
+      const entryKey = JSON.stringify([entry.server, entry.tool]);
+      if (seen.has(entryKey)) throw new Error(`Duplicate ${selectorName} entry: ${entry.server}/${entry.tool}`);
+      seen.add(entryKey);
+      return { server: entry.server, tool: entry.tool };
+    });
+  };
+  const inlineTools = obj.inlineTools !== undefined ? validateToolEntries(obj.inlineTools, 'inlineTools') : undefined;
+  const nativeTools = obj.nativeTools !== undefined ? validateToolEntries(obj.nativeTools, 'nativeTools') : undefined;
+  return { version: 1, servers, ...(inlineTools !== undefined ? { inlineTools } : {}), ...(nativeTools !== undefined ? { nativeTools } : {}) };
 }
 
 export async function loadConfig(path: string): Promise<GatewayConfig> {

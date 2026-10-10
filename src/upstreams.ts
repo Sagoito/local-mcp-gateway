@@ -77,7 +77,7 @@ export function createUpstreams(config: GatewayConfig, configPath: string): Upst
             const result = await withTimeout(client.listTools(cursor ? { cursor } : {}, { signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) }), REQUEST_TIMEOUT_MS, `Listing tools on ${server} timed out`);
             for (const tool of result.tools) {
               if (++discovered > 5000) throw new Error('tool limit exceeded');
-              tools.push({ server, name: tool.name, ...(tool.description ? { description: tool.description } : {}), inputSchema: tool.inputSchema as Record<string, unknown> });
+              tools.push({ server, name: tool.name, ...(tool.description ? { description: tool.description } : {}), inputSchema: tool.inputSchema as Record<string, unknown>, ...(tool.annotations ? {annotations:tool.annotations} : {}) });
             }
             cursor = result.nextCursor;
           } while (cursor);

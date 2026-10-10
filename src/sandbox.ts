@@ -77,28 +77,28 @@ export async function executeCode(code: string, upstreams: Upstreams, options: S
     }
     finally { arg.dispose(); }
   };
-  const bridge = context.newFunction("call", (serverH, toolH, argsH) => {
-    const hostPromise = (promise: Promise<unknown>) => {
-      const deferred = context.newPromise();
-      deferreds.add(deferred);
-      void promise.then((value) => {
-        if (disposed) return;
-        const handle = parse(String(value));
-        deferred.resolve(handle);
-        handle.dispose();
-      }, (reason: unknown) => {
-        if (disposed) return;
-        const error = context.newError(reason instanceof Error ? reason.message : String(reason));
-        deferred.reject(error);
-        error.dispose();
-      }).catch((error: unknown) => {
-        // Parsing may fail when a large intermediate result exhausts the guest heap.
-        // Surface it to the main loop rather than leaving a pending promise until timeout.
-        if (!disposed) callbackFailure = error instanceof Error ? error : new Error('Unable to import MCP result');
-      });
-      return deferred.handle;
-    };
-    const reject = (message: string) => hostPromise(Promise.reject(new Error(message)));
+  const hostPromise = (promise: Promise<unknown>) => {
+    const deferred = context.newPromise();
+    deferreds.add(deferred);
+    void promise.then((value) => {
+      if (disposed) return;
+      const handle = parse(String(value));
+      deferred.resolve(handle);
+      handle.dispose();
+    }, (reason: unknown) => {
+      if (disposed) return;
+      const error = context.newError(reason instanceof Error ? reason.message : String(reason));
+      deferred.reject(error);
+      error.dispose();
+    }).catch((error: unknown) => {
+      // Parsing may fail when a large intermediate result exhausts the guest heap.
+      // Surface it to the main loop rather than leaving a pending promise until timeout.
+      if (!disposed) callbackFailure = error instanceof Error ? error : new Error('Unable to import MCP result');
+    });
+    return deferred.handle;
+  };
+  const reject = (message: string) => hostPromise(Promise.reject(new Error(message)));
+  const callBridge = context.newFunction("call", (serverH, toolH, argsH) => {
     if (++calls > maxCalls) return reject(`MCP call limit (${maxCalls}) exceeded`);
     const server = context.getString(serverH);
     const tool = context.getString(toolH);
@@ -106,18 +106,32 @@ export async function executeCode(code: string, upstreams: Upstreams, options: S
     try { args = JSON.parse(context.getString(argsH)); }
     catch { return reject("Invalid MCP arguments"); }
     if (!args || typeof args !== "object" || Array.isArray(args)) return reject("MCP arguments must be an object");
-    const rpc = upstreams.callTool(server, tool, args as Record<string, unknown>, abort.signal)
+    const rpc = Promise.resolve().then(() => upstreams.callTool(server, tool, args as Record<string, unknown>, abort.signal))
       .then((value) => jsonBytes(value, MAX_RPC_RESULT, "MCP result"));
     return hostPromise(rpc);
   });
-  context.setProp(context.global, "__hostCall", bridge);
-  bridge.dispose();
+  const resultBridge = context.newFunction("result", (idH) => {
+    if (++calls > maxCalls) return reject(`MCP call limit (${maxCalls}) exceeded`);
+    const id = context.getString(idH);
+    if (!id) return reject("MCP result handle must be a non-empty string");
+    if (!upstreams.getResult) return reject("MCP retained results are unavailable");
+    const result = Promise.resolve().then(() => upstreams.getResult!(id)).then((value) => {
+      if (value === undefined) throw new Error(`Unknown MCP result handle "${id}"`);
+      return jsonBytes(value, MAX_RPC_RESULT, "MCP result");
+    });
+    return hostPromise(result);
+  });
+  context.setProp(context.global, "__hostCall", callBridge);
+  context.setProp(context.global, "__hostResult", resultBridge);
+  callBridge.dispose();
+  resultBridge.dispose();
 
   const prelude = `
     delete globalThis.process; delete globalThis.require; delete globalThis.fetch;
     delete globalThis.XMLHttpRequest; delete globalThis.WebSocket; delete globalThis.console;
     const __safeStringify = JSON.stringify.bind(JSON);
     const __safeCall = globalThis.__hostCall;
+    const __safeResult = globalThis.__hostResult;
     const text = result => {
       if (result && result.isError === true) throw new Error('MCP tool returned an error result');
       const blocks = result && Array.isArray(result.content) ? result.content : [];
@@ -154,6 +168,10 @@ export async function executeCode(code: string, upstreams: Upstreams, options: S
       if (typeof server !== 'string' || typeof tool !== 'string' || !args || typeof args !== 'object' || Array.isArray(args))
         return Promise.reject(new TypeError('mcp.call expects server, tool, and object arguments'));
       return __safeCall(server, tool, __safeStringify(args));
+    }, result: id => {
+      if (typeof id !== 'string' || id.length === 0)
+        return Promise.reject(new TypeError('mcp.result expects a non-empty result handle string'));
+      return __safeResult(id);
     }, text, json, rows});
   `;
   try {

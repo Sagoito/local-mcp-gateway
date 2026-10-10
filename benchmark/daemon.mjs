@@ -52,7 +52,7 @@ async function getSession(runId) {
     if (!cfg.gatewayConfig || cfg.gatewayConfig.version !== 1 || !cfg.gatewayConfig.servers) throw new Error('Invalid gateway configuration');
     const gatewayPath = path.join(runDir, 'gateway.json');
     await atomicJson(gatewayPath, cfg.gatewayConfig);
-    session.clients.set('gateway', await connect(process.execPath, [path.resolve(path.dirname(new URL(import.meta.url).pathname), '../dist/cli.js'), '--config', gatewayPath, 'serve']));
+    session.clients.set('gateway', await connect(process.execPath, [cfg.gatewayEntry ?? path.resolve(path.dirname(new URL(import.meta.url).pathname), '../dist/cli.js'), '--config', gatewayPath, 'serve']));
   }
   sessions.set(runId, session);
   return session;
@@ -98,6 +98,9 @@ async function closeRun(runId) {
   sessions.delete(runId);
 }
 async function processRequest(file) {
+  const claimed = `${file}.processing`;
+  try { await rename(file, claimed); } catch { return; }
+  file = claimed;
   let req;
   try { req = await readJson(file); }
   catch (error) { await rename(file, `${file}.invalid`).catch(() => {}); return; }
