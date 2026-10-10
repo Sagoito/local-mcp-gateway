@@ -1,5 +1,6 @@
 import { newQuickJSWASMModule } from "quickjs-emscripten";
 import type { Upstreams, SandboxOptions } from "./types.js";
+import { assertCallArguments } from "./policy.js";
 
 const DEFAULT_TIMEOUT = 15_000;
 const MAX_TIMEOUT = 60_000;
@@ -8,6 +9,7 @@ const DEFAULT_CALLS = 32;
 const DEFAULT_OUTPUT = 32 * 1024;
 const MAX_CODE = 64 * 1024;
 const MAX_RPC_RESULT = 8 * 1024 * 1024;
+const MAX_CALL_ARGUMENTS = 64 * 1024;
 // Reuse the expensive WASM module initialization while creating a new runtime and
 // context for every execution below. QuickJS state therefore remains isolated.
 const wasmModule = newQuickJSWASMModule();
@@ -34,17 +36,22 @@ export async function executeCode(code: string, upstreams: Upstreams, options: S
   const maxCalls = bounded(options.maxCalls, DEFAULT_CALLS, 1, 10_000, "maxCalls");
   const maxOutputBytes = bounded(options.maxOutputBytes, DEFAULT_OUTPUT, 1, 16 * 1024 * 1024, "maxOutputBytes");
   const deadline = Date.now() + timeoutMs;
+  if (options.signal?.aborted) throw new Error("Sandbox aborted");
   const wasm = await wasmModule;
+  if (options.signal?.aborted) throw new Error("Sandbox aborted");
   const runtime = wasm.newRuntime({ memoryLimitBytes: memoryBytes });
   const context = runtime.newContext();
   const abort = new AbortController();
   let calls = 0;
   let disposed = false;
+  let externallyAborted = false;
   let callbackFailure: Error | undefined;
   const deferreds = new Set<ReturnType<typeof context.newPromise>>();
   const jsonObject = context.getProp(context.global, "JSON");
   const jsonParse = context.getProp(jsonObject, "parse");
-  runtime.setInterruptHandler(() => Date.now() >= deadline);
+  const onAbort = () => { externallyAborted = true; abort.abort(); };
+  options.signal?.addEventListener("abort", onAbort, { once: true });
+  runtime.setInterruptHandler(() => externallyAborted || abort.signal.aborted || Date.now() >= deadline);
 
   const pump = () => {
     if (disposed) return;
@@ -103,10 +110,16 @@ export async function executeCode(code: string, upstreams: Upstreams, options: S
     const server = context.getString(serverH);
     const tool = context.getString(toolH);
     let args: unknown;
-    try { args = JSON.parse(context.getString(argsH)); }
-    catch { return reject("Invalid MCP arguments"); }
-    if (!args || typeof args !== "object" || Array.isArray(args)) return reject("MCP arguments must be an object");
-    const rpc = Promise.resolve().then(() => upstreams.callTool(server, tool, args as Record<string, unknown>, abort.signal))
+    try {
+      args = JSON.parse(context.getString(argsH));
+      assertCallArguments(args, MAX_CALL_ARGUMENTS);
+    }
+    catch (error) { return reject(error instanceof Error ? error.message : "Invalid MCP arguments"); }
+    const rpc = Promise.resolve().then(() => {
+      if (disposed || abort.signal.aborted || externallyAborted || Date.now() >= deadline)
+        throw new Error(externallyAborted ? "Sandbox aborted" : `Sandbox timed out after ${timeoutMs}ms`);
+      return upstreams.callTool(server, tool, args as Record<string, unknown>, abort.signal);
+    })
       .then((value) => jsonBytes(value, MAX_RPC_RESULT, "MCP result"));
     return hostPromise(rpc);
   });
@@ -115,7 +128,11 @@ export async function executeCode(code: string, upstreams: Upstreams, options: S
     const id = context.getString(idH);
     if (!id) return reject("MCP result handle must be a non-empty string");
     if (!upstreams.getResult) return reject("MCP retained results are unavailable");
-    const result = Promise.resolve().then(() => upstreams.getResult!(id)).then((value) => {
+    const result = Promise.resolve().then(() => {
+      if (disposed || abort.signal.aborted || externallyAborted || Date.now() >= deadline)
+        throw new Error(externallyAborted ? "Sandbox aborted" : `Sandbox timed out after ${timeoutMs}ms`);
+      return upstreams.getResult!(id);
+    }).then((value) => {
       if (value === undefined) throw new Error(`Unknown MCP result handle "${id}"`);
       return jsonBytes(value, MAX_RPC_RESULT, "MCP result");
     });
@@ -192,6 +209,7 @@ export async function executeCode(code: string, upstreams: Upstreams, options: S
     try {
       while (true) {
         if (callbackFailure) throw callbackFailure;
+        if (externallyAborted || options.signal?.aborted) throw new Error("Sandbox aborted");
         if (Date.now() >= deadline) throw new Error(`Sandbox timed out after ${timeoutMs}ms`);
         pump();
         const state = context.getPromiseState(promise);
@@ -211,6 +229,7 @@ export async function executeCode(code: string, upstreams: Upstreams, options: S
       }
     } finally { promise.dispose(); }
   } finally {
+    options.signal?.removeEventListener("abort", onAbort);
     abort.abort();
     disposed = true;
     for (const deferred of deferreds) deferred.dispose();

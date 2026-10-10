@@ -19,6 +19,25 @@ async function cli(configPath: string, ...args: string[]) {
   }
 }
 
+test('CLI creates explicit tool allowlists and preserves them through other edits', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'local-mcp-cli-policy-'));
+  const path = join(dir,'config.json');
+  try {
+    let out = await cli(path,'add','files','--allow-tool','read_text_file','--allow-tool','search_files','--','node','server.mjs');
+    assert.equal(out.code,0,out.stderr);
+    out = await cli(path,'add','disabled-tools','--no-tools','--url','https://example.test/mcp');
+    assert.equal(out.code,0,out.stderr);
+    out = await cli(path,'add','ambiguous','--no-tools','--allow-tool','read','--','node');
+    assert.notEqual(out.code,0);
+    assert.match(out.stderr,/not both/);
+    out = await cli(path,'remove','disabled-tools');
+    assert.equal(out.code,0,out.stderr);
+    const config=JSON.parse(await readFile(path,'utf8'));
+    assert.deepEqual(config.servers.files.allowedTools,['read_text_file','search_files']);
+    assert.equal('ambiguous' in config.servers,false);
+  } finally { await rm(dir,{recursive:true,force:true}); }
+});
+
 test('config may be parsed before the upstream -- boundary', async () => {
   const dir = await mkdtemp(join(tmpdir(), 'local-mcp-cli-boundary-'));
   const configPath = join(dir, 'config.json');

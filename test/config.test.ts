@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, readFile, rm, stat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { expandEnv, loadConfig, saveConfig } from '../src/config.js';
+import { expandEnv, loadConfig, saveConfig, validateHttpUrl } from '../src/config.js';
 
 test('expands variables and does not expose missing values', () => {
   process.env.LOCAL_MCP_TEST_TOKEN = 'secret-value';
@@ -118,4 +118,34 @@ test('rejects malformed, duplicate, and unknown native tool selectors', async ()
     await assert.rejects(saveConfig(path, { ...base, nativeTools: [{ server: 'worker', tool: 'bad\nname' }] }), /Invalid tool name/);
     await assert.rejects(saveConfig(path, { ...base, nativeTools: [{ server: 'worker', tool: 'x', extra: true }] } as never), /Invalid nativeTools entry/);
   } finally { await rm(dir, { recursive: true, force: true }); }
+});
+
+test('validates security, limits, and strict server settings', async () => {
+  const base = { version: 1 as const, servers: { worker: { command: 'node' } } };
+  const dir = await mkdtemp(join(tmpdir(), 'local-mcp-policy-config-'));
+  const path = join(dir, 'config.json');
+  try {
+    await assert.rejects(saveConfig(path, { ...base, security: { allowCode: 'yes' } } as never), /allowCode must be a boolean/);
+    await assert.rejects(saveConfig(path, { ...base, security: { typo: true } } as never), /Unknown security setting/);
+    await assert.rejects(saveConfig(path, { ...base, limits: { maxTools: 0 } }), /Invalid limits.maxTools/);
+    await assert.rejects(saveConfig(path, { ...base, limits: { maxCatalogBytes: 129 * 1024 * 1024 } }), /Invalid limits.maxCatalogBytes/);
+    await assert.rejects(saveConfig(path, { ...base, limits: { typo: 4 } } as never), /Unknown limits setting/);
+    await assert.rejects(saveConfig(path, { version: 1, servers: { worker: { command: 'node', allowedTool: ['x'] } } } as never), /Unknown setting allowedTool/);
+    await assert.rejects(saveConfig(path, { ...base, securty: { allowCode: true } } as never), /Unknown config key: securty/);
+    await assert.rejects(saveConfig(path, { version: 1, servers: { worker: { command: 'node', env: { 'BAD-NAME': 'x' } } } } as never), /Invalid env/);
+    await assert.rejects(saveConfig(path, { version: 1, servers: { remote: { url: 'https://example.com', oauth: { clientId: 'x', typo: true } } } } as never), /Unknown OAuth setting/);
+    await assert.rejects(saveConfig(path, { version: 1, servers: { remote: { url: 'https://example.com', oauth: { clientSecretEnv: 'BAD-NAME' } } } } as never), /Invalid OAuth secret environment name/);
+    await saveConfig(path, { ...base, security: { allowCode: false }, limits: { maxPages: 25 } });
+    assert.deepEqual((await loadConfig(path)).security, { allowCode: false });
+    assert.deepEqual((await loadConfig(path)).limits, { maxPages: 25 });
+  } finally { await rm(dir, { recursive: true, force: true }); }
+});
+
+test('validates fully resolved HTTP URLs', () => {
+  assert.equal(validateHttpUrl('https://example.com/mcp', 'remote').hostname, 'example.com');
+  process.env.LOCAL_MCP_URL_PART = 'secret';
+  try { assert.equal(validateHttpUrl('https://example.com/${LOCAL_MCP_URL_PART}', 'remote').pathname, '/$%7BLOCAL_MCP_URL_PART%7D'); }
+  finally { delete process.env.LOCAL_MCP_URL_PART; }
+  assert.throws(() => validateHttpUrl('http://example.com', 'remote'), /must use HTTPS/);
+  assert.throws(() => validateHttpUrl('https://user:secret@example.com', 'remote'), /user information/);
 });

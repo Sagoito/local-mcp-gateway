@@ -2,6 +2,8 @@
 
 Research date: 2026-10-10. Status: proposal; no new performance results or production changes.
 
+The implementation audit below describes the v10 baseline (`0c4b6e4`). The subsequent security update preserves catalogue identity across unchanged refreshes, fixes aggregate cached/fresh budgets and bounds discovery lookahead; see [security notes](../SECURITY.md). Persistent index restoration and daemon operation remain proposals.
+
 ## Recommendation
 
 Build the tool index during an explicit preparation step, persist the prepared catalogue and index, and restore compatible generations on restart. Refresh upstreams independently and publish changed generations atomically. Offer a local daemon later for users who want to retain upstream connections between conversations.

@@ -1,0 +1,37 @@
+{
+  "date": "2026-10-10",
+  "environment": {
+    "node": "24.19.0",
+    "platform": "Linux"
+  },
+  "checks": {
+    "command": "npm test",
+    "passed": 85,
+    "failed": 0,
+    "skipped": 0,
+    "liveToolCapRegression": {
+      "default5000Rejects5001": true,
+      "explicit6000Accepts5001": true
+    },
+    "frozenV10ArtifactsUnchanged": true
+  },
+  "context": {
+    "defaultTools": 2,
+    "defaultDefinitionJsonBytes": 3160,
+    "o200kProxy": 758,
+    "frozenV10Proxy": 753,
+    "note": "JSON definition token proxy only; not provider context or billed usage"
+  },
+  "sourceSha256": {
+    "src/auth.ts": "237378d0f75dff04e443fb072f6a94bb39ce9028ce4e5aa7c8e0af3e3eaf3b33",
+    "src/cli.ts": "39aeccb3d07eaefa40a5fa817507bb25e15fb998dbb8896e096e82bcc19f0e18",
+    "src/config.ts": "d63627623c369ed3f2aec5f6b376bced8c33c25e8f9081fd26ca7a40addc8962",
+    "src/policy.ts": "fe25a9f0c5d334e510376276244adc08afe65161d43f814653c499ff92090e53",
+    "src/results.ts": "dcacecc4ae31d287b664402e630cce35ddce48d91595be8659b5c6874029481c",
+    "src/sandbox.ts": "58adb934dfa5f58dbaa260c7df3fb04319c517fd3abd9f27b5179ac8941d6a1a",
+    "src/server.ts": "ce47830e69996cc594acd590c7cf9f4cbb34d09e02047d0603c1c00f58381a5e",
+    "src/types.ts": "74554b2e32a6e8b19e36488be99fc23b9dcd2ce23b6c2e2eace8ff9f838f1a21",
+    "src/upstreams.ts": "a10b68127aaa126983b25165c4af45d3a340b585fe4f143f142d32f2e72d910e",
+    "src/search.ts": "658a6c08fbb2bf75d4ef00ca6b52d9af6b851bd0d49ac6d4c8646f136e3912f0"
+  }
+}

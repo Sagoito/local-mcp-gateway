@@ -21,6 +21,80 @@ function textOf(result: { content: Array<{ type: string; text?: string }> }): st
   return result.content.find(item => item.type === 'text')?.text ?? '';
 }
 
+test('disabling JavaScript keeps structured calls and retained JSON filtering available', async () => {
+  let security: GatewayConfig['security'] = {allowCode:false};
+  let calls=0;
+  const upstreams: Upstreams={listTools:async()=>[],close:async()=>{},callTool:async()=>{
+    calls++;
+    return {content:[{type:'text',text:JSON.stringify({rows:Array.from({length:400},(_,id)=>({id,padding:'x'.repeat(100)}))})}]};
+  }};
+  const client=await connected(createGateway(upstreams,undefined,[],undefined,undefined,()=>security));
+  try {
+    const execute=(await client.listTools()).tools.find(t=>t.name==='execute')!;
+    assert.equal(Object.hasOwn(execute.inputSchema.properties ?? {},'code'),false);
+    const denied=await client.callTool({name:'execute',arguments:{code:"await mcp.call('s','write'); return 1"}});
+    assert.equal(denied.isError,true); assert.match(textOf(denied),/disabled by gateway policy/); assert.equal(calls,0);
+    const result=JSON.parse(textOf(await client.callTool({name:'execute',arguments:{call:{server:'s',tool:'list'}}})));
+    assert.equal(textOf({content:[{type:'text',text:result.hint}]}).includes('execute.code'),false);
+    const count=await client.callTool({name:'execute',arguments:{result:{id:result.gatewayResult.id,path:['rows'],action:'count'}}});
+    assert.equal(JSON.parse(textOf(count)),400); assert.equal(calls,1);
+    security={allowCode:true};
+    assert.equal(Object.hasOwn((await client.listTools()).tools.find(t=>t.name==='execute')!.inputSchema.properties ?? {},'code'),true);
+    const enabled=await client.callTool({name:'execute',arguments:{code:'return 7;'}});
+    assert.equal(JSON.parse(textOf(enabled)),7);
+  } finally {await client.close();}
+});
+
+test('structured and native calls reject oversized UTF-8 arguments before upstream dispatch', async () => {
+  let calls=0;
+  const tools:ToolEntry[]=[{server:'s',name:'read',inputSchema:{type:'object'}}];
+  const client=await connected(createGateway({listTools:async()=>tools,close:async()=>{},callTool:async()=>{calls++;return {content:[{type:'text',text:'ok'}]};}},undefined,tools,()=>[],t=>t));
+  try {
+    const args={padding:'é'.repeat(40_000)};
+    for(const call of [{name:'execute',arguments:{call:{server:'s',tool:'read',args}}},{name:'s__read',arguments:args}]) {
+      const response=await client.callTool(call);
+      assert.equal(response.isError,true); assert.match(textOf(response),/size limit/);
+    }
+    assert.equal(calls,0);
+    const small=await client.callTool({name:'s__read',arguments:{padding:'ok'}});
+    assert.equal(small.isError,undefined); assert.equal(calls,1);
+  } finally {await client.close();}
+});
+
+test('real stdio gateway enforces allowlists across discovery, code, direct calls and config revocation', async () => {
+  const dir=await mkdtemp(join(tmpdir(),'local-mcp-policy-'));
+  const path=join(dir,'config.json');
+  const config:GatewayConfig={version:1,servers:{
+    issues:{command:process.execPath,args:[resolve('examples/demo-server.mjs'),'issues'],allowedTools:['list_issues']},
+    build:{command:process.execPath,args:[resolve('examples/demo-server.mjs'),'builds'],allowedTools:[]},
+  },nativeTools:[{server:'issues',tool:'list_issues'},{server:'build',tool:'get_build'}]};
+  await saveConfig(path,config);
+  const client=new Client({name:'policy-stdio-test',version:'1.0'});
+  const transport=new StdioClientTransport({command:process.execPath,args:[resolve('dist/cli.js'),'--config',path,'serve'],stderr:'pipe'});
+  try {
+    await client.connect(transport);
+    assert.deepEqual((await client.listTools()).tools.map(t=>t.name).sort(),['execute','issues__list_issues','search']);
+    const search=JSON.parse(textOf(await client.callTool({name:'search',arguments:{server:'build'}})));
+    assert.equal(search.matched,0);
+    for(const arguments_ of [{call:{server:'build',tool:'get_build'}},{code:"return await mcp.call('build','get_build',{})"}]) {
+      const response=await client.callTool({name:'execute',arguments:arguments_});
+      assert.equal(response.isError,true);assert.match(textOf(response),/not allowed by server policy/);
+    }
+    const ok=await client.callTool({name:'issues__list_issues',arguments:{}});
+    assert.equal(ok.isError,undefined);
+    config.servers.issues!.allowedTools=[];
+    config.security={allowCode:false};
+    await saveConfig(path,config);
+    const revoked=await client.callTool({name:'issues__list_issues',arguments:{}});
+    assert.equal(revoked.isError,true);
+    assert.deepEqual((await client.listTools()).tools.map(t=>t.name).sort(),['execute','search']);
+    const guessed=await client.callTool({name:'execute',arguments:{call:{server:'issues',tool:'list_issues'}}});
+    assert.equal(guessed.isError,true);assert.match(textOf(guessed),/not allowed by server policy/);
+    const code=await client.callTool({name:'execute',arguments:{code:'return 1;'}});
+    assert.equal(code.isError,true);assert.match(textOf(code),/disabled by gateway policy/);
+  } finally {await client.close();await rm(dir,{recursive:true,force:true});}
+});
+
 test('catalog discovery stays bounded and only expands the exact requested schema', async () => {
   const tools: ToolEntry[] = Array.from({ length: 1000 }, (_, i) => ({
     server: 'bulk', name: `tool_${i}`, description: `Synthetic fixture tool ${i}`,
@@ -224,7 +298,7 @@ test('structured calls avoid code, reject ambiguous requests and retain oversize
 });
 
 
-test('native tools preserve complete schemas and hints, route directly, and retain large responses', async () => {
+test('native tools preserve schemas, use conservative hints, route directly, and retain large responses', async () => {
   const tool: ToolEntry = {server:'files',name:'read',description:'Read a document',annotations:{readOnlyHint:true},inputSchema:{type:'object',properties:{path:{type:'string',pattern:'^/'},format:{enum:['text','json']}},required:['path'],additionalProperties:false}};
   let calls = 0;
   const upstreams: Upstreams = {listTools:async()=>[tool],close:async()=>{},callTool:async(s,t,args)=>{
@@ -237,7 +311,7 @@ test('native tools preserve complete schemas and hints, route directly, and reta
     assert.equal(tools.length,3);
     const definition = tools.find(t=>t.name==='files__read')!;
     assert.deepEqual(definition.inputSchema,tool.inputSchema);
-    assert.deepEqual(definition.annotations,tool.annotations);
+    assert.deepEqual(definition.annotations,{readOnlyHint:false,destructiveHint:true,idempotentHint:false,openWorldHint:true});
     const result = await client.callTool({name:'files__read',arguments:{path:'/big'}});
     assert.equal(result.isError,undefined);
     const data = JSON.parse(textOf(result));

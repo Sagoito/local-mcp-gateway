@@ -5,7 +5,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { auth } from '@modelcontextprotocol/sdk/client/auth.js';
-import { createAuthProvider } from '../src/auth.js';
+import { createAuthProvider, startCallbackServer } from '../src/auth.js';
 
 const resourceUrl = 'https://resource.example/mcp';
 const issuer = 'https://auth.example';
@@ -79,3 +79,34 @@ test('OAuth discovery, DCR, PKCE authorization-code exchange, and refresh use SD
 function json(value: unknown): Response {
   return new Response(JSON.stringify(value), { status: 200, headers: { 'content-type': 'application/json' } });
 }
+
+test('OAuth rejects insecure or credential-bearing expanded and authorization URLs', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'local-mcp-oauth-url-'));
+  const previous = process.env.LOCAL_MCP_TEST_HOST;
+  try {
+    process.env.LOCAL_MCP_TEST_HOST = 'remote.example';
+    assert.throws(() => createAuthProvider('remote', {url: 'http://${LOCAL_MCP_TEST_HOST}/mcp'}, join(dir,'config.json')), /HTTPS/);
+    process.env.LOCAL_MCP_TEST_HOST = 'user:private-secret@remote.example';
+    assert.throws(() => createAuthProvider('remote', {url: 'https://${LOCAL_MCP_TEST_HOST}/mcp'}, join(dir,'config.json')), /user information/);
+    const provider = createAuthProvider('remote', {url: resourceUrl}, join(dir,'config.json'), true);
+    await assert.rejects(provider.redirectToAuthorization(new URL('http://remote.example/authorize')), /HTTPS/);
+    await assert.rejects(provider.redirectToAuthorization(new URL('https://user:secret@remote.example/authorize')), /user information/);
+    await assert.rejects(provider.redirectToAuthorization(new URL('javascript:alert(1)')), /HTTPS/);
+  } finally {
+    if (previous === undefined) delete process.env.LOCAL_MCP_TEST_HOST;
+    else process.env.LOCAL_MCP_TEST_HOST = previous;
+    await rm(dir, {recursive:true,force:true});
+  }
+});
+
+test('loopback OAuth callback validates state and handles a completed response only once', async () => {
+  const callback=await startCallbackServer(async url=>url.searchParams.get('state')==='test-state');
+  try {
+    assert.equal((await fetch('http://127.0.0.1:43127/other')).status,404);
+    assert.equal((await fetch('http://127.0.0.1:43127/callback?state=wrong&code=wrong')).status,400);
+    assert.equal((await fetch('http://127.0.0.1:43127/callback?state=test-state')).status,400);
+    assert.equal((await fetch('http://127.0.0.1:43127/callback?state=test-state&code=first')).status,200);
+    assert.equal((await callback.result).searchParams.get('code'),'first');
+    assert.equal((await fetch('http://127.0.0.1:43127/callback?state=test-state&code=second')).status,409);
+  } finally {await callback.close();}
+});

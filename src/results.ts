@@ -7,6 +7,7 @@ const DEFAULT_TTL_MS = 5 * 60 * 1000;
 const MAX_METADATA_BYTES = 4 * 1024;
 
 export interface ResultStoreOptions {
+  allowCode?: () => boolean;
   inlineBytes?: number;
   maxEntries?: number;
   maxTotalBytes?: number;
@@ -23,6 +24,7 @@ interface StoredResult {
 
 /** Normalizes MCP results and keeps oversized raw results in a bounded snapshot cache. */
 export class ResultStore {
+  private readonly allowCode: () => boolean;
   private readonly inlineBytes: number;
   private readonly maxEntries: number;
   private readonly maxTotalBytes: number;
@@ -33,6 +35,7 @@ export class ResultStore {
   private totalBytes = 0;
 
   constructor(options: ResultStoreOptions = {}) {
+    this.allowCode = options.allowCode ?? (() => true);
     this.inlineBytes = nonNegativeInteger(options.inlineBytes, DEFAULT_INLINE_BYTES, 'inlineBytes');
     this.maxEntries = nonNegativeInteger(options.maxEntries, DEFAULT_ENTRY_LIMIT, 'maxEntries');
     this.maxTotalBytes = nonNegativeInteger(options.maxTotalBytes, DEFAULT_TOTAL_BYTES, 'maxTotalBytes');
@@ -79,7 +82,7 @@ export class ResultStore {
     this.retain(id, rawSnapshot, snapshotBytes);
     const metadata = {
       gatewayResult: { id, bytes: outputBytes, shape: summarizeShape(value) },
-      hint: `For JSON, call execute.result with id ${JSON.stringify(id)}, path to the desired array, where comparisons, and action all/first/count. Use execute.code with mcp.result(${JSON.stringify(id)}) for custom processing; for ordinary text use mcp.text(await mcp.result(${JSON.stringify(id)})).`,
+      hint: `For JSON, call execute.result with id ${JSON.stringify(id)}, path to the desired array, where comparisons, and action all/first/count.` + (this.allowCode() ? ` Use execute.code with mcp.result(${JSON.stringify(id)}) for custom processing; for ordinary text use mcp.text(await mcp.result(${JSON.stringify(id)})).` : ' JavaScript processing is disabled; retained non-JSON text requires a smaller upstream response.'),
     };
     const serialized = JSON.stringify(metadata);
     if (Buffer.byteLength(serialized, 'utf8') > MAX_METADATA_BYTES) {

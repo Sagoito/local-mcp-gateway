@@ -28,6 +28,7 @@ function parse(argv: string[]): Parsed {
     const tail = split >= 0 ? tokens.splice(split) : [];
     const parsed = parseArgs({ args: tokens, options: {
       url: { type: 'string' }, header: { type: 'string', multiple: true }, env: { type: 'string', multiple: true }, 'oauth-client-id': { type: 'string' },
+      'allow-tool': { type: 'string', multiple: true }, 'no-tools': { type: 'boolean' },
     }, allowPositionals: true, strict: true });
     const positionals = [...parsed.positionals, ...tail.slice(1)];
     if (tail.length) positionals.splice(parsed.positionals.length, 0, '--');
@@ -38,7 +39,7 @@ function parse(argv: string[]): Parsed {
 }
 
 function usage(): string {
-  return `Usage: local-mcp [--config PATH] <command>\n\nCommands:\n  init\n  add NAME --url URL [--header 'Name=Value'] [--oauth-client-id ID]\n  add NAME [--env KEY=VALUE]... -- COMMAND [ARGS...]\n  remove NAME\n  list\n  login NAME\n  serve\n  doctor`;
+  return `Usage: local-mcp [--config PATH] <command>\n\nCommands:\n  init\n  add NAME --url URL [--header 'Name=Value'] [--oauth-client-id ID] [--allow-tool TOOL]...\n  add NAME [--env KEY=VALUE]... [--allow-tool TOOL]... -- COMMAND [ARGS...]\n  add NAME --no-tools -- COMMAND [ARGS...]\n  remove NAME\n  list\n  login NAME\n  serve\n  doctor`;
 }
 
 function headerPairs(value: string | string[] | boolean | undefined): Record<string, string> | undefined {
@@ -93,6 +94,9 @@ async function run(argv: string[]): Promise<void> {
     }
     const config = await loadConfig(configPath);
     if (Object.hasOwn(config.servers, name)) throw new Error(`Server ${name} already exists; remove it before adding a replacement`);
+    if (options['no-tools'] && options['allow-tool'] !== undefined) throw new Error('Use --no-tools or --allow-tool, not both');
+    if (options['no-tools']) server.allowedTools = [];
+    else if (options['allow-tool'] !== undefined) server.allowedTools = Array.isArray(options['allow-tool']) ? options['allow-tool'] : [String(options['allow-tool'])];
     config.servers[name] = server;
     await saveConfig(configPath, config);
     console.log(`Added ${name}`); return;
@@ -111,7 +115,8 @@ async function run(argv: string[]): Promise<void> {
     const config = await loadConfig(configPath);
     for (const [name, server] of Object.entries(config.servers)) {
       const detail = 'command' in server ? `stdio ${server.command}` : `http ${new URL(server.url.replace(/\$\{[^}]+\}/g, 'placeholder')).origin}`;
-      console.log(`${name}\t${server.disabled ? 'disabled' : 'enabled'}\t${detail}`);
+      const policy = server.allowedTools === undefined ? 'unrestricted tools' : `${server.allowedTools.length} allowed tools`;
+      console.log(`${name}\t${server.disabled ? 'disabled' : 'enabled'}\t${detail}\t${policy}`);
     }
     return;
   }

@@ -10,7 +10,7 @@ import type { OAuthClientProvider } from '@modelcontextprotocol/sdk/client/auth.
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { UnauthorizedError } from '@modelcontextprotocol/sdk/client/auth.js';
-import { expandEnv } from './config.js';
+import { expandEnv, validateHttpUrl } from './config.js';
 import type { ServerConfig } from './types.js';
 
 type AuthState = { client?: OAuthClientInformationMixed; tokens?: OAuthTokens; verifier?: string; state?: string };
@@ -20,6 +20,7 @@ const AUTH_DIR = '.local-mcp-auth';
 export function createAuthProvider(serverName: string, serverConfig: ServerConfig, configPath: string, interactive = false): OAuthClientProvider {
   if (!('url' in serverConfig)) throw new Error(`Server "${serverName}" does not support HTTP OAuth`);
   const serverUrl = expandEnv(serverConfig.url);
+  validateHttpUrl(serverUrl, serverName);
   const configuredClientId = serverConfig.oauth?.clientId ? expandEnv(serverConfig.oauth.clientId) : undefined;
   const redirectUrl = 'http://127.0.0.1:43127/callback';
   const file = authFilePath(configPath, serverName, serverUrl, configuredClientId);
@@ -69,7 +70,7 @@ export function createAuthProvider(serverName: string, serverConfig: ServerConfi
     },
     redirectToAuthorization: async url => {
       if (!interactive) throw new Error(`OAuth login required; run local-mcp login ${serverName}`);
-      if (!['https:', 'http:'].includes(url.protocol)) throw new Error('Unsupported OAuth authorization URL');
+      validateHttpUrl(url.toString(), serverName);
       process.stderr.write(`Authorize ${serverName} at: ${url.toString()}\n`);
       openBrowser(url);
     },
@@ -82,10 +83,11 @@ export function createAuthProvider(serverName: string, serverConfig: ServerConfi
 export async function login(serverName: string, serverConfig: ServerConfig, configPath: string): Promise<void> {
   if (!('url' in serverConfig)) throw new Error(`Server "${serverName}" does not support HTTP OAuth`);
   serverConfig = { ...serverConfig, url: expandEnv(serverConfig.url), headers: Object.fromEntries(Object.entries(serverConfig.headers ?? {}).map(([k,v]) => [k, expandEnv(v)])), oauth: serverConfig.oauth ? { ...serverConfig.oauth, ...(serverConfig.oauth.clientId ? { clientId: expandEnv(serverConfig.oauth.clientId) } : {}) } : undefined };
+  const resolvedUrl = validateHttpUrl(serverConfig.url, serverName);
   const provider = createAuthProvider(serverName, serverConfig, configPath, true);
-  const callback = await startCallbackServer(async url => Boolean(url.searchParams.get('state') && url.searchParams.get('state') === await provider.state?.()));
   const client = new Client({ name: 'local-mcp-gateway', version: '0.1.0' });
-  const transport = new StreamableHTTPClientTransport(new URL(serverConfig.url), { authProvider: provider, requestInit: { headers: serverConfig.headers } });
+  const transport = new StreamableHTTPClientTransport(resolvedUrl, { authProvider: provider, requestInit: { headers: serverConfig.headers } });
+  const callback = await startCallbackServer(async url => Boolean(url.searchParams.get('state') && url.searchParams.get('state') === await provider.state?.()));
   try {
     try { await client.connect(transport); }
     catch (error) {
@@ -110,20 +112,25 @@ function authFilePath(configPath: string, serverName: string, identity: string, 
   return join(dirname(configPath), AUTH_DIR, `${safeName}-${fingerprint}.json`);
 }
 
-async function startCallbackServer(validateState: (url: URL) => Promise<boolean>): Promise<{ result: Promise<URL>; close: () => Promise<void> }> {
+export async function startCallbackServer(validateState: (url: URL) => Promise<boolean>): Promise<{ result: Promise<URL>; close: () => Promise<void> }> {
   // A stable loopback port keeps the redirect URI registered with the authorization server.
   const server = createServer();
   let resolve!: (url: URL) => void;
   let reject!: (error: Error) => void;
   const result = new Promise<URL>((res, rej) => { resolve = res; reject = rej; });
   void result.catch(() => undefined);
+  let settled = false;
   const timer = setTimeout(() => reject(new Error('Timed out waiting for OAuth callback')), 5 * 60_000);
   server.on('request', (req, res) => {
     const address = `http://127.0.0.1:43127${req.url ?? '/'}`;
-    const url = new URL(address);
+    let url: URL;
+    try { url = new URL(address); } catch { res.writeHead(400).end('Invalid authorization response.'); return; }
     if (req.method !== 'GET' || url.pathname !== '/callback') { res.writeHead(404).end(); return; }
     void validateState(url).then(valid => {
+      if (settled) { res.writeHead(409).end('Authorization response already handled.'); return; }
       if (!valid) { res.writeHead(400).end('Invalid authorization state. Return to the terminal and try again.'); return; }
+      if (!url.searchParams.has('error') && !url.searchParams.get('code')) { res.writeHead(400).end('Authorization code is missing.'); return; }
+      settled = true;
       if (url.searchParams.has('error')) { res.writeHead(400).end('Authorization was declined. You can close this window.'); reject(new Error('OAuth authorization was declined')); return; }
       res.writeHead(200, { 'content-type': 'text/plain; charset=utf-8' }).end('Authorization complete. You can close this window.');
       resolve(url);

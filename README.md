@@ -156,12 +156,49 @@ These helpers do not execute text from upstream results. Use `Promise.all` for i
 
 ## Limits and security notes
 
-**This prototype is not an authorization boundary.** Generated code cannot directly access host filesystem or network APIs, but `mcp.call` can invoke any configured upstream tool, including destructive operations. The gateway does not enforce tool allowlists, argument policies, or per-operation approvals. Client approval of the outer `execute` call must not be mistaken for inspection/approval of every nested action. Prompt injection in upstream descriptions/results remains a risk, and read tools can still expose sensitive data. A compromised upstream stdio process also runs outside QuickJS with the gateway user's OS permissions.
+**Tool allowlists are enforced on the host before dispatch**, across structured calls, native tools and JavaScript. Denied tools are also excluded from search and inline/native definitions. Set `allowedTools` per server: omitted permits all tools for compatibility; `[]` denies every tool; names match exactly, with no wildcard expansion. Configure `security.allowCode:false` to disable JavaScript while retaining structured calls and JSON result filtering.
 
-Before sensitive deployments, enforce permissions at each upstream, use narrowly scoped credentials, and add host-side tool/argument policies and trusted approval handling. QuickJS resource bounds reduce exposure but are not a claim of OS-level isolation or a security audit.
+```json
+{
+  "version": 1,
+  "security": { "allowCode": false },
+  "servers": {
+    "files": {
+      "command": "node",
+      "args": ["/absolute/path/to/filesystem-server.js", "/allowed/path"],
+      "allowedTools": ["read_text_file", "search_files"]
+    }
+  },
+  "limits": { "maxTools": 10000, "maxCatalogBytes": 33554432 }
+}
+```
+
+You can set an allowlist when adding a server:
+
+```sh
+node dist/cli.js --config ./config.json add files \
+  --allow-tool read_text_file --allow-tool search_files \
+  -- node /absolute/path/to/filesystem-server.js /allowed/path
+```
+
+Use `--no-tools` to create an empty allowlist. This still permits discovery and starts a configured stdio server; use `disabled:true` to prevent its connection. `list` reports whether each server has unrestricted tools or an explicit allowlist. Unknown config settings fail validation, including misspelled policy settings. Policy edits take effect before the next tool call; operations already dispatched may complete.
+
+An allowlist restricts tool names, not argument values or the behavior of a permitted tool. Narrow upstream credentials and upstream path/resource restrictions remain necessary. Approval of an outer `execute` call does not inspect or approve every nested operation. Descriptions, results and upstream annotations are untrusted; the gateway does not infer permission from a tool's claimed read-only status. A stdio upstream runs with the gateway user's OS permissions, outside QuickJS. See [the security model and remaining work](SECURITY.md).
+
+Native tool advertisements use conservative side-effect hints rather than forwarding an upstream's read-only claim. Clients may consequently request approval more often; annotations do not replace the enforced allowlist.
+
+| Discovery setting | Default | Configurable range |
+|---|---:|---:|
+| `limits.maxTools` | 5,000 | 1–50,000 |
+| `limits.maxCatalogBytes` | 32 MiB | 1 KiB–128 MiB |
+| `limits.maxToolBytes` | 256 KiB | 1 KiB–1 MiB |
+| `limits.maxPages` per upstream | 100 | 1–1,000 |
+
+Counts and UTF-8 metadata bytes include denied tools and cached listings. Aggregate admission follows server-name order. A server whose complete catalogue exceeds a limit is marked unavailable; tools are not silently truncated. Other admitted servers remain usable. Retained catalogue data and discovery lookahead are bounded, but SDK decoding happens before these checks: these are not transport-byte or process-RAM guarantees. Raising a limit does not establish tested capacity at that size.
 
 - The gateway process runs locally, but configured upstream services and the model/client may be remote. No telemetry is sent by this project itself.
 - `execute` runs JavaScript in a QuickJS sandbox with no filesystem, network, imports, or console access. Defaults are 32 upstream calls, 32 MiB of JavaScript heap, a 15-second execution timeout (maximum 60 seconds), and 32 KiB of returned JSON. Each individual MCP response is limited to 8 MiB before the final result is assembled; the 32 KiB final output limit still applies. Individual upstream calls have a 30-second timeout. Cancellation on timeout is best effort and does not roll back side effects already performed upstream.
+- Upstream call arguments are limited to 64 KiB of UTF-8 JSON on every execution route, including direct sandbox bridge access. JavaScript source is limited to 64 KiB of UTF-8. Cancelled or expired sandbox work cannot dispatch queued bridge calls. Tight synchronous code is bounded by its deadline; external cancellation is processed when Node's event loop can deliver it.
 - Discovery is lexical matching over tool names and descriptions. It is not semantic search. Search responses are limited to 24 KiB; narrow by server/tool when needed.
 - The gateway's `execute` tool can invoke upstream tools that make changes or other side effects. It does not ask for approval before each upstream call. Only execute actions authorized by the user.
 - The gateway proxies tools only. It does not proxy upstream resources, prompts, sampling, or elicitation. Upstream connections support stdio and MCP Streamable HTTP. Legacy SSE transport is not supported. The CLI and sandbox are JavaScript/TypeScript based.
@@ -177,11 +214,11 @@ npm run build
 
 ## Verification
 
-Validated with Node.js 24 on Linux. The automated suite covers CLI configuration and secret-reference preservation, real stdio MCP composition and config reload, sandbox time/memory/output limits and cleanup, and mocked SDK OAuth discovery, dynamic registration, PKCE code exchange and token refresh.
+Validated with Node.js 24 on Linux. The automated suite covers CLI configuration and secret-reference preservation, real stdio MCP composition and config reload, host allowlist enforcement and policy revocation, disabled-code execution, cached/fresh discovery budgets and refresh identity, sandbox time/memory/argument/output limits and cleanup, and mocked SDK OAuth discovery, dynamic registration, PKCE code exchange and token refresh. A local HTTP test covers callback state validation and duplicate rejection.
 
 In a synthetic catalog test, the two advertised gateway tool definitions remain small without inline signatures; the optional inline catalogue adds at most 4,096 UTF-8 bytes before JSON escaping. Another test filters over 100 KB of intermediate data to less than 100 bytes of final JSON. These are byte measurements, not model token counts or measured cost/latency savings.
 
-Browser callback handling and real vendor OAuth interoperability have not been exercised end to end. Test your first authenticated upstream before relying on this prototype. No service credentials are included. Retained results live only in gateway-process memory: eight entries, 8 MiB total, five-minute TTL, LRU capacity eviction. Config replacement and disconnect clear them. Handles are opaque references within the same client session, not separate authorization grants.
+Browser opening and real vendor OAuth interoperability have not been exercised end to end. Test your first authenticated upstream before relying on this prototype. No service credentials are included. Retained results live only in gateway-process memory: eight entries, 8 MiB total, five-minute TTL, LRU capacity eviction. Config replacement and disconnect clear them. Handles are opaque references within the same client session, not separate authorization grants.
 
 ## License
 
@@ -208,7 +245,7 @@ Set optional `inlineTools` in your gateway config to select up to five existing 
 }
 ```
 
-This controls context hints, **not access permissions**. Other tools remain discoverable and callable. Removing a server also removes its inline selections. Signatures for missing tools are omitted; use search or doctor to check what the upstream actually exposes.
+This controls context hints, **not access permissions**. Other permitted tools remain discoverable and callable; use `allowedTools` for access restrictions. Removing a server also removes its inline selections. Signatures for missing or denied tools are omitted; use search or doctor to check what the upstream actually exposes.
 
 ### Expose common tools directly for lower latency
 
@@ -268,6 +305,6 @@ Stage 1 adds a cached local BM25 index. The full ToolRet development fixture con
 | Frozen BM25 reference | 0.296189 / 0 | — | — |
 | Historical v9 gateway | 0.063799 / 360 | — | 417.88 / 834.70 ms |
 
-The full-suite run took 916 ms for its first cold search; its warm latency covers all 7,961 queries after ten fixed warmup calls. The paired sample uses 90 category-stratified queries and two balanced repetitions; it was not source-stratified. The historical row’s latency comes from that sample, while retrieval scores cover the full suite. A separate index-only diagnostic measured a 116.5 ms build for 5,000 tools; this is not a 5,000-tool SDK latency result. Production discovery remains capped at 5,000 tools. Full-suite peak RSS was 631 MiB, including the index, SDK, and benchmark data. Initial MCP definitions remain two tools and measured 3,131 JSON bytes (753 o200k token proxy); the proxy is not provider usage or billed cost. Cold search was slower than v9 (883.6 vs 693.5 ms). The new 8,192-character limit accepted the 360 queries the old v9 interface rejected.
+The full-suite run took 916 ms for its first cold search; its warm latency covers all 7,961 queries after ten fixed warmup calls. The paired sample uses 90 category-stratified queries and two balanced repetitions; it was not source-stratified. The historical row’s latency comes from that sample, while retrieval scores cover the full suite. A separate index-only diagnostic measured a 116.5 ms build for 5,000 tools; this is not a 5,000-tool SDK latency result. That release capped live discovery at 5,000 tools; the current default is unchanged, with an explicit configurable ceiling. Full-suite peak RSS was 631 MiB, including the index, SDK, and benchmark data. The v10 two-tool definitions measured 3,131 JSON bytes (753 o200k token proxy); the proxy is not provider usage or billed cost. The current security changes were not part of that frozen evaluation. Cold search was slower than v9 (883.6 vs 693.5 ms). The new 8,192-character limit accepted the 360 queries the old v9 interface rejected.
 
 ToolRet measures retrieval behavior, not answer quality, competitor parity, provider usage, or cost. Server aliases remain searchable for users who query connector names; the benchmark is a measurement, not a ranking target. See the [public-v10 report](benchmark/results/public-v10/README.md) and [comparison protocol](benchmark/COMPARABILITY_PLAN.md) for full results, scope, and reproduction instructions. Historical task and context pilots remain limited local studies: [initial task pilot](benchmark/results/local-luna/README.md), [latency follow-up](benchmark/results/latency-v2/README.md), [structured-call latency](benchmark/results/typed-v4/README.md), [final latency pilot](benchmark/results/query-v6/README.md), [many-server context](benchmark/results/scale-v7/README.md), and [quality pilot](benchmark/results/quality-v8/README.md). Their results do not establish general answer quality or billed savings.

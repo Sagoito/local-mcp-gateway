@@ -107,6 +107,34 @@ test("enforces timeout for loops and unresolved awaits", async () => {
   await assert.rejects(executeCode("await new Promise(() => {}); return 1", mock(), { timeoutMs: 100 }), /timed out/i);
 });
 
+test("aborts unresolved awaits and prevents queued bridge calls from dispatching after timeout", async () => {
+  const controller = new AbortController();
+  const waiting = executeCode("await new Promise(() => {}); return 1", mock(), { signal: controller.signal });
+  setTimeout(() => controller.abort(), 20);
+  await assert.rejects(waiting, /aborted/i);
+
+  let dispatched = 0;
+  const upstreams = mock(async () => { dispatched++; return { ok: true }; });
+  await assert.rejects(executeCode(`
+    const pending = Promise.resolve().then(() => __hostCall('a', 'late', '{}'));
+    const until = Date.now() + 100;
+    while (Date.now() < until) {}
+    return await pending;
+  `, upstreams, { timeoutMs: 30 }), /interrupt|timed out/i);
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  assert.equal(dispatched, 0);
+});
+
+test("limits UTF-8 JSON call arguments at both guest and host bridge boundaries", async () => {
+  let dispatched = 0;
+  const upstreams = mock(async () => { dispatched++; return { ok: true }; });
+  await assert.rejects(executeCode(`return await mcp.call('a', 'large', { value: 'x'.repeat(65536) });`, upstreams), /size limit/i);
+  await assert.rejects(executeCode(`return await __hostCall('a', 'large', JSON.stringify({ value: 'é'.repeat(32769) }));`, upstreams), /size limit/i);
+  await assert.rejects(executeCode(`return await __hostCall('a', 'bad', '{');`, upstreams), /invalid|JSON/i);
+  assert.equal(dispatched, 0);
+  assert.equal(await executeCode("return 9;", mock()), 9, "argument failures do not poison later sandboxes");
+});
+
 test("enforces RPC, result, and output limits", async () => {
   await assert.rejects(executeCode("await mcp.call('a','x'); await mcp.call('a','x');", mock(), { maxCalls: 1 }), /call limit/i);
   await assert.rejects(executeCode("return await mcp.call('a','x')", mock(async () => "x".repeat(100)), { maxOutputBytes: 20 }), /exceeds/i);
