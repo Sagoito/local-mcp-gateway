@@ -1,0 +1,4 @@
+* text=auto eol=lf
+
+# Historical benchmark artifacts retain their exact recorded bytes.
+benchmark/results/** -text

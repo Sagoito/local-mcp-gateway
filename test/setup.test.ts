@@ -2,7 +2,14 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
+import {
+  mkdtemp,
+  readFile,
+  realpath,
+  rm,
+  stat,
+  writeFile,
+} from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { createServer } from 'node:http';
@@ -342,7 +349,10 @@ await server.connect(new StdioServerTransport());
     const text =
       (response.content as Array<{ text?: string }>).find((c) => c.text)
         ?.text ?? '';
-    assert.deepEqual(JSON.parse(text), { cwd: dir, token: value });
+    assert.deepEqual(JSON.parse(text), {
+      cwd: await realpath(dir),
+      token: value,
+    });
     assert.equal(await readFile(marker, 'utf8'), 'started');
   } finally {
     await client.close();
