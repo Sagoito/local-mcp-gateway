@@ -7,7 +7,7 @@ npm ci --ignore-scripts
 npm run check
 ```
 
-The quality check covers formatting, linting, type checking, tests, and package validation. CI runs it on Ubuntu with Node.js 22 and 24, and on Windows and macOS with Node.js 24. The gateway is exercised without real OAuth credentials or live upstream services.
+The quality check covers formatting, linting, type checking, tests, and package validation. CI runs it on Ubuntu with Node.js 26.11.1 (the minimum supported version) and the latest Node.js 26 release, and on Windows and macOS with the latest Node.js 26 release. The development version is pinned in `.nvmrc`. The gateway is exercised without real OAuth credentials or live upstream services.
 
 ## Security checks
 
@@ -27,6 +27,6 @@ These tools are only needed for security scans; no hooks or scanners are install
 
 Dependabot groups minor and patch updates and opens major upgrades separately. Every update must pass the same quality and security checks as other changes; QuickJS and validation-library updates also exercise the sandbox and input-validation regression tests.
 
-Node.js type declarations track Node.js 22, the oldest supported runtime, so type checking does not silently allow newer APIs. TypeScript is kept on the latest supported 6.0 patch while `typescript-eslint` requires a version below 6.1. Dependabot excludes versions outside those compatibility ranges, not security or patch updates within them. Revisit both limits when runtime support or typed-lint compatibility changes.
+Builds and type-checks use TypeScript 7.0.2. Typed ESLint currently uses TypeScript 6's API through a development-only compatibility alias (`typescript` → `@typescript/typescript6`); this bridge is not a runtime dependency and does not imply typed-lint support for the TypeScript 7 API. Revisit the bridge when typed ESLint supports TypeScript 7.
 
 GitHub Actions also runs CodeQL's JavaScript and TypeScript `security-extended` query suite and dependency review on pull requests. Those checks report findings in GitHub and are not represented by the local `npm run check` command. Repository branch protection must be configured separately to make any workflow status a merge requirement.

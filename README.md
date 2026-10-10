@@ -4,7 +4,7 @@ Use the MCP servers you already have through one local gateway. Your agent sees 
 
 ## Install once
 
-Requires Node.js 22.13+ (22.x) or 24+. Install from this repository; there is no published npm package yet.
+Requires Node.js 26.11.1 or later. Install from this repository; there is no published npm package yet.
 
 ```sh
 git clone https://github.com/Sagoito/local-mcp-gateway.git

@@ -27,7 +27,7 @@
     "security:secret-rules": "node scripts/check-secret-rules.mjs"
   },
   "engines": {
-    "node": "^22.13.0 || >=24.0.0"
+    "node": ">=26.11.1"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.26.0",
@@ -35,16 +35,17 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@typescript/native": "npm:typescript@^7.0.2",
     "@eslint/js": "10.0.1",
     "@modelcontextprotocol/server-filesystem": "2026.8.31",
     "@modelcontextprotocol/server-memory": "2026.8.31",
-    "@types/node": "^22.0.0",
+    "@types/node": "^26.6.5",
     "eslint": "10.12.0",
     "globals": "17.13.0",
     "js-tiktoken": "1.0.21",
     "prettier": "3.9.10",
     "tsx": "^4.20.0",
-    "typescript": "~6.0.3",
+    "typescript": "npm:@typescript/typescript6@6.0.2",
     "typescript-eslint": "8.71.1"
   },
   "license": "MIT",
