@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { readdir, readFile, mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 import { getEncoding } from 'js-tiktoken';
 
 const [runsArg, outputArg] = process.argv.slice(2);
@@ -68,7 +69,26 @@ for (const runId of dirs) {
   const listEvents = events.filter(e => e.op === 'list');
   const callEvents = events.filter(e => e.op === 'call');
   const finishEvents = events.filter(e => e.op === 'finish');
-  const definitions = listEvents.find(e => e.response)?.response;
+  const paged = cfg.catalogPaged === true;
+  let definitions;
+  let catalogueComplete = true;
+  if (paged) {
+    const pageEvents = listEvents.filter(e => e.response?.catalogPage);
+    const expectedPages = Number(cfg.cataloguePageCount);
+    const indices = pageEvents.map(e => e.response.catalogPage.index);
+    const pageMeta = pageEvents.map(e => e.response.catalogPage);
+    const totalTools = pageMeta[0]?.totalTools;
+    catalogueComplete = Number.isInteger(expectedPages) && expectedPages > 0 && pageEvents.length === expectedPages &&
+      new Set(indices).size === expectedPages && indices.every((n, i) => n === i) &&
+      pageEvents.every(e => e.response.catalogPage.complete === true && e.response.catalogPage.pages === expectedPages &&
+        e.response.catalogPage.totalTools === totalTools && Array.isArray(e.response.tools)) &&
+      Number.isInteger(totalTools) && pageEvents.reduce((n, e) => n + e.response.tools.length, 0) === totalTools;
+    if (catalogueComplete) {
+      definitions = { tools: pageEvents.flatMap(e => e.response.tools) };
+      const actualSha = createHash('sha256').update(json(definitions)).digest('hex');
+      if (actualSha !== cfg.catalogueDefinitionSha256) { definitions = undefined; catalogueComplete = false; }
+    }
+  } else definitions = listEvents.find(e => e.response)?.response;
   const definitionJson = definitions == null ? '' : json(definitions);
   const toolResponseTokens = callEvents.reduce((n, e) => n + tokens(e.response ?? ''), 0);
   const requestTokens = callEvents.reduce((n, e) => n + tokens({ name: e.name, args: e.args }), 0);
@@ -76,19 +96,28 @@ for (const runId of dirs) {
   const promptTokens = tokens(prompt);
   const definitionTokens = tokens(definitionJson);
   const responseAndRequestTokens = callEvents.reduce((n, e) => n + tokens(e.response ?? '') + tokens({ name: e.name, args: e.args }), 0);
-  const decisionEvents = events.filter(e => e.op === 'list' || e.op === 'call');
+  const decisionEvents = paged
+    ? [...events.filter(e => e.op === 'list' && !e.response?.catalogPage), ...events.filter(e => e.op === 'call')]
+    : events.filter(e => e.op === 'list' || e.op === 'call');
   let carried = 0;
   let cumulativeInput = 0;
+  if (paged) cumulativeInput = null;
   for (const e of decisionEvents) {
-    cumulativeInput += promptTokens + carried;
+    if (cumulativeInput !== null) cumulativeInput += promptTokens + carried;
     carried += tokens({ name: e.name, args: e.args });
     carried += tokens(e.response ?? '');
   }
-  if (answerFile) cumulativeInput += promptTokens + carried;
+  if (answerFile && cumulativeInput !== null) cumulativeInput += promptTokens + carried;
   const firstList = listEvents[0];
+  const lastList = listEvents.at(-1);
   const lastFinish = finishEvents.at(-1);
   const rpcTotal = events.reduce((n, e) => n + (Number(e.durationMs) || 0), 0);
   const agentElapsed = firstList && lastFinish ? Math.max(0, Date.parse(lastFinish.startedAt) - Date.parse(firstList.startedAt)) : null;
+  const catalogueDeliveryRpcMs = paged ? (catalogueComplete ? pageEventsDuration(listEvents) : null) : null;
+  const catalogueEndMs = paged && catalogueComplete && lastList ? Date.parse(lastList.startedAt) + (Number(lastList.durationMs) || 0) : null;
+  const catalogueDeliveryElapsedMs = paged && catalogueComplete && firstList && Number.isFinite(catalogueEndMs)
+    ? Math.max(0, catalogueEndMs - Date.parse(firstList.startedAt)) : null;
+  const postCatalogueTaskMs = Number.isFinite(catalogueEndMs) && lastFinish ? Math.max(0, Date.parse(lastFinish.startedAt) - catalogueEndMs) : null;
   const rawFinishAnswer = lastFinish?.answer ?? answerFile?.answer;
   const outputTokens = requestTokens + finalAnswerTokens;
   rows.push({
@@ -97,12 +126,15 @@ for (const runId of dirs) {
     expected: expected ?? null, answer: finalValue, error: events.find(e => e.error)?.error ?? null,
     ignoredAfterFinishEvents, toolCalls: callEvents.length, toolErrors: callEvents.filter(e => e.error || e.response?.isError).length,
     initialToolListBytes: bytes(definitionJson), initialToolListTokens: definitionTokens,
+    catalogPaged: paged, catalogueComplete, cataloguePageCount: paged ? Number(cfg.cataloguePageCount) || null : null,
+    catalogueDeliveryGroups: paged ? Number(cfg.catalogueDeliveryGroups) || null : null,
     toolResponseTokens, requestArgumentTokens: requestTokens, finalAnswerTokens,
     finalPayloadTokenProxy: promptTokens + definitionTokens + responseAndRequestTokens + finalAnswerTokens,
     cumulativeInputTokenProxy: cumulativeInput, outputTokenProxy: outputTokens,
-    inputProxyCostAt1USDPerMTokens: cumulativeInput / 1_000_000,
+    inputProxyCostAt1USDPerMTokens: cumulativeInput === null ? null : cumulativeInput / 1_000_000,
     outputProxyCostAt1USDPerMTokens: outputTokens / 1_000_000,
     listRpcMs: listEvents.reduce((n, e) => n + (Number(e.durationMs) || 0), 0),
+    catalogueDeliveryRpcMs, catalogueDeliveryElapsedMs, postCatalogueTaskMs,
     firstListColdSetupMs: firstList ? Number(firstList.durationMs) || 0 : null,
     callRpcTotalMs: callEvents.reduce((n, e) => n + (Number(e.durationMs) || 0), 0),
     callRpcMedianMs: median(callEvents.map(e => Number(e.durationMs))),
@@ -111,7 +143,11 @@ for (const runId of dirs) {
   });
 }
 
-const fields = ['runId','questionId','mode','repetition','status','pass','ignoredAfterFinishEvents','toolCalls','toolErrors','initialToolListBytes','initialToolListTokens','toolResponseTokens','requestArgumentTokens','finalAnswerTokens','finalPayloadTokenProxy','cumulativeInputTokenProxy','outputTokenProxy','inputProxyCostAt1USDPerMTokens','outputProxyCostAt1USDPerMTokens','firstListColdSetupMs','listRpcMs','callRpcTotalMs','callRpcMedianMs','rpcTotalMs','agentElapsedMs','error'];
+function pageEventsDuration(events) {
+  return events.filter(e => e.response?.catalogPage).reduce((n, e) => n + (Number(e.durationMs) || 0), 0);
+}
+
+const fields = ['runId','questionId','mode','repetition','status','pass','ignoredAfterFinishEvents','toolCalls','toolErrors','catalogPaged','catalogueComplete','cataloguePageCount','catalogueDeliveryGroups','initialToolListBytes','initialToolListTokens','toolResponseTokens','requestArgumentTokens','finalAnswerTokens','finalPayloadTokenProxy','cumulativeInputTokenProxy','outputTokenProxy','inputProxyCostAt1USDPerMTokens','outputProxyCostAt1USDPerMTokens','firstListColdSetupMs','listRpcMs','catalogueDeliveryRpcMs','catalogueDeliveryElapsedMs','postCatalogueTaskMs','callRpcTotalMs','callRpcMedianMs','rpcTotalMs','agentElapsedMs','error'];
 await mkdir(outputDir, { recursive: true });
 await writeFile(path.join(outputDir, 'runs.csv'), [fields.join(','), ...rows.map(r => fields.map(f => csvCell(r[f])).join(','))].join('\n') + '\n');
 const overall = {};
@@ -123,11 +159,12 @@ for (const mode of ['direct','gateway']) {
     failedRuns: selected.filter(r => r.status === 'failed').length, passes: complete.filter(r => r.pass).length,
     passRateAmongComplete: complete.length ? complete.filter(r => r.pass).length / complete.length : null,
     medianAgentElapsedMs: median(complete.map(r => r.agentElapsedMs)),
+    medianCatalogueDeliveryRpcMs: median(complete.map(r => r.catalogueDeliveryRpcMs)), medianCatalogueDeliveryElapsedMs: median(complete.map(r => r.catalogueDeliveryElapsedMs)), medianPostCatalogueTaskMs: median(complete.map(r => r.postCatalogueTaskMs)),
     medianCallRpcMs: median(complete.map(r => r.callRpcTotalMs)),
     medianFinalPayloadTokenProxy: median(complete.map(r => r.finalPayloadTokenProxy)),
-    cumulativeInputTokenProxy: complete.reduce((n, r) => n + r.cumulativeInputTokenProxy, 0),
+    cumulativeInputTokenProxy: complete.some(r => r.cumulativeInputTokenProxy == null) ? null : complete.reduce((n, r) => n + r.cumulativeInputTokenProxy, 0),
     outputTokenProxy: complete.reduce((n, r) => n + r.outputTokenProxy, 0),
-    inputProxyCostAt1USDPerMTokens: complete.reduce((n, r) => n + r.cumulativeInputTokenProxy, 0) / 1_000_000,
+    inputProxyCostAt1USDPerMTokens: complete.some(r => r.cumulativeInputTokenProxy == null) ? null : complete.reduce((n, r) => n + r.cumulativeInputTokenProxy, 0) / 1_000_000,
     outputProxyCostAt1USDPerMTokens: complete.reduce((n, r) => n + r.outputTokenProxy, 0) / 1_000_000,
   };
 }
@@ -154,7 +191,7 @@ const summary = { generatedAt: new Date().toISOString(), runsDir, runCount: rows
     'No billed tokens, provider usage records, or actual Luna pricing are available; cost is unpriced and must not be presented as billed cost.',
     'Agent elapsed time spans first list request to finish request start and includes generic bridge orchestration; it is not model-only latency.',
     'First list RPC duration includes cold connection/setup. Subsequent RPC timings are reported separately.',
-    'Accumulated payload and cumulative input are payload estimates and exclude system prompts, built-in tool definitions, reasoning, and provider framing.',
+    'Accumulated payload and cumulative input are payload estimates and exclude system prompts, built-in tool definitions, reasoning, and provider framing. For paged runs, full definitions are counted once in the payload proxy. Cumulative input is unavailable because catalogue pages are delivered across multiple grouped model turns.',
     'Both conditions use the same generic bridge; this is not a native tool registry injection or Copilot deferred-definition baseline.',
     'Daemon payload proxies can exceed model-visible content when the host truncates output; no actual billing savings are established.',
     'The planned design has two repetitions per question and condition, too few to support statistical significance claims.'
@@ -174,7 +211,7 @@ report += `## Per-question results\n\n| Question | Condition | Complete / runs |
 for (const g of groups) report += `| ${g.questionId} | ${g.mode} | ${g.complete} / ${g.runs} | ${g.passRateAmongComplete == null ? 'n/a' : `${(100*g.passRateAmongComplete).toFixed(1)}%`} | ${fmt(g.medianAgentElapsedMs)} | ${fmt(g.medianCallRpcMs)} | ${g.medianFinalPayloadTokenProxy ?? 'n/a'} tokens |\n`;
 report += `\n## Timing and cost interpretation\n\n`;
 report += `The first list request is the cold setup phase; its daemon RPC duration includes connection setup. Later tool-call RPC totals and per-call medians are reported separately in [runs.csv](runs.csv). Agent elapsed time is measured from the first list request start through the finish request start and includes the generic bridge/orchestration path.\n\n`;
-report += `Token counts are UTF-8 text tokenization proxies with o200k_base, not reported Luna or provider usage. The accumulated-payload estimate sums prompt, initial tool definitions, serialized tool requests/responses, and final answer once. The cumulative input proxy replays accumulated visible payload for each bridge decision, adding definitions after list returns. Both exclude potentially material content: system prompts, built-in tool definitions, reasoning, and provider framing are excluded. Input and output proxy amounts are also normalized separately to a hypothetical $1 per million tokens; they are scenario units, not actual Luna pricing, bills, or costs.\n\n`;
+report += `Token counts are UTF-8 text tokenization proxies with o200k_base, not reported Luna or provider usage. The accumulated-payload estimate sums prompt, initial tool definitions, serialized tool requests/responses, and final answer once. The cumulative input proxy replays accumulated visible payload for each bridge decision for unpaged runs. In paged runs, the full definition payload is counted once, while cumulative input is unavailable because catalogue pages are delivered across multiple grouped model turns. Catalogue delivery RPC time sums page RPC durations; catalogue delivery elapsed time spans the first page request start through the final page response; post-catalogue task time runs from that response to finish. These exclude potentially material content: system prompts, built-in tool definitions, reasoning, and provider framing are excluded. Input and output proxy amounts are also normalized separately to a hypothetical $1 per million tokens; they are scenario units, not actual Luna pricing, bills, or costs.\n\n`;
 report += `The two conditions use the same generic bridge. This comparison does not measure native tool registry injection or a Copilot deferred-definition baseline. The planned two repetitions per question are too few for statistical significance claims. See [summary.json](summary.json) and [runs.csv](runs.csv); raw event logs remain in the input run directories.\n`;
 await writeFile(path.join(outputDir, 'REPORT.md'), report);
 console.log(`Analyzed ${rows.length} runs into ${outputDir}`);

@@ -1,0 +1,195 @@
+{
+  "generatedAt": "2026-10-09T20:05:41.682Z",
+  "runsDir": "/workspace/scratch/ec180a675233/mcp-scale-16-runs",
+  "runCount": 24,
+  "metrics": {
+    "direct": {
+      "totalRuns": 12,
+      "completeRuns": 2,
+      "missingRuns": 10,
+      "failedRuns": 0,
+      "passes": 1,
+      "passRateAmongComplete": 0.5,
+      "medianAgentElapsedMs": 28177,
+      "medianCatalogueDeliveryRpcMs": null,
+      "medianCatalogueDeliveryElapsedMs": null,
+      "medianPostCatalogueTaskMs": null,
+      "medianCallRpcMs": 36.5,
+      "medianFinalPayloadTokenProxy": 24140,
+      "cumulativeInputTokenProxy": 493879,
+      "outputTokenProxy": 726,
+      "inputProxyCostAt1USDPerMTokens": 0.493879,
+      "outputProxyCostAt1USDPerMTokens": 0.000726
+    },
+    "gateway": {
+      "totalRuns": 12,
+      "completeRuns": 2,
+      "missingRuns": 10,
+      "failedRuns": 0,
+      "passes": 2,
+      "passRateAmongComplete": 1,
+      "medianAgentElapsedMs": 8776.5,
+      "medianCatalogueDeliveryRpcMs": null,
+      "medianCatalogueDeliveryElapsedMs": null,
+      "medianPostCatalogueTaskMs": null,
+      "medianCallRpcMs": 16,
+      "medianFinalPayloadTokenProxy": 2372.5,
+      "cumulativeInputTokenProxy": 16626,
+      "outputTokenProxy": 194,
+      "inputProxyCostAt1USDPerMTokens": 0.016626,
+      "outputProxyCostAt1USDPerMTokens": 0.000194
+    }
+  },
+  "perQuestionMode": [
+    {
+      "questionId": "filesystem-memory-join",
+      "mode": "direct",
+      "runs": 2,
+      "complete": 0,
+      "passRateAmongComplete": null,
+      "medianAgentElapsedMs": null,
+      "medianCallRpcMs": null,
+      "medianFinalPayloadTokenProxy": null
+    },
+    {
+      "questionId": "filesystem-memory-join",
+      "mode": "gateway",
+      "runs": 2,
+      "complete": 0,
+      "passRateAmongComplete": null,
+      "medianAgentElapsedMs": null,
+      "medianCallRpcMs": null,
+      "medianFinalPayloadTokenProxy": null
+    },
+    {
+      "questionId": "large-filter-aggregation",
+      "mode": "direct",
+      "runs": 2,
+      "complete": 0,
+      "passRateAmongComplete": null,
+      "medianAgentElapsedMs": null,
+      "medianCallRpcMs": null,
+      "medianFinalPayloadTokenProxy": null
+    },
+    {
+      "questionId": "large-filter-aggregation",
+      "mode": "gateway",
+      "runs": 2,
+      "complete": 0,
+      "passRateAmongComplete": null,
+      "medianAgentElapsedMs": null,
+      "medianCallRpcMs": null,
+      "medianFinalPayloadTokenProxy": null
+    },
+    {
+      "questionId": "multi-hop-dependency-runbook",
+      "mode": "direct",
+      "runs": 2,
+      "complete": 0,
+      "passRateAmongComplete": null,
+      "medianAgentElapsedMs": null,
+      "medianCallRpcMs": null,
+      "medianFinalPayloadTokenProxy": null
+    },
+    {
+      "questionId": "multi-hop-dependency-runbook",
+      "mode": "gateway",
+      "runs": 2,
+      "complete": 0,
+      "passRateAmongComplete": null,
+      "medianAgentElapsedMs": null,
+      "medianCallRpcMs": null,
+      "medianFinalPayloadTokenProxy": null
+    },
+    {
+      "questionId": "parallel-small-reads",
+      "mode": "direct",
+      "runs": 2,
+      "complete": 0,
+      "passRateAmongComplete": null,
+      "medianAgentElapsedMs": null,
+      "medianCallRpcMs": null,
+      "medianFinalPayloadTokenProxy": null
+    },
+    {
+      "questionId": "parallel-small-reads",
+      "mode": "gateway",
+      "runs": 2,
+      "complete": 0,
+      "passRateAmongComplete": null,
+      "medianAgentElapsedMs": null,
+      "medianCallRpcMs": null,
+      "medianFinalPayloadTokenProxy": null
+    },
+    {
+      "questionId": "small-direct-lookup",
+      "mode": "direct",
+      "runs": 2,
+      "complete": 1,
+      "passRateAmongComplete": 1,
+      "medianAgentElapsedMs": 27894,
+      "medianCallRpcMs": 37,
+      "medianFinalPayloadTokenProxy": 24068
+    },
+    {
+      "questionId": "small-direct-lookup",
+      "mode": "gateway",
+      "runs": 2,
+      "complete": 1,
+      "passRateAmongComplete": 1,
+      "medianAgentElapsedMs": 5856,
+      "medianCallRpcMs": 9,
+      "medianFinalPayloadTokenProxy": 2240
+    },
+    {
+      "questionId": "unfamiliar-file-search",
+      "mode": "direct",
+      "runs": 2,
+      "complete": 1,
+      "passRateAmongComplete": 0,
+      "medianAgentElapsedMs": 28460,
+      "medianCallRpcMs": 36,
+      "medianFinalPayloadTokenProxy": 24212
+    },
+    {
+      "questionId": "unfamiliar-file-search",
+      "mode": "gateway",
+      "runs": 2,
+      "complete": 1,
+      "passRateAmongComplete": 1,
+      "medianAgentElapsedMs": 11697,
+      "medianCallRpcMs": 23,
+      "medianFinalPayloadTokenProxy": 2505
+    }
+  ],
+  "pairedCompleteCount": 2,
+  "pairedPassRateDifferenceGatewayMinusDirect": 0.5,
+  "pairedRuns": [
+    {
+      "questionId": "small-direct-lookup",
+      "repetition": "1",
+      "directPass": true,
+      "gatewayPass": true,
+      "directElapsedMs": 27894,
+      "gatewayElapsedMs": 5856
+    },
+    {
+      "questionId": "unfamiliar-file-search",
+      "repetition": "1",
+      "directPass": false,
+      "gatewayPass": true,
+      "directElapsedMs": 28460,
+      "gatewayElapsedMs": 11697
+    }
+  ],
+  "caveats": [
+    "Token values are UTF-8 text tokenization proxies using o200k_base, not Luna/provider-reported usage.",
+    "No billed tokens, provider usage records, or actual Luna pricing are available; cost is unpriced and must not be presented as billed cost.",
+    "Agent elapsed time spans first list request to finish request start and includes generic bridge orchestration; it is not model-only latency.",
+    "First list RPC duration includes cold connection/setup. Subsequent RPC timings are reported separately.",
+    "Accumulated payload and cumulative input are payload estimates and exclude system prompts, built-in tool definitions, reasoning, and provider framing. For paged runs, full definitions are counted once in the payload proxy. Cumulative input is unavailable because catalogue pages are delivered across multiple grouped model turns.",
+    "Both conditions use the same generic bridge; this is not a native tool registry injection or Copilot deferred-definition baseline.",
+    "Daemon payload proxies can exceed model-visible content when the host truncates output; no actual billing savings are established.",
+    "The planned design has two repetitions per question and condition, too few to support statistical significance claims."
+  ]
+}

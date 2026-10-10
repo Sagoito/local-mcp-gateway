@@ -1,0 +1,145 @@
+{
+  "generatedAt": "2026-10-09T19:46:43.552Z",
+  "gatewayEntry": "/workspace/scratch/ec180a675233/local-mcp/.local/query-v6-dist/cli.js",
+  "records": [
+    {
+      "serverCount": 2,
+      "distinctServerImplementations": 2,
+      "mode": "direct",
+      "upstreamToolCount": 23,
+      "advertisedTools": 23,
+      "definitionBytes": 13179,
+      "definitionTokenProxy": 2749,
+      "listSetupMs": 220,
+      "definitionSha256": "6744affca8c1a4bd7825385b84785f69fdd5c41dea54d786b81a09393ee2630a"
+    },
+    {
+      "serverCount": 2,
+      "distinctServerImplementations": 2,
+      "mode": "gateway-default",
+      "upstreamToolCount": 23,
+      "advertisedTools": 2,
+      "definitionBytes": 5752,
+      "definitionTokenProxy": 1408,
+      "listSetupMs": 393,
+      "definitionSha256": "9785fb86e245837196d51704338d0b7fdc1168f2cdbfeb388231e4e2ef1d5fb2"
+    },
+    {
+      "serverCount": 2,
+      "distinctServerImplementations": 2,
+      "mode": "gateway-native",
+      "upstreamToolCount": 23,
+      "advertisedTools": 7,
+      "definitionBytes": 7390,
+      "definitionTokenProxy": 1647,
+      "listSetupMs": 494,
+      "definitionSha256": "24cfdbb794bb9dae464ded54ed43e92d2b6bc321a2477338b39c63b1c94725d2"
+    },
+    {
+      "serverCount": 8,
+      "distinctServerImplementations": 2,
+      "mode": "direct",
+      "upstreamToolCount": 92,
+      "advertisedTools": 92,
+      "definitionBytes": 52956,
+      "definitionTokenProxy": 11191,
+      "listSetupMs": 518,
+      "definitionSha256": "f28219220fa34bacd50ef70d1a56741fb1af6e4722211113e688777ed9b0f77e"
+    },
+    {
+      "serverCount": 8,
+      "distinctServerImplementations": 2,
+      "mode": "gateway-default",
+      "upstreamToolCount": 92,
+      "advertisedTools": 2,
+      "definitionBytes": 3140,
+      "definitionTokenProxy": 754,
+      "listSetupMs": 684,
+      "definitionSha256": "0aad32bcbbed9c6597e8bca65727247de527d4b58e7074794cf6044774af6230"
+    },
+    {
+      "serverCount": 8,
+      "distinctServerImplementations": 2,
+      "mode": "gateway-native",
+      "upstreamToolCount": 92,
+      "advertisedTools": 7,
+      "definitionBytes": 7390,
+      "definitionTokenProxy": 1647,
+      "listSetupMs": 783,
+      "definitionSha256": "24cfdbb794bb9dae464ded54ed43e92d2b6bc321a2477338b39c63b1c94725d2"
+    },
+    {
+      "serverCount": 16,
+      "distinctServerImplementations": 2,
+      "mode": "direct",
+      "upstreamToolCount": 184,
+      "advertisedTools": 184,
+      "definitionBytes": 105992,
+      "definitionTokenProxy": 22447,
+      "listSetupMs": 1009,
+      "definitionSha256": "3d5d69de915280cf9b2cc3840b582aeace805a6e496e1569194e941ac41988dc"
+    },
+    {
+      "serverCount": 16,
+      "distinctServerImplementations": 2,
+      "mode": "gateway-default",
+      "upstreamToolCount": 184,
+      "advertisedTools": 2,
+      "definitionBytes": 3140,
+      "definitionTokenProxy": 754,
+      "listSetupMs": 1187,
+      "definitionSha256": "0aad32bcbbed9c6597e8bca65727247de527d4b58e7074794cf6044774af6230"
+    },
+    {
+      "serverCount": 16,
+      "distinctServerImplementations": 2,
+      "mode": "gateway-native",
+      "upstreamToolCount": 184,
+      "advertisedTools": 7,
+      "definitionBytes": 7390,
+      "definitionTokenProxy": 1647,
+      "listSetupMs": 1248,
+      "definitionSha256": "24cfdbb794bb9dae464ded54ed43e92d2b6bc321a2477338b39c63b1c94725d2"
+    },
+    {
+      "serverCount": 32,
+      "distinctServerImplementations": 2,
+      "mode": "direct",
+      "upstreamToolCount": 368,
+      "advertisedTools": 368,
+      "definitionBytes": 212064,
+      "definitionTokenProxy": 44959,
+      "listSetupMs": 1942,
+      "definitionSha256": "a3b1c95f361a78802cbfca88a8eda5b857373dcf4a74021dc23f6bfe22f0d726"
+    },
+    {
+      "serverCount": 32,
+      "distinctServerImplementations": 2,
+      "mode": "gateway-default",
+      "upstreamToolCount": 368,
+      "advertisedTools": 2,
+      "definitionBytes": 3140,
+      "definitionTokenProxy": 754,
+      "listSetupMs": 2041,
+      "definitionSha256": "0aad32bcbbed9c6597e8bca65727247de527d4b58e7074794cf6044774af6230"
+    },
+    {
+      "serverCount": 32,
+      "distinctServerImplementations": 2,
+      "mode": "gateway-native",
+      "upstreamToolCount": 368,
+      "advertisedTools": 7,
+      "definitionBytes": 7390,
+      "definitionTokenProxy": 1647,
+      "listSetupMs": 2151,
+      "definitionSha256": "24cfdbb794bb9dae464ded54ed43e92d2b6bc321a2477338b39c63b1c94725d2"
+    }
+  ],
+  "catalogArchiveSha256": "35b7ac5c2ad22c842f0a04b90512bea3803e93e256e6aef8b29ec796e4496224",
+  "caveats": [
+    "Real official stdio processes replicated as isolated endpoints; only two server implementations, not 32 distinct vendors.",
+    "Definitions are serialized tools/list payloads, not provider-reported model context.",
+    "Direct comparable payload retains name, description and inputSchema as in the agent harness; complete original SDK listings are retained in the audit archive.",
+    "Startup includes real process connection and listing; tokenization and shutdown are excluded. No latency significance claim from a single catalogue sample."
+  ]
+}

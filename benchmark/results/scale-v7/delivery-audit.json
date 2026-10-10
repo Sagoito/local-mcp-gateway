@@ -1,0 +1,72 @@
+{
+  "monolithic32": {
+    "visibleTruncation": true,
+    "marker": "\u20264396 tokens truncated\u2026",
+    "completedRuns": 6,
+    "unstartedRuns": 18,
+    "fairFullCatalogueComparison": false
+  },
+  "monolithic16": {
+    "visibleTruncation": true,
+    "marker": "\u20264396 tokens truncated\u2026",
+    "completedRuns": 4,
+    "unstartedRuns": 20,
+    "fairFullCatalogueComparison": false
+  },
+  "deliveryAuditSingleInvocation": {
+    "agent": "gpt-6-luna",
+    "reasoningEffort": "medium",
+    "pages": 19,
+    "visibleFullPages": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "visiblePartialPages": [
+      4
+    ],
+    "marker": "\u20262429 tokens truncated\u2026",
+    "omittedTextItems": 14,
+    "primaryFilesystemSchemaVisible": false,
+    "primaryMemorySchemaVisible": false
+  },
+  "deliveryAuditSevenInvocations": {
+    "agent": "gpt-6-luna",
+    "reasoningEffort": "medium",
+    "pages": 19,
+    "maxPagesPerInvocation": 3,
+    "visibleFullPages": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18
+    ],
+    "visibleTruncation": false,
+    "primaryFilesystemSchemaPage": 17,
+    "primaryMemorySchemaPage": 18,
+    "finalMetadata": {
+      "index": 18,
+      "pages": 19,
+      "totalTools": 368,
+      "complete": true
+    },
+    "taskPilotDispatched": false,
+    "reason": "Multiple model turns to deliver the direct catalogue would confound latency and cumulative input comparisons."
+  }
+}
