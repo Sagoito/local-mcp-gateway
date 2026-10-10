@@ -21,7 +21,10 @@
     "zod": "^3.25.0"
   },
   "devDependencies": {
+    "@modelcontextprotocol/server-filesystem": "2026.8.31",
+    "@modelcontextprotocol/server-memory": "2026.8.31",
     "@types/node": "^22.0.0",
+    "js-tiktoken": "1.0.21",
     "tsx": "^4.20.0",
     "typescript": "^5.9.0"
   },

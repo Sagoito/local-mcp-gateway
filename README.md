@@ -161,3 +161,7 @@ Browser callback handling and real vendor OAuth interoperability have not been e
 ## License
 
 [MIT](LICENSE). Copyright (c) 2026 Sagoito. Dependencies retain their respective licenses.
+
+## Agent benchmark
+
+[24-run Luna pilot](benchmark/results/local-luna/README.md): two official MCP servers, direct versus gateway. Initial tool-list bytes fell 88%; median answers were slower (19.83 s versus 7.85 s). Large-response filtering helped, but actual billed savings are unmeasured. Includes [test plan](benchmark/PLAN.md), [questions](benchmark/questions.json), harness and raw audit logs.

@@ -13,3 +13,7 @@ config.json
 demo-config.json
 *.zip
 IMPLEMENTATION.md
+
+# Generated benchmark sessions
+benchmark/runs/
+benchmark/fixtures/

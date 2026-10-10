@@ -1,0 +1,52 @@
+[
+  {
+    "id": "small-direct-lookup",
+    "category": "small direct lookup",
+    "prompt": "Read {{FIXTURE_ROOT}}/config.json. What is the configured defaultRegion? Return the requested value as JSON. Use exactly these JSON keys and types: {\"defaultRegion\": \"string\"}.",
+    "expected": {
+      "defaultRegion": "us-east-1"
+    }
+  },
+  {
+    "id": "unfamiliar-file-search",
+    "category": "search unfamiliar file",
+    "prompt": "Search the files under {{FIXTURE_ROOT}} for the Inventory Ledger recovery runbook. What is the exact verification metric name? Return the requested value as JSON. Use exactly these JSON keys and types: {\"verificationMetric\": \"string\"}.",
+    "expected": {
+      "verificationMetric": "inventory_commit_lag_seconds"
+    }
+  },
+  {
+    "id": "large-filter-aggregation",
+    "category": "large filter and aggregation",
+    "prompt": "In {{FIXTURE_ROOT}}/incidents.json, count incidents whose createdAt is on or after 2026-01-08T00:00:00Z and before 2026-01-12T00:00:00Z, with severity SEV2 and state open. Return the count as JSON. Use exactly these JSON keys and types: {\"count\": 0}.",
+    "expected": {
+      "count": 7
+    }
+  },
+  {
+    "id": "filesystem-memory-join",
+    "category": "filesystem-memory join",
+    "prompt": "In {{FIXTURE_ROOT}}/incidents.json, find the incident with ID INC-0003. Use the memory MCP to look up the owner team for its service. Return the incident ID and owner team as JSON. Use exactly these JSON keys and types: {\"incidentId\": \"string\", \"ownerTeam\": \"string\"}.",
+    "expected": {
+      "incidentId": "INC-0003",
+      "ownerTeam": "Revenue Systems"
+    }
+  },
+  {
+    "id": "parallel-small-reads",
+    "category": "parallel small reads",
+    "prompt": "Read {{FIXTURE_ROOT}}/services.json and {{FIXTURE_ROOT}}/config.json. Return the name of the tier-0 service and the SEV2 pagingThreshold as JSON. Use exactly these JSON keys and types: {\"tier0Service\": \"string\", \"sev2PagingThreshold\": 0}.",
+    "expected": {
+      "tier0Service": "Identity Gateway",
+      "sev2PagingThreshold": 5
+    }
+  },
+  {
+    "id": "multi-hop-dependency-runbook",
+    "category": "multi-hop dependencies and runbook",
+    "prompt": "Using the memory graph, follow Checkout API's reads_from dependency, then that service's depends_on dependency. Find that final service's recovery runbook under {{FIXTURE_ROOT}}/runbooks. What is the first action in the runbook? Return the requested value as JSON. Use exactly these JSON keys and types: {\"firstAction\": \"string\"}.",
+    "expected": {
+      "firstAction": "Pause the catalog indexing scheduler."
+    }
+  }
+]
