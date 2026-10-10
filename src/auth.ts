@@ -16,6 +16,7 @@ import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/
 import { UnauthorizedError } from '@modelcontextprotocol/sdk/client/auth.js';
 import { expandEnv, validateHttpUrl } from './config.js';
 import type { ServerConfig } from './types.js';
+import { PROJECT_NAME, PROJECT_SLUG, PROJECT_VERSION } from './brand.js';
 
 type AuthState = {
   client?: OAuthClientInformationMixed;
@@ -31,6 +32,7 @@ export function createAuthProvider(
   serverConfig: ServerConfig,
   configPath: string,
   interactive = false,
+  onAuthorize?: (url: URL) => void,
 ): OAuthClientProvider {
   if (!('url' in serverConfig))
     throw new Error(`Server "${serverName}" does not support HTTP OAuth`);
@@ -90,7 +92,7 @@ export function createAuthProvider(
           : 'none',
         grant_types: ['authorization_code', 'refresh_token'],
         response_types: ['code'],
-        client_name: 'Local MCP Gateway',
+        client_name: PROJECT_NAME,
       };
     },
     state: async () => {
@@ -134,6 +136,10 @@ export function createAuthProvider(
           `OAuth login required; run local-mcp login ${serverName}`,
         );
       validateHttpUrl(url.toString(), serverName);
+      if (onAuthorize) {
+        onAuthorize(url);
+        return;
+      }
       process.stderr.write(`Authorize ${serverName} at: ${url.toString()}\n`);
       openBrowser(url);
     },
@@ -153,6 +159,7 @@ export async function login(
   serverName: string,
   serverConfig: ServerConfig,
   configPath: string,
+  options: { onAuthorize?: (url: URL) => void; signal?: AbortSignal } = {},
 ): Promise<void> {
   if (!('url' in serverConfig))
     throw new Error(`Server "${serverName}" does not support HTTP OAuth`);
@@ -182,28 +189,49 @@ export async function login(
     serverConfig,
     configPath,
     true,
+    options.onAuthorize,
   );
-  const client = new Client({ name: 'local-mcp-gateway', version: '0.1.0' });
+  const client = new Client({ name: PROJECT_SLUG, version: PROJECT_VERSION });
   const transport = new StreamableHTTPClientTransport(resolvedUrl, {
     authProvider: provider,
     requestInit: { headers: serverConfig.headers },
   });
-  const callback = await startCallbackServer(async (url) =>
-    Boolean(
-      url.searchParams.get('state') &&
-      url.searchParams.get('state') === (await provider.state?.()),
-    ),
-  );
+  let callback: Awaited<ReturnType<typeof startCallbackServer>> | undefined;
   try {
+    callback = await startCallbackServer(
+      async (url) =>
+        Boolean(
+          url.searchParams.get('state') &&
+          url.searchParams.get('state') === (await provider.state?.()),
+        ),
+      options.signal,
+    );
     try {
-      await client.connect(transport);
+      await raceWithSignal(
+        client.connect(transport),
+        options.signal,
+        callback.result.then(
+          () => new Promise<never>(() => undefined),
+          (error: unknown) =>
+            Promise.reject(
+              error instanceof Error
+                ? error
+                : new Error('OAuth callback failed'),
+            ),
+        ),
+      );
     } catch (error) {
+      if (options.signal?.aborted) {
+        // The cancelled transport error may contain credential-bearing request details.
+        // eslint-disable-next-line preserve-caught-error -- Cancellation errors are deliberately sanitized.
+        throw new Error('OAuth login cancelled');
+      }
       if (!(error instanceof UnauthorizedError)) {
         // Raw transport errors can include credentials; expose only the sanitized message.
         // eslint-disable-next-line preserve-caught-error -- Raw transport errors can include credentials.
         throw new Error('OAuth authorization could not be started');
       }
-      const callbackUrl = await callback.result;
+      const callbackUrl = await raceWithSignal(callback.result, options.signal);
       const gotState = callbackUrl.searchParams.get('state');
       if (!gotState || gotState !== (await provider.state?.())) {
         // eslint-disable-next-line preserve-caught-error -- Callback state errors are sanitized at the auth boundary.
@@ -214,13 +242,42 @@ export async function login(
         // eslint-disable-next-line preserve-caught-error -- Callback errors are sanitized at the auth boundary.
         throw new Error('OAuth callback did not contain an authorization code');
       }
-      await transport.finishAuth(code);
-      await client.connect(transport);
+      await raceWithSignal(transport.finishAuth(code), options.signal);
+      await raceWithSignal(client.connect(transport), options.signal);
     }
   } finally {
     await transport.close().catch(() => undefined);
-    await callback.close();
+    await callback?.close();
   }
+}
+
+function raceWithSignal<T>(
+  operation: Promise<T>,
+  signal?: AbortSignal,
+  failure?: Promise<never>,
+): Promise<T> {
+  if (signal?.aborted) {
+    // The caller already created this operation promise. Attach a rejection handler
+    // before returning so an immediate cancellation cannot leave it unhandled.
+    void operation.catch(() => undefined);
+    void failure?.catch(() => undefined);
+    return Promise.reject(new Error('OAuth login cancelled'));
+  }
+  if (!signal && !failure) return operation;
+  let onAbort: (() => void) | undefined;
+  const abort = signal
+    ? new Promise<never>((_, reject) => {
+        onAbort = () => reject(new Error('OAuth login cancelled'));
+        signal.addEventListener('abort', onAbort, { once: true });
+      })
+    : undefined;
+  return Promise.race([
+    operation,
+    ...(failure ? [failure] : []),
+    ...(abort ? [abort] : []),
+  ]).finally(() => {
+    if (onAbort) signal?.removeEventListener('abort', onAbort);
+  });
 }
 
 function authFilePath(
@@ -241,9 +298,14 @@ function authFilePath(
 
 export async function startCallbackServer(
   validateState: (url: URL) => Promise<boolean>,
+  signal?: AbortSignal,
 ): Promise<{ result: Promise<URL>; close: () => Promise<void> }> {
+  if (signal?.aborted) throw new Error('OAuth login cancelled');
   // A stable loopback port keeps the redirect URI registered with the authorization server.
   const server = createServer();
+  server.requestTimeout = 5_000;
+  server.headersTimeout = 5_000;
+  server.keepAliveTimeout = 1_000;
   let resolve!: (url: URL) => void;
   let reject!: (error: Error) => void;
   const result = new Promise<URL>((res, rej) => {
@@ -252,10 +314,36 @@ export async function startCallbackServer(
   });
   void result.catch(() => undefined);
   let settled = false;
-  const timer = setTimeout(
-    () => reject(new Error('Timed out waiting for OAuth callback')),
-    5 * 60_000,
-  );
+  let onTimeout = (): void => undefined;
+  const timer = setTimeout(() => onTimeout(), 5 * 60_000);
+  let closePromise: Promise<void> | undefined;
+  let listenSettled = false;
+  let closeAfterListen: (() => void) | undefined;
+  let closingRequested = false;
+  const close = (): Promise<void> => {
+    if (closePromise) return closePromise;
+    closingRequested = true;
+    closePromise = new Promise<void>((resolveClose) => {
+      clearTimeout(timer);
+      signal?.removeEventListener('abort', onAbort);
+      if (server.listening) {
+        server.close(() => resolveClose());
+        server.closeAllConnections();
+      } else if (listenSettled) resolveClose();
+      else closeAfterListen = resolveClose;
+    });
+    return closePromise;
+  };
+  const rejectAndClose = (error: Error): void => {
+    settled = true;
+    reject(error);
+    void close();
+  };
+  const onAbort = (): void =>
+    rejectAndClose(new Error('OAuth login cancelled'));
+  signal?.addEventListener('abort', onAbort, { once: true });
+  onTimeout = () =>
+    rejectAndClose(new Error('Timed out waiting for OAuth callback'));
   server.on('request', (req, res) => {
     const address = `http://127.0.0.1:43127${req.url ?? '/'}`;
     let url: URL;
@@ -292,7 +380,7 @@ export async function startCallbackServer(
           res
             .writeHead(400)
             .end('Authorization was declined. You can close this window.');
-          reject(new Error('OAuth authorization was declined'));
+          rejectAndClose(new Error('OAuth authorization was declined'));
           return;
         }
         res
@@ -305,23 +393,26 @@ export async function startCallbackServer(
       });
   });
   await new Promise<void>((resolveListen, rejectListen) => {
-    server.once('error', (error) => {
-      clearTimeout(timer);
-      rejectListen(error);
-    });
+    const onListenError = (): void => {
+      listenSettled = true;
+      closeAfterListen?.();
+      void close();
+      rejectListen(new Error('Could not start OAuth callback server'));
+    };
+    server.once('error', onListenError);
     server.listen(43127, '127.0.0.1', () => {
-      server.removeListener('error', rejectListen);
+      listenSettled = true;
+      server.removeListener('error', onListenError);
+      if (closingRequested) {
+        server.close(() => closeAfterListen?.());
+        server.closeAllConnections();
+        rejectListen(new Error('OAuth login cancelled'));
+        return;
+      }
       resolveListen();
     });
   });
-  return {
-    result,
-    close: () =>
-      new Promise((resolveClose) => {
-        clearTimeout(timer);
-        server.close(() => resolveClose());
-      }),
-  };
+  return { result, close };
 }
 
 function openBrowser(url: URL): void {

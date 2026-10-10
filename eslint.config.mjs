@@ -12,6 +12,11 @@ const typescript = ['src/**/*.ts', 'test/*.test.ts'];
 
 export default [
   {
+    ...js.configs.recommended,
+    files: ['web/**/*.js'],
+    languageOptions: { globals: globals.browser },
+  },
+  {
     ignores: [
       'node_modules/**',
       'dist/**',

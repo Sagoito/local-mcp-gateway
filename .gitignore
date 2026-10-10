@@ -9,6 +9,8 @@ coverage/
 .env.*
 !.env.example
 .local-mcp-auth/
+*.service.json
+*.service.json.*.tmp
 config.json
 demo-config.json
 *.zip

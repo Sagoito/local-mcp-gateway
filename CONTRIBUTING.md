@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping improve Local MCP Gateway. Before opening a pull request, run the same checks used by CI:
+Thanks for helping improve Weftly. Before opening a pull request, run the same checks used by CI:
 
 ```sh
 npm ci --ignore-scripts

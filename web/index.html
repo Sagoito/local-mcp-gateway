@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f4f5f7" />
+    <title>Connections · Weftly</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#servers">Skip to connections</a>
+    <div id="workspace" class="app-shell">
+      <header class="workspace-bar">
+        <a class="brand" href="#overview" aria-label="Weftly home">
+          <svg
+            class="brand-mark"
+            width="28"
+            height="28"
+            viewBox="0 0 28 28"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M5 4v20M14 4v20M23 4v20M3 9h22M3 19h22"
+              stroke="currentColor"
+              stroke-width="2.5"
+            />
+            <path d="M9 7v4M18 17v4" stroke="var(--paper)" stroke-width="4" />
+          </svg>
+          <span>weftly</span>
+        </a>
+        <span class="workspace-name"
+          >Personal workspace <span class="local-tag">Local</span></span
+        >
+        <div class="workspace-actions">
+          <span class="connection-status" role="status"
+            ><span class="status-dot" id="service-dot" aria-hidden="true"></span
+            ><span id="service-label">Connecting</span></span
+          >
+          <button class="button button-quiet" id="nav-settings" type="button">
+            Settings
+          </button>
+          <button
+            class="button button-primary"
+            id="connection-open"
+            type="button"
+          >
+            Connect agent <span aria-hidden="true">↗</span>
+          </button>
+        </div>
+      </header>
+      <main class="content-wrap" id="overview">
+        <section class="page-intro">
+          <div>
+            <div class="eyebrow">
+              <span class="section-index">01</span> Workspace / Connections
+            </div>
+            <h1>
+              Connections<span class="title-period" aria-hidden="true">.</span>
+            </h1>
+            <p>One place for the tools your agents use.</p>
+          </div>
+          <div class="intro-actions">
+            <button
+              class="button button-secondary"
+              id="import-open"
+              type="button"
+            >
+              Import config
+            </button>
+            <button class="button button-ink" id="add-server" type="button">
+              <span aria-hidden="true">+</span> Add server
+            </button>
+          </div>
+        </section>
+        <section class="workspace-summary" aria-label="Workspace summary">
+          <div class="summary-item">
+            <span class="stat-value" id="stat-connected">—</span
+            ><span class="stat-label">connected</span>
+          </div>
+          <div class="summary-item">
+            <span class="stat-value" id="stat-tools">—</span
+            ><span class="stat-label">available tools</span>
+          </div>
+          <div class="summary-health">
+            <span class="stat-value status-value" id="stat-status">Loading</span
+            ><span class="stat-note" id="stat-subnote"
+              >Checking local service</span
+            >
+          </div>
+        </section>
+        <section
+          class="notice"
+          id="notice"
+          role="status"
+          aria-live="polite"
+          hidden
+        >
+          <span id="notice-text"></span
+          ><button
+            type="button"
+            class="icon-button notice-close"
+            aria-label="Dismiss notice"
+            id="notice-close"
+          >
+            ×
+          </button>
+        </section>
+        <section
+          class="connection-register"
+          id="servers"
+          aria-labelledby="register-heading"
+        >
+          <div class="register-toolbar">
+            <h2 id="register-heading">
+              Server directory
+              <span class="heading-count" id="server-count">0</span>
+            </h2>
+            <div class="register-controls">
+              <div class="search-field">
+                <label class="sr-only" for="server-filter"
+                  >Find a connection</label
+                >
+                <input
+                  type="search"
+                  id="server-filter"
+                  placeholder="Find a connection…"
+                  autocomplete="off"
+                  aria-describedby="filter-shortcut"
+                />
+                <kbd id="filter-shortcut" title="Press slash to focus search"
+                  >/</kbd
+                >
+              </div>
+              <button
+                type="button"
+                class="button button-quiet"
+                id="refresh-servers"
+              >
+                Refresh
+              </button>
+            </div>
+          </div>
+          <div class="register-columns" aria-hidden="true">
+            <span></span><span>Connection</span><span>Status</span
+            ><span>Tools</span><span class="actions-heading">Manage</span>
+          </div>
+          <div id="server-list" class="server-list">
+            <div class="loading-card">
+              <span class="spinner" aria-hidden="true"></span
+              ><span>Loading connections…</span>
+            </div>
+          </div>
+          <span id="filter-summary" class="sr-only" role="status"></span>
+          <div class="register-footnote">
+            <span
+              ><span id="nav-count">0</span> configured · Commands run on this
+              machine</span
+            ><span>Agent access is separate from workspace settings</span>
+          </div>
+        </section>
+        <section class="agent-strip" aria-labelledby="agent-heading">
+          <div class="agent-route" aria-hidden="true">
+            <span class="route-node"></span><span class="route-line"></span
+            ><span class="route-node end-node"></span>
+          </div>
+          <div>
+            <h3 id="agent-heading">One connection for your agents.</h3>
+            <p>
+              Copy one connection entry into your agent’s MCP configuration.
+            </p>
+          </div>
+          <button type="button" class="text-button" id="connection-open-bottom">
+            Get connection entry <span aria-hidden="true">↗</span>
+          </button>
+        </section>
+        <footer class="footer">
+          <span>Weftly / Local workspace</span
+          ><span>Configuration &amp; sign-ins stay on this machine.</span>
+        </footer>
+      </main>
+    </div>
+    <div id="modal-root"></div>
+  </body>
+</html>

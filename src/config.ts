@@ -6,7 +6,9 @@ import type { GatewayConfig, ServerConfig } from './types.js';
 
 export function defaultConfigPath(): string {
   return (
-    process.env.LOCAL_MCP_CONFIG || `${homedir()}/.config/local-mcp/config.json`
+    process.env.WEFTLY_CONFIG ||
+    process.env.LOCAL_MCP_CONFIG ||
+    `${homedir()}/.config/local-mcp/config.json`
   );
 }
 
