@@ -44,7 +44,7 @@
     "js-tiktoken": "1.0.21",
     "prettier": "3.9.10",
     "tsx": "^4.20.0",
-    "typescript": "^5.9.0",
+    "typescript": "^7.0.2",
     "typescript-eslint": "8.71.1"
   },
   "license": "MIT",
