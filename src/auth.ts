@@ -19,6 +19,7 @@ const AUTH_DIR = '.local-mcp-auth';
 /** Durable OAuth provider. Secret values and token objects are only ever stored on disk. */
 export function createAuthProvider(serverName: string, serverConfig: ServerConfig, configPath: string, interactive = false): OAuthClientProvider {
   if (!('url' in serverConfig)) throw new Error(`Server "${serverName}" does not support HTTP OAuth`);
+  if (serverConfig.oauth === false) throw new Error(`OAuth is disabled for server "${serverName}"`);
   const serverUrl = expandEnv(serverConfig.url);
   validateHttpUrl(serverUrl, serverName);
   const configuredClientId = serverConfig.oauth?.clientId ? expandEnv(serverConfig.oauth.clientId) : undefined;
@@ -38,6 +39,7 @@ export function createAuthProvider(serverName: string, serverConfig: ServerConfi
     await chmod(file, 0o600);
   };
   const clientSecret = serverConfig.oauth?.clientSecretEnv ? process.env[serverConfig.oauth.clientSecretEnv] : undefined;
+  if (serverConfig.oauth?.clientSecretEnv && clientSecret === undefined) throw new Error(`Required environment variable ${serverConfig.oauth.clientSecretEnv} is not set`);
   const clientId = configuredClientId;
   let flowState: string | undefined;
   return {
@@ -82,6 +84,7 @@ export function createAuthProvider(serverName: string, serverConfig: ServerConfi
 /** Run the SDK authorization-code + PKCE flow against one upstream. */
 export async function login(serverName: string, serverConfig: ServerConfig, configPath: string): Promise<void> {
   if (!('url' in serverConfig)) throw new Error(`Server "${serverName}" does not support HTTP OAuth`);
+  if (serverConfig.oauth === false) throw new Error(`OAuth is disabled for server "${serverName}"`);
   serverConfig = { ...serverConfig, url: expandEnv(serverConfig.url), headers: Object.fromEntries(Object.entries(serverConfig.headers ?? {}).map(([k,v]) => [k, expandEnv(v)])), oauth: serverConfig.oauth ? { ...serverConfig.oauth, ...(serverConfig.oauth.clientId ? { clientId: expandEnv(serverConfig.oauth.clientId) } : {}) } : undefined };
   const resolvedUrl = validateHttpUrl(serverConfig.url, serverName);
   const provider = createAuthProvider(serverName, serverConfig, configPath, true);

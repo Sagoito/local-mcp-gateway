@@ -1,5 +1,9 @@
 #!/usr/bin/env node
-import { parseArgs } from 'node:util';
+import { parseArgs, type ParseArgsOptionsConfig } from 'node:util';
+import { isDeepStrictEqual } from 'node:util';
+import { readFile, realpath, stat } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defaultConfigPath, loadConfig, saveConfig } from './config.js';
 import type { GatewayConfig, ServerConfig } from './types.js';
 
@@ -34,12 +38,19 @@ function parse(argv: string[]): Parsed {
     if (tail.length) positionals.splice(parsed.positionals.length, 0, '--');
     return { command, positional: positionals, configPath, options: parsed.values };
   }
+  if (command === 'import' || command === 'setup' || command === 'client-config') {
+    const definitions: ParseArgsOptionsConfig = command === 'client-config'
+      ? { client: { type: 'string' } }
+      : { format: { type: 'string' }, workspace: { type: 'string' }, server: { type: 'string', multiple: true }, 'dry-run': { type: 'boolean' }, ...(command === 'setup' ? { client: { type: 'string' as const } } : {}) };
+    const parsed = parseArgs({ args: tokens, options: definitions, allowPositionals: true, strict: true });
+    return { command, positional: parsed.positionals, configPath, options: parsed.values as Parsed['options'] };
+  }
   const parsed = parseArgs({ args: tokens, options: {}, allowPositionals: true, strict: true });
   return { command, positional: parsed.positionals, configPath, options: parsed.values };
 }
 
 function usage(): string {
-  return `Usage: local-mcp [--config PATH] <command>\n\nCommands:\n  init\n  add NAME --url URL [--header 'Name=Value'] [--oauth-client-id ID] [--allow-tool TOOL]...\n  add NAME [--env KEY=VALUE]... [--allow-tool TOOL]... -- COMMAND [ARGS...]\n  add NAME --no-tools -- COMMAND [ARGS...]\n  remove NAME\n  list\n  login NAME\n  serve\n  doctor`;
+  return `Usage: local-mcp [--config PATH] <command>\n\nCommands:\n  setup FILE [--client generic|copilot|vscode|opencode] [--dry-run]\n  import FILE [--format auto|mcpServers|vscode|opencode] [--workspace DIR] [--server NAME]... [--dry-run]\n  client-config [--client generic|copilot|vscode|opencode]\n  init\n  add NAME --url URL [--header 'Name=Value'] [--oauth-client-id ID] [--allow-tool TOOL]...\n  add NAME [--env KEY=VALUE]... [--allow-tool TOOL]... -- COMMAND [ARGS...]\n  add NAME --no-tools -- COMMAND [ARGS...]\n  remove NAME\n  list\n  login NAME\n  serve\n  doctor\n\nsetup accepts the same import options; diagnostics go to stderr and the agent entry goes to stdout.`;
 }
 
 function headerPairs(value: string | string[] | boolean | undefined): Record<string, string> | undefined {
@@ -61,6 +72,62 @@ async function run(argv: string[]): Promise<void> {
   const parsed = parse(argv);
   const { command, positional, options, configPath } = parsed;
   if (!command || command === 'help' || command === '--help') { console.log(usage()); return; }
+  if (command === 'client-config') {
+    if (positional.length) throw new Error('client-config takes no positional arguments');
+    const { clientConfig } = await import('./client-config.js');
+    console.log(JSON.stringify(clientConfig((options.client ?? 'generic') as never, { configPath, cliPath: fileURLToPath(import.meta.url) }), null, 2));
+    return;
+  }
+  if (command === 'import' || command === 'setup') {
+    if (positional.length !== 1) throw new Error(`${command} requires exactly one existing client configuration FILE`);
+    const source = resolve(positional[0]!);
+    const destination = resolve(configPath);
+    const canonicalDestination = await realpath(destination).catch(error => {
+      if ((error as NodeJS.ErrnoException).code === 'ENOENT') return destination;
+      throw new Error('Cannot access gateway configuration');
+    });
+    let sourceReal: string;
+    try { sourceReal = await realpath(source); } catch { throw new Error('Cannot read client configuration FILE'); }
+    if (sourceReal === canonicalDestination) throw new Error('Client source and gateway configuration must be different files');
+    if ((await stat(sourceReal)).size > 8 * 1024 * 1024) throw new Error('Client configuration exceeds the 8 MiB import limit');
+    let input: string;
+    try { input = await readFile(sourceReal, 'utf8'); } catch { throw new Error('Cannot read client configuration FILE'); }
+    if (Buffer.byteLength(input) > 8 * 1024 * 1024) throw new Error('Client configuration exceeds the 8 MiB import limit');
+    const { importClientConfig } = await import('./import.js');
+    const imported = importClientConfig(input, { format: (options.format ?? 'auto') as never, workspaceDir: resolve(String(options.workspace ?? process.cwd())), names: options.server as string[] | undefined });
+    for (const notice of imported.notices) console.error(`Note: ${notice}`);
+    if (imported.issues.length) {
+      for (const issue of imported.issues) console.error(`${issue.server}: ${issue.message}`);
+      throw new Error('Import blocked; no configuration was written. Resolve these settings or select compatible entries with --server NAME');
+    }
+    const config = await loadConfig(destination);
+    const names = Object.keys(imported.servers);
+    if (!names.length) throw new Error('No servers selected for import');
+    for (const name of names) {
+      const server = imported.servers[name]!;
+      if (Object.hasOwn(config.servers, name) && !isDeepStrictEqual(config.servers[name], server)) throw new Error(`Server ${name} already exists with different settings; no configuration was written`);
+      config.servers[name] = server;
+      console.error(`${options['dry-run'] ? 'Would import' : 'Ready to import'} ${name}${server.disabled ? ' (disabled)' : ''}`);
+    }
+    let entry: Record<string, unknown> | undefined;
+    if (command === 'setup') {
+      const { clientConfig } = await import('./client-config.js');
+      entry = clientConfig((options.client ?? 'generic') as never, { configPath: destination, cliPath: fileURLToPath(import.meta.url) });
+    }
+    const newConfig = await stat(destination).then(() => false, error => {
+      if ((error as NodeJS.ErrnoException).code === 'ENOENT') return true;
+      throw new Error('Cannot access gateway configuration');
+    });
+    if (newConfig) config.security = { allowCode: false };
+    if (!options['dry-run']) {
+      await saveConfig(destination, config);
+      console.error(`Imported ${names.length} server(s) into ${destination}`);
+    } else console.error('Preview only; no files changed.');
+    if (newConfig) console.error('New gateway configuration uses structured calls; JavaScript is disabled.');
+    console.error('Source configuration was not changed. Replace the imported direct entries in your agent with the gateway entry to avoid duplicate tools.');
+    if (entry) console.log(JSON.stringify(entry, null, 2));
+    return;
+  }
   if (command === 'init') {
     const config = await loadConfig(configPath);
     await saveConfig(configPath, config);
@@ -146,7 +213,11 @@ async function run(argv: string[]): Promise<void> {
       for (const tool of tools) counts.set(tool.server, (counts.get(tool.server) ?? 0) + 1);
       for (const [name, server] of Object.entries(config.servers)) {
         if (server.disabled) console.log(`${name}\tdisabled\t0 tools`);
-        else if (errors[name]) console.log(`${name}\terror\t${errors[name]!.replace(/(?:Bearer\s+)[^\s]+/gi, 'Bearer [redacted]')}`);
+        else if (errors[name]) {
+          process.exitCode = 1;
+          console.log(`${name}\terror\t${errors[name]!.replace(/(?:Bearer\s+)[^\s]+/gi, 'Bearer [redacted]')}`);
+          console.error(`${name}: check the executable, working directory and gateway environment${'url' in server && server.oauth !== false ? `; for OAuth, run local-mcp --config "${resolve(configPath)}" login ${name}` : ''}.`);
+        }
         else console.log(`${name}\tok\t${counts.get(name) ?? 0} tools`);
       }
       for (const tool of tools) if (!Object.hasOwn(config.servers, tool.server)) console.log(`${tool.server}\terror\tunexpected upstream result`);

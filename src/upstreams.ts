@@ -32,12 +32,13 @@ export function createUpstreams(config: GatewayConfig, configPath: string): Upst
       transport = new StdioClientTransport({
         command: expandEnv(serverConfig.command),
         args: serverConfig.args?.map(expandEnv),
+        cwd: serverConfig.cwd ? expandEnv(serverConfig.cwd) : undefined,
         env: Object.fromEntries(Object.entries(serverConfig.env ?? {}).map(([k, v]) => [k, expandEnv(v)])),
         stderr: 'ignore',
       });
     } else {
       const headers = Object.fromEntries(Object.entries(serverConfig.headers ?? {}).map(([k, v]) => [k, expandEnv(v)]));
-      const authProvider = createAuthProvider(server, serverConfig, configPath, false);
+      const authProvider = serverConfig.oauth === false ? undefined : createAuthProvider(server, serverConfig, configPath, false);
       transport = new StreamableHTTPClientTransport(validateHttpUrl(expandEnv(serverConfig.url), server), {
         requestInit: { headers },
         authProvider,

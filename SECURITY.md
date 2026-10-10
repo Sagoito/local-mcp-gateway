@@ -29,6 +29,8 @@ OAuth tokens are plaintext on disk; there is no keychain integration or Windows 
 
 ## Defaults and deployment choices
 
+`setup` and `import` read a specified client file without launching upstreams or modifying that file. Unsupported settings or conflicting destination entries block the entire write; selective import requires explicit server names. Exact tool filters and disabled entries are preserved. New gateway configurations created by these commands disable JavaScript; existing policies remain unchanged. The import is a snapshot, not a bridge to client-private credentials, approvals, workspace trust, OS sandboxing, inherited configuration or enterprise controls. Explicit unsupported sandbox/permission rules in the file block migration. Review external client policies before switching to a gateway, since the client sees a different server and invocation boundary. OAuth-disabled entries do not create an auth provider or permit explicit login. Imported literal credentials remain plaintext in the restricted configuration file.
+
 For workflows needing only structured operations, set `security.allowCode:false` and use explicit allowlists. Prefer tool-specific credentials and upstream restrictions on files, projects, repositories or resources. The README lists defaults and valid discovery-limit ranges. Increasing a limit makes more data eligible for ingestion; it is not a verified scale or memory guarantee. Existing unrestricted configurations remain unrestricted after upgrade until policies are added.
 
 ## Validation
